@@ -1,0 +1,12 @@
+{
+  "updated": "2026-11-05",
+  "note": "관심종목 목록. 실적 공시 감지와 데이터 수집의 기준. ticker는 KRX 6자리 코드 또는 미국 티커.",
+  "kr": [
+    { "ticker": "005930", "name": "삼성전자", "sector": "반도체", "dart_corp_code": "" },
+    { "ticker": "000660", "name": "SK하이닉스", "sector": "반도체", "dart_corp_code": "" }
+  ],
+  "us": [
+    { "ticker": "NVDA", "name": "NVIDIA", "sector": "반도체", "cik": "" },
+    { "ticker": "MSFT", "name": "Microsoft", "sector": "소프트웨어", "cik": "" }
+  ]
+}

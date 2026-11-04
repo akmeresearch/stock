@@ -1,0 +1,12 @@
+{
+  "run_at": "2026-11-05T08:35:11+09:00",
+  "kr_count": 2,
+  "us_count": 2,
+  "modules": [
+    "prices",
+    "flows",
+    "financials",
+    "macro"
+  ],
+  "note": "placeholder — 수집 모듈은 2단계에서 구현"
+}
