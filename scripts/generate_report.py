@@ -9,8 +9,9 @@
       --source ir.txt --source concall.txt --consensus "영업이익 105.4조" \
       --price "206,750원 / 시총 1,208.7조 / PER 9.27 (2026-11-05)"
 
-  python scripts/generate_report.py --ticker 005930 --period 2026Q3 --rcept 20261029000123
-      (DART 접수번호로 공시 원문을 직접 받아 분석)
+  python scripts/generate_report.py --ticker 005930 --period 2026Q3 --rcept 20261029000123 \
+      --url https://news.samsung.com/kr/... --url https://www.thelec.kr/...
+      (DART 접수번호 + IR 보도자료·컨콜 전문 URL을 함께 분석. 공시만 넣으면 숫자 6개뿐이라 부문별·가이던스가 비게 된다)
 
 환경변수: ANTHROPIC_API_KEY (필수), DART_API_KEY (--rcept 사용 시)
 """
@@ -59,6 +60,21 @@ def fetch_dart_document(rcept_no: str, api_key: str) -> str:
     return text.strip()
 
 
+def fetch_url_text(url: str) -> str:
+    """웹페이지 본문을 텍스트로. 스크립트·내비게이션 제거."""
+    from bs4 import BeautifulSoup
+
+    r = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (akme-research bot)"}, timeout=60)
+    r.raise_for_status()
+    soup = BeautifulSoup(r.text, "html.parser")
+    for tag in soup(["script", "style", "nav", "header", "footer", "aside", "form", "noscript"]):
+        tag.decompose()
+    article = soup.find("article") or soup.find(id=re.compile("article|content", re.I)) or soup.body or soup
+    text = article.get_text("\n")
+    lines = [ln.strip() for ln in text.splitlines()]
+    return "\n".join(ln for ln in lines if ln)
+
+
 def build_user_message(entry: dict, period: str, sources: list[tuple[str, str]],
                        consensus: str | None, price: str | None) -> str:
     parts = [
@@ -83,7 +99,7 @@ def call_claude(system: str, user: str) -> str:
     client = Anthropic()
     resp = client.messages.create(
         model=MODEL,
-        max_tokens=4000,
+        max_tokens=8000,
         system=system,
         messages=[{"role": "user", "content": user}],
     )
@@ -96,6 +112,7 @@ def main() -> int:
     ap.add_argument("--period", required=True, help="예: 2026Q3")
     ap.add_argument("--source", action="append", default=[], help="원문 텍스트 파일 (여러 번 가능)")
     ap.add_argument("--rcept", help="DART 접수번호 (원문을 직접 내려받음)")
+    ap.add_argument("--url", action="append", default=[], help="IR 보도자료·컨콜 전문 등 웹페이지 (여러 번 가능)")
     ap.add_argument("--consensus")
     ap.add_argument("--price")
     ap.add_argument("--dry-run", action="store_true", help="API 호출 없이 프롬프트만 출력")
@@ -116,8 +133,13 @@ def main() -> int:
             print("DART_API_KEY not set", file=sys.stderr)
             return 1
         sources.append((f"DART {args.rcept}", fetch_dart_document(args.rcept, key)))
+    for u in [x.strip() for x in args.url if x.strip()]:
+        try:
+            sources.append((u, fetch_url_text(u)))
+        except Exception as e:  # 한 URL 실패가 전체를 막지 않도록
+            print(f"skip url {u}: {e}", file=sys.stderr)
     if not sources:
-        print("no sources: use --source or --rcept", file=sys.stderr)
+        print("no sources: use --source, --rcept or --url", file=sys.stderr)
         return 1
 
     system = PROMPT.read_text(encoding="utf-8")
