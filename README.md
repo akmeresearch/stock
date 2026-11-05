@@ -14,6 +14,7 @@ AI 기반 실적·시장 리서치 사이트. 사이트: https://akmeresearch.gi
 │   ├── financials/         # DART 분기 재무제표
 │   ├── macro.json          # 금리·환율·심리지표
 │   └── reports/            # Claude가 생성한 실적 분석 리포트 (markdown)
+├── prompts/                # Claude 분석 지침 (earnings_analysis.md = 실적 분석 스킬)
 ├── scripts/                # 수집·분석 스크립트 (Python)
 └── .github/workflows/      # 스케줄 자동화
 ```
@@ -32,6 +33,12 @@ AI 기반 실적·시장 리서치 사이트. 사이트: https://akmeresearch.gi
 | `ANTHROPIC_API_KEY` | Claude API |
 | `KIS_APP_KEY`, `KIS_APP_SECRET` | 한국투자증권 Open API |
 | `FRED_API_KEY` | FRED 거시지표 |
+
+## 리포트 생성
+
+Actions → **Generate earnings report** → Run workflow 에서 종목코드·분기·DART 접수번호를 넣으면
+`scripts/generate_report.py`가 `prompts/earnings_analysis.md` 지침으로 Claude API를 호출해 `data/reports/`에 저장한다.
+리포트 품질은 코드가 아니라 `prompts/earnings_analysis.md`를 고쳐서 조정한다.
 
 ## 로컬 실행
 

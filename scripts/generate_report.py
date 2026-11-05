@@ -1,0 +1,151 @@
+"""실적 분석 리포트 생성.
+
+입력: 종목코드, 분기, 원문 파일(들) 또는 DART 접수번호
+처리: prompts/earnings_analysis.md 를 system prompt로, 원문을 user 메시지로 Claude API 호출
+출력: data/reports/{ticker}_{period}.md
+
+사용 예
+  python scripts/generate_report.py --ticker 005930 --period 2026Q3 \
+      --source ir.txt --source concall.txt --consensus "영업이익 105.4조" \
+      --price "206,750원 / 시총 1,208.7조 / PER 9.27 (2026-11-05)"
+
+  python scripts/generate_report.py --ticker 005930 --period 2026Q3 --rcept 20261029000123
+      (DART 접수번호로 공시 원문을 직접 받아 분석)
+
+환경변수: ANTHROPIC_API_KEY (필수), DART_API_KEY (--rcept 사용 시)
+"""
+import argparse
+import io
+import json
+import os
+import re
+import sys
+import zipfile
+from datetime import date
+from pathlib import Path
+
+import requests
+
+ROOT = Path(__file__).resolve().parent.parent
+PROMPT = ROOT / "prompts" / "earnings_analysis.md"
+WATCHLIST = ROOT / "data" / "watchlist.json"
+REPORTS = ROOT / "data" / "reports"
+
+MODEL = os.environ.get("REPORT_MODEL", "claude-sonnet-5-5")
+MAX_INPUT_CHARS = 180_000  # 원문이 너무 길면 앞부분만 (약 6만 토큰)
+
+
+def load_watchlist_entry(ticker: str) -> dict:
+    wl = json.loads(WATCHLIST.read_text(encoding="utf-8"))
+    for s in wl.get("kr", []) + wl.get("us", []):
+        if s["ticker"] == ticker:
+            return s
+    return {"ticker": ticker, "name": ticker}
+
+
+def fetch_dart_document(rcept_no: str, api_key: str) -> str:
+    """DART 공시 원문(zip 안의 xml)을 받아 태그를 벗긴 텍스트로 반환."""
+    r = requests.get(
+        "https://opendart.fss.or.kr/api/document.xml",
+        params={"crtfc_key": api_key, "rcept_no": rcept_no},
+        timeout=60,
+    )
+    r.raise_for_status()
+    with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
+        names = [n for n in zf.namelist() if n.lower().endswith((".xml", ".html", ".htm"))]
+        raw = zf.read(names[0]).decode("utf-8", errors="ignore")
+    text = re.sub(r"<[^>]+>", " ", raw)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def build_user_message(entry: dict, period: str, sources: list[tuple[str, str]],
+                       consensus: str | None, price: str | None) -> str:
+    parts = [
+        f"기업명: {entry.get('name')}",
+        f"종목코드: {entry.get('ticker')}",
+        f"대상 분기: {period}",
+        f"컨센서스: {consensus or '미제공'}",
+        f"현재가/시총/PER: {price or '미제공'}",
+        "",
+    ]
+    for label, body in sources:
+        parts.append(f"=== 자료: {label} ===")
+        parts.append(body[:MAX_INPUT_CHARS])
+        parts.append("")
+    parts.append("위 자료만 근거로 스킬 지침의 출력 형식에 맞춰 리포트를 작성하라.")
+    return "\n".join(parts)
+
+
+def call_claude(system: str, user: str) -> str:
+    from anthropic import Anthropic
+
+    client = Anthropic()
+    resp = client.messages.create(
+        model=MODEL,
+        max_tokens=4000,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+    )
+    return "".join(block.text for block in resp.content if getattr(block, "type", "") == "text")
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ticker", required=True)
+    ap.add_argument("--period", required=True, help="예: 2026Q3")
+    ap.add_argument("--source", action="append", default=[], help="원문 텍스트 파일 (여러 번 가능)")
+    ap.add_argument("--rcept", help="DART 접수번호 (원문을 직접 내려받음)")
+    ap.add_argument("--consensus")
+    ap.add_argument("--price")
+    ap.add_argument("--dry-run", action="store_true", help="API 호출 없이 프롬프트만 출력")
+    args = ap.parse_args()
+
+    if not os.environ.get("ANTHROPIC_API_KEY") and not args.dry_run:
+        print("ANTHROPIC_API_KEY not set", file=sys.stderr)
+        return 1
+
+    entry = load_watchlist_entry(args.ticker)
+    sources: list[tuple[str, str]] = []
+    for p in args.source:
+        path = Path(p)
+        sources.append((path.name, path.read_text(encoding="utf-8", errors="ignore")))
+    if args.rcept:
+        key = os.environ.get("DART_API_KEY", "")
+        if not key:
+            print("DART_API_KEY not set", file=sys.stderr)
+            return 1
+        sources.append((f"DART {args.rcept}", fetch_dart_document(args.rcept, key)))
+    if not sources:
+        print("no sources: use --source or --rcept", file=sys.stderr)
+        return 1
+
+    system = PROMPT.read_text(encoding="utf-8")
+    user = build_user_message(entry, args.period, sources, args.consensus, args.price)
+
+    if args.dry_run:
+        print(user[:3000])
+        print(f"\n... total {len(user):,} chars")
+        return 0
+
+    body = call_claude(system, user)
+
+    front = (
+        "---\n"
+        f'ticker: "{entry.get("ticker")}"\n'
+        f"name: {entry.get('name')}\n"
+        f"period: {args.period}\n"
+        f"published: {date.today().isoformat()}\n"
+        f"model: {MODEL}\n"
+        "source_type: auto\n"
+        "---\n\n"
+    )
+    REPORTS.mkdir(parents=True, exist_ok=True)
+    out = REPORTS / f"{entry.get('ticker')}_{args.period}.md"
+    out.write_text(front + body.strip() + "\n", encoding="utf-8")
+    print(f"written: {out.relative_to(ROOT)} ({len(body):,} chars)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
