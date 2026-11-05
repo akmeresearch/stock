@@ -21,6 +21,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Resolve DART corp codes
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: python scripts/resolve_corp_codes.py
+
       - name: Collect data
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
