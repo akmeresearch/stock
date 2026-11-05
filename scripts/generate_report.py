@@ -61,18 +61,30 @@ def fetch_dart_document(rcept_no: str, api_key: str) -> str:
 
 
 def fetch_url_text(url: str) -> str:
-    """웹페이지 본문을 텍스트로. 스크립트·내비게이션 제거."""
+    """웹페이지 본문을 텍스트로. 후보 블록 중 텍스트가 가장 긴 것을 본문으로 본다."""
     from bs4 import BeautifulSoup
 
-    r = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (akme-research bot)"}, timeout=60)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+        "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+    }
+    r = requests.get(url, headers=headers, timeout=60)
     r.raise_for_status()
     soup = BeautifulSoup(r.text, "html.parser")
-    for tag in soup(["script", "style", "nav", "header", "footer", "aside", "form", "noscript"]):
+    for tag in soup(["script", "style", "nav", "header", "footer", "aside", "form", "noscript", "iframe"]):
         tag.decompose()
-    article = soup.find("article") or soup.find(id=re.compile("article|content", re.I)) or soup.body or soup
-    text = article.get_text("\n")
-    lines = [ln.strip() for ln in text.splitlines()]
-    return "\n".join(ln for ln in lines if ln)
+
+    def clean(node) -> str:
+        lines = [ln.strip() for ln in node.get_text("\n").splitlines()]
+        return "\n".join(ln for ln in lines if ln)
+
+    candidates = soup.find_all(["article", "section", "div"], id=re.compile("article|content|body|view|news", re.I))
+    candidates += soup.find_all(["article", "section", "div"], class_=re.compile("article|content|body|view|news", re.I))
+    candidates += soup.find_all("article")
+    best = max((clean(c) for c in candidates), key=len, default="")
+    fallback = clean(soup.body or soup)
+    # 후보 본문이 전체의 절반도 안 되면 추출이 잘못된 것이므로 전체를 쓴다
+    return best if len(best) >= len(fallback) * 0.5 and len(best) > 500 else fallback
 
 
 def build_user_message(entry: dict, period: str, sources: list[tuple[str, str]],
