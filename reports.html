@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실적 리포트 · AKME Research</title>
+<link rel="stylesheet" href="site/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html">AKME Research</a>
+  <a href="index.html">시장 현황</a>
+  <a href="reports.html" class="cur">실적 리포트</a>
+</nav>
+<main class="wrap">
+  <h1>실적 리포트</h1>
+  <div class="sub">실적 공시 + 컨콜을 AI가 같은 틀로 정리합니다. 최신순.</div>
+  <div id="list"><div class="empty">불러오는 중…</div></div>
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</main>
+<script>
+fetch('data/reports/index.json?v=' + Date.now())
+  .then(r => r.json())
+  .then(items => {
+    const el = document.getElementById('list');
+    if (!items.length) { el.innerHTML = '<div class="empty">아직 리포트가 없습니다.</div>'; return; }
+    el.innerHTML = items.map(r => `
+      <a class="card" href="report.html?f=${encodeURIComponent(r.file)}">
+        <div class="meta">${r.published} · ${r.ticker}${r.source_type === 'auto' ? '<span class="badge">자동 생성</span>' : '<span class="badge">샘플</span>'}</div>
+        <div class="title">${r.title}</div>
+        <div class="summary">${r.summary}</div>
+      </a>`).join('');
+  })
+  .catch(() => { document.getElementById('list').innerHTML = '<div class="empty">목록을 불러오지 못했습니다.</div>'; });
+</script>
+</body>
+</html>

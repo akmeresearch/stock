@@ -4,17 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AKME Research</title>
-<style>
-  body { font-family: -apple-system, "Pretendard", sans-serif; background: #0f1115; color: #e6e6e6;
-         display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-  h1 { font-weight: 600; letter-spacing: -0.5px; }
-  p { color: #8a8f98; }
-</style>
+<link rel="stylesheet" href="site/style.css">
 </head>
 <body>
-  <div>
-    <h1>AKME Research</h1>
-    <p>AI 기반 실적·시장 리서치 — 준비 중</p>
+<nav class="nav">
+  <a class="brand" href="index.html">AKME Research</a>
+  <a href="index.html" class="cur">시장 현황</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap">
+  <h1>AKME Research</h1>
+  <div class="sub">AI 기반 실적·시장 리서치</div>
+  <a class="card" href="reports.html">
+    <div class="title">실적 리포트 →</div>
+    <div class="summary">실적 공시와 컨콜을 같은 틀로 정리한 기업별 리뷰</div>
+  </a>
+  <div class="card" style="opacity:.6">
+    <div class="title">시장 현황 (준비 중)</div>
+    <div class="summary">지수·선물·외국인 수급 — 2단계 데이터 수집 후 연결</div>
   </div>
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</main>
 </body>
 </html>
