@@ -105,17 +105,28 @@ def build_user_message(entry: dict, period: str, sources: list[tuple[str, str]],
     return "\n".join(parts)
 
 
-def call_claude(system: str, user: str) -> str:
+def call_claude(system: str, user: str) -> tuple[str, dict]:
+    """Claude 호출. 출력이 max_tokens에 걸리면 '이어서'를 요청해 최대 3회까지 이어 붙인다."""
     from anthropic import Anthropic
 
     client = Anthropic()
-    resp = client.messages.create(
-        model=MODEL,
-        max_tokens=8000,
-        system=system,
-        messages=[{"role": "user", "content": user}],
-    )
-    return "".join(block.text for block in resp.content if getattr(block, "type", "") == "text")
+    messages = [{"role": "user", "content": user}]
+    body, meta = "", {"stop": [], "in": 0, "out": 0}
+    for _ in range(3):
+        resp = client.messages.create(model=MODEL, max_tokens=16000, system=system, messages=messages)
+        chunk = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        body += chunk
+        meta["stop"].append(resp.stop_reason)
+        meta["in"] += resp.usage.input_tokens
+        meta["out"] += resp.usage.output_tokens
+        print(f"stop_reason={resp.stop_reason} in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+        if resp.stop_reason != "max_tokens":
+            break
+        messages += [
+            {"role": "assistant", "content": chunk},
+            {"role": "user", "content": "출력이 잘렸다. 마지막 문장 바로 다음부터 이어서, 반복 없이 끝까지 작성하라."},
+        ]
+    return body, meta
 
 
 def main() -> int:
@@ -162,7 +173,7 @@ def main() -> int:
         print(f"\n... total {len(user):,} chars")
         return 0
 
-    body = call_claude(system, user)
+    body, meta = call_claude(system, user)
 
     front = (
         "---\n"
@@ -172,6 +183,9 @@ def main() -> int:
         f"published: {date.today().isoformat()}\n"
         f"model: {MODEL}\n"
         "source_type: auto\n"
+        f"stop_reason: {','.join(meta['stop'])}\n"
+        f"tokens_in: {meta['in']}\n"
+        f"tokens_out: {meta['out']}\n"
         "---\n\n"
     )
     REPORTS.mkdir(parents=True, exist_ok=True)
