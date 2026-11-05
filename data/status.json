@@ -1,7 +1,7 @@
 {
-  "run_at": "2026-11-05T08:35:11+09:00",
-  "kr_count": 2,
-  "us_count": 2,
+  "run_at": "2026-11-05T10:58:22+09:00",
+  "kr_count": 3,
+  "us_count": 0,
   "modules": [
     "prices",
     "flows",
