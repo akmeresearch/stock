@@ -41,6 +41,15 @@ jobs:
       - name: Collect data
         run: python scripts/collect_all.py
 
+      - name: Detect earnings filings & generate reports
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/detect_filings.py --days 14
+
+      - name: Build report index
+        run: python scripts/build_index.py
+
       - name: Commit data
         run: |
           git config user.name "akme-bot"

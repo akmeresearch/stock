@@ -44,6 +44,35 @@ def load_watchlist_entry(ticker: str) -> dict:
     return {"ticker": ticker, "name": ticker}
 
 
+SECTION_KEYS = ("사업의 내용", "경영진단", "재무에 관한 사항", "연결재무제표", "요약재무정보", "영업실적")
+
+
+def trim_dart_text(text: str, limit: int = MAX_INPUT_CHARS) -> str:
+    """분기보고서처럼 긴 문서는 실적 관련 섹션 주변을 우선 남긴다."""
+    if len(text) <= limit:
+        return text
+    head = text[:20_000]  # 표지·요약
+    slots = []
+    for key in SECTION_KEYS:
+        for m in re.finditer(re.escape(key), text):
+            slots.append(m.start())
+    slots = sorted(set(slots))
+    chunks, used = [], 0
+    per = max(20_000, (limit - len(head)) // max(1, min(len(slots), 6)))
+    last_end = 0
+    for pos in slots:
+        if pos < last_end:
+            continue
+        chunk = text[pos:pos + per]
+        chunks.append(chunk)
+        used += len(chunk)
+        last_end = pos + per
+        if used >= limit - len(head):
+            break
+    body = "\n\n[...중략...]\n\n".join(chunks) if chunks else text[20_000:limit]
+    return (head + "\n\n[...중략...]\n\n" + body)[:limit]
+
+
 def fetch_dart_document(rcept_no: str, api_key: str) -> str:
     """DART 공시 원문(zip 안의 xml)을 받아 태그를 벗긴 텍스트로 반환."""
     r = requests.get(
@@ -57,7 +86,7 @@ def fetch_dart_document(rcept_no: str, api_key: str) -> str:
         raw = zf.read(names[0]).decode("utf-8", errors="ignore")
     text = re.sub(r"<[^>]+>", " ", raw)
     text = re.sub(r"\s+", " ", text)
-    return text.strip()
+    return trim_dart_text(text.strip())
 
 
 def fetch_url_text(url: str) -> str:
@@ -136,6 +165,7 @@ def main() -> int:
     ap.add_argument("--source", action="append", default=[], help="원문 텍스트 파일 (여러 번 가능)")
     ap.add_argument("--rcept", help="DART 접수번호 (원문을 직접 내려받음)")
     ap.add_argument("--url", action="append", default=[], help="IR 보도자료·컨콜 전문 등 웹페이지 (여러 번 가능)")
+    ap.add_argument("--kind", default="", help="공시 종류 (잠정실적/분기보고서 등) — frontmatter 기록용")
     ap.add_argument("--consensus")
     ap.add_argument("--price")
     ap.add_argument("--dry-run", action="store_true", help="API 호출 없이 프롬프트만 출력")
@@ -183,6 +213,7 @@ def main() -> int:
         f"published: {date.today().isoformat()}\n"
         f"model: {MODEL}\n"
         "source_type: auto\n"
+        f"filing_kind: {args.kind}\n"
         f"stop_reason: {','.join(meta['stop'])}\n"
         f"tokens_in: {meta['in']}\n"
         f"tokens_out: {meta['out']}\n"
