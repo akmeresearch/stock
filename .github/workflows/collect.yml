@@ -39,6 +39,8 @@ jobs:
         run: python scripts/resolve_corp_codes.py
 
       - name: Collect data
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
         run: python scripts/collect_all.py
 
       - name: Detect earnings filings & generate reports

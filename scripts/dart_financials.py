@@ -73,7 +73,7 @@ def fetch_quarter(corp_code: str, year: int, q: str, api_key: str) -> dict | Non
     return None
 
 
-def collect_company(ticker: str, corp_code: str, api_key: str, n_quarters: int = 6) -> dict:
+def collect_company(ticker: str, corp_code: str, api_key: str, n_quarters: int = 12) -> dict:
     path = FIN_DIR / f"{ticker}.json"
     data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"ticker": ticker, "quarters": {}}
     for year, q in quarters_back(n_quarters):
@@ -88,10 +88,31 @@ def collect_company(ticker: str, corp_code: str, api_key: str, n_quarters: int =
         if row:
             data["quarters"][key] = row
             print(f"  {ticker} {key}: {row.get('fs_div')} 매출 {fmt_eok(row.get('매출액', {}).get('q'))} 영업이익 {fmt_eok(row.get('영업이익', {}).get('q'))}")
+    derive_q4(data)
     data["updatedAt"] = now_iso()
     FIN_DIR.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return data
+
+
+def derive_q4(data: dict) -> None:
+    """사업보고서(Q4)는 연간값만 있으므로 Q4 3개월 = 연간 − 3분기 누적 으로 역산한다."""
+    q = data.get("quarters", {})
+    for key, row in q.items():
+        if not key.endswith("Q4") or row.get("derived"):
+            continue
+        q3 = q.get(key[:4] + "Q3")
+        if not q3:
+            continue
+        ok = False
+        for label, _ in LINES:
+            annual = (row.get(label) or {}).get("q")
+            acc3 = (q3.get(label) or {}).get("acc")
+            if annual is not None and acc3 is not None:
+                row[label]["annual"] = annual
+                row[label]["q"] = annual - acc3
+                ok = True
+        row["derived"] = ok
 
 
 def fmt_eok(v) -> str:
