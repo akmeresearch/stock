@@ -1,22 +1,34 @@
 name: Collect market data
 
 on:
-  workflow_dispatch:        # Actions 탭에서 수동 실행
-  # schedule:               # 2단계에서 스크립트 완성 후 주석 해제
-  #   - cron: "10 7 * * 1-5"   # 평일 16:10 KST (UTC 07:10)
+  workflow_dispatch:
+  schedule:
+    # KST 08:30~16:00 평일 30분 간격 (UTC 23:30~07:00), 미국장 반영 위해 KST 23:30·02:30·06:00 추가
+    - cron: "30,0 23 * * 0-4"
+    - cron: "0,30 0-6 * * 1-5"
+    - cron: "0 7 * * 1-5"
+    - cron: "30 14 * * 1-5"
+    - cron: "30 17 * * 1-5"
+    - cron: "0 21 * * 1-5"
 
 permissions:
   contents: write
 
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
 jobs:
   collect:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -27,11 +39,6 @@ jobs:
         run: python scripts/resolve_corp_codes.py
 
       - name: Collect data
-        env:
-          DART_API_KEY: ${{ secrets.DART_API_KEY }}
-          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
-          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python scripts/collect_all.py
 
       - name: Commit data
@@ -39,5 +46,6 @@ jobs:
           git config user.name "akme-bot"
           git config user.email "actions@users.noreply.github.com"
           git add data/
-          git diff --cached --quiet || git commit -m "data: $(date -u +%Y-%m-%d) collect"
+          git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Seoul date +%Y-%m-%d\ %H:%M) collect"
+          git pull --rebase origin main
           git push
