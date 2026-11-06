@@ -43,11 +43,12 @@ function drawHead(meta, p) {
     </div>
     <div class="kv">
       <div><span>시가총액</span><b>${p.marketCap || '—'}</b></div>
-      <div><span>PER</span><b>${p.per || '—'}</b></div>
+      <div><span>PER (추정)</span><b>${p.per || '—'}${p.perEst ? ` <small style="color:var(--muted)">(${p.perEst})</small>` : ''}</b></div>
       <div><span>PBR</span><b>${p.pbr || '—'}</b></div>
       <div><span>EPS</span><b>${p.eps || '—'}</b></div>
       <div><span>52주 최고 / 최저</span><b>${p.high52 || '—'} / ${p.low52 || '—'}</b></div>
-      <div><span>외국인 비율</span><b>${p.foreignRate || '—'}</b></div>
+      <div><span>외인소진율</span><b>${p.foreignRate || '—'}</b></div>
+      <div><span>배당수익률</span><b>${p.dividendYield || '—'}</b></div>
     </div>` : '<div class="empty">시세는 다음 수집 때 표시됩니다.</div>'}`;
 }
 

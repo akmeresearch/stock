@@ -21,16 +21,10 @@ def live(code: str) -> dict:
         integ = get_json(f"https://m.stock.naver.com/api/stock/{code}/integration")
         infos = {str(i.get("key", "")).strip(): str(i.get("value", "")).strip() for i in integ.get("totalInfos", [])}
         out["infos"] = infos
-        pick = lambda *subs: next((v for k, v in infos.items() if all(x in k for x in subs)), None)
-        out["marketCap"] = pick("시가총액")
-        out["per"] = pick("PER")
-        out["pbr"] = pick("PBR")
-        out["eps"] = pick("EPS")
-        out["high52"] = pick("52주", "고") or pick("52주", "최고")
-        out["low52"] = pick("52주", "저") or pick("52주", "최저")
-        out["dividendYield"] = pick("배당수익률")
-        out["foreignRate"] = pick("외국인")
-        print(f"  {code} totalInfos keys: {list(infos)[:20]}")
+        g = lambda k: infos.get(k) or None
+        out.update({"marketCap": g("시총"), "per": g("PER"), "pbr": g("PBR"), "eps": g("EPS"),
+                    "perEst": g("추정PER"), "high52": g("52주 최고"), "low52": g("52주 최저"),
+                    "dividendYield": g("배당수익률"), "foreignRate": g("외인소진율")})
     except Exception as e:
         print(f"  {code} integration FAIL {type(e).__name__}: {e}", file=sys.stderr)
     return out
