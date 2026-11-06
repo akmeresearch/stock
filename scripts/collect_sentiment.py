@@ -64,6 +64,9 @@ def cnn() -> list[dict]:
         fg_pts = [p for p in fg_pts if p["date"] != d] + [{"date": d, "value": score}]
     item_fg = series_item("fear-greed", "공포·탐욕 지수", "CNN Business · 미국 주식 · 0=극단적 공포, 100=극단적 탐욕",
                           fg_pts, 0, rating=fg.get("rating"), source=CNN_PAGE)
+    prev_close = fg.get("previous_close")
+    if isinstance(score, (int, float)) and isinstance(prev_close, (int, float)):
+        item_fg["change"] = score - prev_close
     item_pc = series_item("put-call", "Put/Call Ratio", "CNN · 풋/콜 거래량 5일 평균 · 높을수록 풋 우위",
                           pts(payload.get("put_call_options"), 0, 10), 2,
                           rating=(payload.get("put_call_options") or {}).get("rating"), source=CNN_PAGE)
@@ -81,7 +84,14 @@ def _cnn_get(start: str):
 
 def fred(id_, series, name, subtitle, digits) -> dict:
     start = (datetime.now(timezone.utc) - timedelta(days=400)).strftime("%Y-%m-%d")
-    text = get_text(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}&cosd={start}", timeout=40)
+    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}&cosd={start}"
+    try:  # FRED는 파이썬 기본 TLS 지문을 차단하는 것으로 보여 브라우저 지문으로 요청한다
+        from curl_cffi import requests as cffi
+        r = cffi.get(url, impersonate="chrome", timeout=40)
+        r.raise_for_status()
+        text = r.text
+    except ImportError:
+        text = get_text(url, timeout=40)
     rows = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
     head = rows[0]
     if len(head) != 2 or head[1] != series:

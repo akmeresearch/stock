@@ -71,7 +71,7 @@ async function loadIndicators() {
         <div class="k">${i.name} <span class="tag">${i.delayLabel || ''}${i.status === 'stale' ? ' · 이전' : ''}</span></div>
         <div class="v ${cls(i.changePercent)}">${fmt(i.price, i.digits)}<small>${i.unit === '%' ? '%' : ''}</small></div>
         <div class="c ${cls(i.change)}">${i.change == null ? '' : `${sign(i.change)}${fmt(i.change, i.unit === '%' ? 3 : i.digits)}`} ${i.changePercent == null ? '' : `(${sign(i.changePercent)}${fmt(i.changePercent, 2)}%)`}</div>
-        <canvas class="spark" data-id="${i.id}" height="36"></canvas>
+        <div class="spark"><canvas data-id="${i.id}"></canvas></div>
         <div class="p">${['1w', '1m', '3m'].map(k => `<span>${k === '1w' ? '1주' : k === '1m' ? '1개월' : '3개월'} <b class="${cls(i.perf?.[k])}">${i.perf?.[k] == null ? '—' : sign(i.perf[k]) + fmt(i.perf[k], 1) + '%'}</b></span>`).join('')}</div>
         <div class="s">${kst(i.quoteAt)}</div>
       </div>`).join('');
@@ -100,7 +100,7 @@ async function loadSentiment() {
         <div class="k">${i.name}${i.status === 'stale' ? ' <span class="tag">이전</span>' : ''}</div>
         <div class="v">${fmt(i.value, i.digits)}${i.rating ? ` <small class="tag">${rate(i.rating)}</small>` : ''}</div>
         <div class="c ${cls(i.change)}">${i.change == null ? '' : `${sign(i.change)}${fmt(i.change, i.digits)} 전일 대비`}</div>
-        <canvas class="spark" data-id="${i.id}" height="36"></canvas>
+        <div class="spark"><canvas data-id="${i.id}"></canvas></div>
         <div class="p">${Object.entries(i.comparisons || {}).map(([k, v]) => `<span>${{ '1w': '1주 전', '1m': '1개월 전', '1y': '1년 전' }[k]} <b>${fmt(v, i.digits)}</b></span>`).join('')}</div>
         <div class="s">${i.subtitle || ''} · ${i.asOf}</div>
       </div>`).join('');
