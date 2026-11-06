@@ -80,7 +80,8 @@ def _cnn_get(start: str):
 
 
 def fred(id_, series, name, subtitle, digits) -> dict:
-    text = get_text(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}", timeout=25)
+    start = (datetime.now(timezone.utc) - timedelta(days=400)).strftime("%Y-%m-%d")
+    text = get_text(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}&cosd={start}", timeout=40)
     rows = list(csv.reader(io.StringIO(text.lstrip("﻿"))))
     head = rows[0]
     if len(head) != 2 or head[1] != series:

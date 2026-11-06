@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AKME Research</title>
+<title>시장 현황 · AKME Research</title>
+<meta name="description" content="외국인 수급과 지수, 주요 지표, 시장 심리를 한 화면에서">
 <link rel="stylesheet" href="site/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 </head>
 <body>
 <nav class="nav">
@@ -12,18 +14,60 @@
   <a href="index.html" class="cur">시장 현황</a>
   <a href="reports.html">실적 리포트</a>
 </nav>
-<main class="wrap">
-  <h1>AKME Research</h1>
-  <div class="sub">AI 기반 실적·시장 리서치</div>
-  <a class="card" href="reports.html">
-    <div class="title">실적 리포트 →</div>
-    <div class="summary">실적 공시와 컨콜을 같은 틀로 정리한 기업별 리뷰</div>
-  </a>
-  <div class="card" style="opacity:.6">
-    <div class="title">시장 현황 (준비 중)</div>
-    <div class="summary">지수·선물·외국인 수급 — 2단계 데이터 수집 후 연결</div>
+
+<!-- 실시간 티커 (TradingView) -->
+<div class="ticker">
+  <div class="tradingview-widget-container">
+    <div class="tradingview-widget-container__widget"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+    {"symbols":[
+      {"proName":"KRX:KOSPI","title":"코스피"},
+      {"proName":"KRX:KOSDAQ","title":"코스닥"},
+      {"proName":"KRX:KOSPI200","title":"코스피200"},
+      {"proName":"FX_IDC:USDKRW","title":"원/달러"},
+      {"proName":"NASDAQ:IXIC","title":"나스닥"},
+      {"proName":"SP:SPX","title":"S&P 500"},
+      {"proName":"TVC:VIX","title":"VIX"},
+      {"proName":"TVC:US10Y","title":"미 10년물"},
+      {"proName":"TVC:USOIL","title":"WTI"},
+      {"proName":"TVC:GOLD","title":"금"}
+    ],"showSymbolLogo":false,"colorTheme":"light","isTransparent":true,"displayMode":"adaptive","locale":"kr"}
+    </script>
   </div>
-  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</div>
+
+<main class="wrap wide">
+  <section class="sec">
+    <div class="sec-head">
+      <div><div class="eyebrow">MARKET FLOW</div><h1>외국인 수급과 지수를 같은 시간축에서</h1></div>
+      <button class="btn" data-refresh>지금 갱신 ↻</button>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-market="KOSPI">외국인 코스피 × 코스피</button>
+      <button class="tab" data-market="KOSDAQ">외국인 코스닥 × 코스닥</button>
+      <button class="tab" data-market="FUT">외국인 선물 × K200 선물</button>
+    </div>
+    <div id="flow-stat" class="stats"></div>
+    <div class="chart-box"><canvas id="flow-chart"></canvas></div>
+    <div id="flow-note" class="note"></div>
+    <div class="note">현물·선물 모두 순매수 금액(억원). 선물은 매수금액−매도금액 환산. 정규장 시간 구간만 표시하며 주말·휴일에는 최근 거래일을 보여줍니다. 30분마다 자동 수집.</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">INDICATORS</div><h2>주요 지표</h2></div></div>
+    <div id="ind-grid" class="grid"></div>
+    <div id="ind-note" class="note"></div>
+    <div class="note">장중 시세는 네이버페이 증권(지연 여부 카드별 표시), 1주·1개월·3개월 성과와 스파크라인은 Yahoo Finance 일봉 기준이며 장중 시세와 섞어 계산하지 않습니다. 원유·금속은 근월물.</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">SENTIMENT &amp; RISK</div><h2>시장 심리 · 보조지표</h2></div></div>
+    <div id="sent-grid" class="grid"></div>
+    <div id="sent-note" class="note"></div>
+  </section>
+
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다. 출처: 네이버페이 증권, Yahoo Finance, TradingView, CNN Business, FRED.</div>
 </main>
+<script src="site/market.js"></script>
 </body>
 </html>
