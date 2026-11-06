@@ -28,70 +28,70 @@
       "name": "삼성전기",
       "market": "KOSPI",
       "sector": "전자부품",
-      "dart_corp_code": ""
+      "dart_corp_code": "00126371"
     },
     {
       "ticker": "084370",
       "name": "유진테크",
       "market": "KOSDAQ",
       "sector": "반도체장비",
-      "dart_corp_code": ""
+      "dart_corp_code": "00531014"
     },
     {
       "ticker": "095610",
       "name": "테스",
       "market": "KOSDAQ",
       "sector": "반도체장비",
-      "dart_corp_code": ""
+      "dart_corp_code": "00524421"
     },
     {
       "ticker": "067310",
       "name": "하나마이크론",
       "market": "KOSDAQ",
       "sector": "반도체후공정",
-      "dart_corp_code": ""
+      "dart_corp_code": "00445054"
     },
     {
       "ticker": "003160",
       "name": "디아이",
       "market": "KOSPI",
       "sector": "반도체장비",
-      "dart_corp_code": ""
+      "dart_corp_code": "00118275"
     },
     {
       "ticker": "078350",
       "name": "한양디지텍",
       "market": "KOSDAQ",
       "sector": "메모리모듈",
-      "dart_corp_code": ""
+      "dart_corp_code": "00488989"
     },
     {
       "ticker": "007810",
       "name": "코리아써키트",
       "market": "KOSPI",
       "sector": "PCB",
-      "dart_corp_code": ""
+      "dart_corp_code": "00152686"
     },
     {
       "ticker": "489790",
       "name": "한화비전",
       "market": "KOSPI",
       "sector": "보안·영상",
-      "dart_corp_code": ""
+      "dart_corp_code": "01867758"
     },
     {
       "ticker": "257720",
       "name": "실리콘투",
       "market": "KOSDAQ",
       "sector": "화장품유통",
-      "dart_corp_code": ""
+      "dart_corp_code": "00982023"
     },
     {
       "ticker": "267260",
       "name": "HD현대일렉트릭",
       "market": "KOSPI",
       "sector": "전력기기",
-      "dart_corp_code": ""
+      "dart_corp_code": "01205851"
     }
   ],
   "us": []
