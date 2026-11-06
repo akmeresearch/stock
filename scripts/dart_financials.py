@@ -74,20 +74,24 @@ def fetch_quarter(corp_code: str, year: int, q: str, api_key: str) -> dict | Non
 
 
 def collect_company(ticker: str, corp_code: str, api_key: str, n_quarters: int = 12) -> dict:
+    from concurrent.futures import ThreadPoolExecutor
     path = FIN_DIR / f"{ticker}.json"
     data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"ticker": ticker, "quarters": {}}
-    for year, q in quarters_back(n_quarters):
-        key = f"{year}{q}"
-        if key in data["quarters"]:
-            continue
+    todo = [(y, q) for y, q in quarters_back(n_quarters) if f"{y}{q}" not in data["quarters"]]
+
+    def job(yq):
+        y, q = yq
         try:
-            row = fetch_quarter(corp_code, year, q, api_key)
+            return f"{y}{q}", fetch_quarter(corp_code, y, q, api_key)
         except Exception as e:
-            print(f"  {ticker} {key}: {type(e).__name__}: {e}", file=sys.stderr)
-            row = None
-        if row:
-            data["quarters"][key] = row
-            print(f"  {ticker} {key}: {row.get('fs_div')} 매출 {fmt_eok(row.get('매출액', {}).get('q'))} 영업이익 {fmt_eok(row.get('영업이익', {}).get('q'))}")
+            print(f"  {ticker} {y}{q}: {type(e).__name__}: {e}", file=sys.stderr)
+            return f"{y}{q}", None
+
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        for key, row in ex.map(job, todo):
+            if row:
+                data["quarters"][key] = row
+                print(f"  {ticker} {key}: {row.get('fs_div')} 매출 {fmt_eok(row.get('매출액', {}).get('q'))} 영업이익 {fmt_eok(row.get('영업이익', {}).get('q'))}")
     derive_q4(data)
     data["updatedAt"] = now_iso()
     FIN_DIR.mkdir(parents=True, exist_ok=True)
