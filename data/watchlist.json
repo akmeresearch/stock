@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-05",
+  "updated": "2026-11-06",
   "note": "관심종목 목록. 실적 공시 감지와 데이터 수집의 기준. ticker는 KRX 6자리 코드 또는 미국 티커. dart_corp_code는 scripts/resolve_corp_codes.py가 DART corpCode 목록에서 자동으로 채운다.",
   "kr": [
     {
@@ -22,6 +22,76 @@
       "market": "KOSDAQ",
       "sector": "바이오",
       "dart_corp_code": "00415868"
+    },
+    {
+      "ticker": "009150",
+      "name": "삼성전기",
+      "market": "KOSPI",
+      "sector": "전자부품",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "084370",
+      "name": "유진테크",
+      "market": "KOSDAQ",
+      "sector": "반도체장비",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "095610",
+      "name": "테스",
+      "market": "KOSDAQ",
+      "sector": "반도체장비",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "067310",
+      "name": "하나마이크론",
+      "market": "KOSDAQ",
+      "sector": "반도체후공정",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "003160",
+      "name": "디아이",
+      "market": "KOSPI",
+      "sector": "반도체장비",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "078350",
+      "name": "한양디지텍",
+      "market": "KOSDAQ",
+      "sector": "메모리모듈",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "007810",
+      "name": "코리아써키트",
+      "market": "KOSPI",
+      "sector": "PCB",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "489790",
+      "name": "한화비전",
+      "market": "KOSPI",
+      "sector": "보안·영상",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "257720",
+      "name": "실리콘투",
+      "market": "KOSDAQ",
+      "sector": "화장품유통",
+      "dart_corp_code": ""
+    },
+    {
+      "ticker": "267260",
+      "name": "HD현대일렉트릭",
+      "market": "KOSPI",
+      "sector": "전력기기",
+      "dart_corp_code": ""
     }
   ],
   "us": []
