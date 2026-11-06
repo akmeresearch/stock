@@ -33,7 +33,7 @@ def parse(md_path: Path) -> dict | None:
 
 
 def main() -> None:
-    items = [r for p in sorted(REPORTS.glob("*.md")) if (r := parse(p))]
+    items = [r for p in sorted(REPORTS.glob("*.md")) if not p.stem.endswith("_test") and (r := parse(p))]
     items.sort(key=lambda r: (r["published"], r["period"]), reverse=True)
     (REPORTS / "index.json").write_text(json.dumps(items, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"index.json: {len(items)} reports")
