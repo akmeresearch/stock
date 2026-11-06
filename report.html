@@ -35,11 +35,14 @@
   <article id="doc" class="md"><div class="empty">불러오는 중…</div></article>
 </main>
 <script>
-const f = new URLSearchParams(location.search).get('f') || '';
+const qs = new URLSearchParams(location.search);
+const f = qs.get('f') || '';
+const dir = qs.get('t') === 'weekly' ? 'data/weekly/' : 'data/reports/';
+if (dir === 'data/weekly/') { const b = document.querySelector('.back'); b.href = 'weekly.html'; b.textContent = '← 위클리 목록'; document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('cur', a.getAttribute('href') === 'weekly.html')); }
 if (!/^[\w.-]+\.md$/.test(f)) {
   document.getElementById('doc').innerHTML = '<div class="empty">잘못된 주소입니다.</div>';
 } else {
-  fetch('data/reports/' + f + '?v=' + Date.now())
+  fetch(dir + f + '?v=' + Date.now())
     .then(r => { if (!r.ok) throw new Error(); return r.text(); })
     .then(md => {
       const body = md.replace(/^---\n[\s\S]*?\n---\n/, '');

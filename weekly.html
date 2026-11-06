@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>위클리 · AKME Research</title>
+<meta name="description" content="매주 일요일, 한 주의 지수·수급·심리·관심종목을 AI가 정리한 주간 브리핑.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKME Research">
+<meta property="og:title" content="위클리 · AKME Research">
+<meta property="og:description" content="매주 일요일, 한 주의 지수·수급·심리·관심종목을 AI가 정리한 주간 브리핑.">
+<meta property="og:url" content="https://akmeresearch.github.io/stock/weekly.html">
+<meta property="og:image" content="https://akmeresearch.github.io/stock/site/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="위클리 · AKME Research">
+<meta name="twitter:description" content="매주 일요일, 한 주의 지수·수급·심리·관심종목을 AI가 정리한 주간 브리핑.">
+<meta name="twitter:image" content="https://akmeresearch.github.io/stock/site/img/og.png">
+<link rel="icon" type="image/svg+xml" href="site/img/favicon.svg">
+<meta name="theme-color" content="#0b0f17">
+<link rel="stylesheet" href="site/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html">AKME Research</a>
+  <a href="index.html">시장 현황</a>
+  <a href="stocks.html">관심종목</a>
+  <a href="weekly.html" class="cur">위클리</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap">
+  <h1>위클리</h1>
+  <div class="sub">한 주의 지수·수급·심리·관심종목을 묶어 읽습니다. 매주 일요일 저녁 자동 발행.</div>
+  <div id="list"><div class="empty">불러오는 중…</div></div>
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</main>
+<script>
+fetch('data/weekly/index.json?v=' + Date.now())
+  .then(r => r.json())
+  .then(items => {
+    const el = document.getElementById('list');
+    if (!items.length) { el.innerHTML = '<div class="empty">아직 브리핑이 없습니다. 첫 발행은 다음 일요일입니다.</div>'; return; }
+    el.innerHTML = items.map(r => `
+      <a class="card" href="report.html?t=weekly&f=${encodeURIComponent(r.file)}">
+        <div class="meta">${r.week_start} ~ ${r.week_end} · 발행 ${r.published}</div>
+        <div class="title">${r.title}</div>
+        <div class="summary">${r.summary}</div>
+      </a>`).join('');
+  })
+  .catch(() => { document.getElementById('list').innerHTML = '<div class="empty">목록을 불러오지 못했습니다.</div>'; });
+</script>
+</body>
+</html>
