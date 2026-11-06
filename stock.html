@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>종목 · AKME Research</title>
+<link rel="stylesheet" href="site/style.css">
+<script src="site/vendor/chart.umd.min.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html">AKME Research</a>
+  <a href="index.html">시장 현황</a>
+  <a href="stocks.html" class="cur">관심종목</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap wide">
+  <a class="back" href="stocks.html">← 관심종목</a>
+
+  <section class="sec">
+    <div id="head" class="stock-head"><div class="empty">불러오는 중…</div></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">PRICE</div><h2>주가 · 1년</h2></div>
+      <div class="tabs" id="range"><button class="tab" data-days="63">3개월</button><button class="tab" data-days="126">6개월</button><button class="tab on" data-days="0">1년</button></div></div>
+    <div class="chart-box"><canvas id="price-chart"></canvas></div>
+    <div id="price-note" class="note"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">FINANCIALS</div><h2>분기 실적 추이</h2></div></div>
+    <div class="chart-box"><canvas id="fin-chart"></canvas></div>
+    <div id="fin-table" class="md"></div>
+    <div id="fin-note" class="note"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">REPORTS</div><h2>실적 리포트</h2></div></div>
+    <div id="reports"></div>
+  </section>
+
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다. 출처: DART, 네이버페이 증권, Yahoo Finance.</div>
+</main>
+<script src="site/stock.js"></script>
+</body>
+</html>

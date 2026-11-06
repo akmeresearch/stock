@@ -14,11 +14,26 @@ def live(code: str) -> dict:
     price = num(q.get("closePrice"))
     if not price:
         raise ValueError("no price")
-    return {"price": price, "change": num(q.get("compareToPreviousClosePrice")),
-            "changePercent": num(q.get("fluctuationsRatio")), "quoteAt": q.get("localTradedAt"),
-            "marketStatus": q.get("marketStatus"), "marketCap": q.get("marketValue"),
-            "per": num(q.get("per")), "pbr": num(q.get("pbr")), "eps": num(q.get("eps")),
-            "high52": num(q.get("high52w")) if q.get("high52w") else None, "low52": num(q.get("low52w")) if q.get("low52w") else None}
+    out = {"price": price, "change": num(q.get("compareToPreviousClosePrice")),
+           "changePercent": num(q.get("fluctuationsRatio")), "quoteAt": q.get("localTradedAt"),
+           "marketStatus": q.get("marketStatus")}
+    try:  # 시총·PER·PBR·52주 등은 /integration 의 totalInfos (한글 라벨 → 값 문자열)
+        integ = get_json(f"https://m.stock.naver.com/api/stock/{code}/integration")
+        infos = {str(i.get("key", "")).strip(): str(i.get("value", "")).strip() for i in integ.get("totalInfos", [])}
+        out["infos"] = infos
+        pick = lambda *subs: next((v for k, v in infos.items() if all(x in k for x in subs)), None)
+        out["marketCap"] = pick("시가총액")
+        out["per"] = pick("PER")
+        out["pbr"] = pick("PBR")
+        out["eps"] = pick("EPS")
+        out["high52"] = pick("52주", "고") or pick("52주", "최고")
+        out["low52"] = pick("52주", "저") or pick("52주", "최저")
+        out["dividendYield"] = pick("배당수익률")
+        out["foreignRate"] = pick("외국인")
+        print(f"  {code} totalInfos keys: {list(infos)[:20]}")
+    except Exception as e:
+        print(f"  {code} integration FAIL {type(e).__name__}: {e}", file=sys.stderr)
+    return out
 
 
 def history(code: str, market: str) -> list[dict]:

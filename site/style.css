@@ -72,3 +72,20 @@ h1 { font-size: 26px; letter-spacing: -0.5px; margin: 0 0 6px; }
 .tag { font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px; vertical-align: middle; }
 .up { color: #d64545; } .down { color: #2563eb; }
 @media (max-width: 640px) { .sec-head { flex-direction: column; align-items: flex-start; } .chart-box { height: 260px; } }
+
+/* ---- stock page ---- */
+.stock-head { display: grid; grid-template-columns: 1fr auto; gap: 16px 32px; align-items: end; }
+.stock-head h1 { font-size: 28px; margin: 2px 0 0; }
+.stock-head .meta { font-size: 13px; color: var(--muted); }
+.stock-quote .v { font-size: 32px; font-weight: 700; letter-spacing: -0.6px; }
+.stock-quote .v small { font-size: 14px; color: var(--muted); margin-left: 4px; font-weight: 500; }
+.stock-quote .c { font-size: 15px; font-weight: 600; }
+.stock-quote .s { font-size: 12px; color: var(--muted); }
+.kv { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.kv div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.kv span { display: block; font-size: 11px; color: var(--muted); }
+.kv b { font-size: 14px; font-weight: 600; }
+#fin-table table { margin-top: 12px; }
+#fin-table td:not(:first-child), #fin-table th:not(:first-child) { text-align: right; }
+@media (max-width: 640px) { .stock-head { grid-template-columns: 1fr; } }
+.lnk { color: var(--accent); cursor: pointer; } .lnk:hover { text-decoration: underline; }

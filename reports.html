@@ -10,6 +10,7 @@
 <nav class="nav">
   <a class="brand" href="index.html">AKME Research</a>
   <a href="index.html">시장 현황</a>
+  <a href="stocks.html">관심종목</a>
   <a href="reports.html" class="cur">실적 리포트</a>
 </nav>
 <main class="wrap">
@@ -26,7 +27,7 @@ fetch('data/reports/index.json?v=' + Date.now())
     if (!items.length) { el.innerHTML = '<div class="empty">아직 리포트가 없습니다.</div>'; return; }
     el.innerHTML = items.map(r => `
       <a class="card" href="report.html?f=${encodeURIComponent(r.file)}">
-        <div class="meta">${r.published} · ${r.ticker}${r.source_type === 'auto' ? '<span class="badge">자동 생성</span>' : '<span class="badge">샘플</span>'}</div>
+        <div class="meta">${r.published} · <span class="lnk" onclick="event.preventDefault();location.href='stock.html?code=${r.ticker}'">${r.name} ${r.ticker}</span>${r.source_type === 'auto' ? '<span class="badge">자동 생성</span>' : '<span class="badge">샘플</span>'}</div>
         <div class="title">${r.title}</div>
         <div class="summary">${r.summary}</div>
       </a>`).join('');

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관심종목 · AKME Research</title>
+<link rel="stylesheet" href="site/style.css">
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html">AKME Research</a>
+  <a href="index.html">시장 현황</a>
+  <a href="stocks.html" class="cur">관심종목</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap">
+  <h1>관심종목</h1>
+  <div class="sub">종목을 누르면 주가·분기 실적 추이·리포트를 한 화면에서 봅니다.</div>
+  <div id="list" class="grid"><div class="empty">불러오는 중…</div></div>
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</main>
+<script>
+const fmt = (n, d = 0) => n == null ? '—' : n.toLocaleString('ko-KR', { maximumFractionDigits: d, minimumFractionDigits: d });
+const sign = n => n > 0 ? '+' : '';
+const cls = n => n > 0 ? 'up' : n < 0 ? 'down' : '';
+const v = Math.floor(Date.now() / 60000);
+fetch(`data/watchlist.json?v=${v}`).then(r => r.json()).then(async wl => {
+  const el = document.getElementById('list');
+  const cards = await Promise.all(wl.kr.map(async s => {
+    let p = null;
+    try { p = await (await fetch(`data/prices/${s.ticker}.json?v=${v}`)).json(); } catch {}
+    const ok = p && ['ok', 'stale'].includes(p.status);
+    return `<a class="card" href="stock.html?code=${s.ticker}">
+      <div class="meta">${s.ticker} · ${s.market || ''} · ${s.sector || ''}</div>
+      <div class="title">${s.name}</div>
+      ${ok ? `<div class="v ${cls(p.changePercent)}" style="font-size:20px;font-weight:700;margin-top:4px">${fmt(p.price)}<small style="font-size:13px;margin-left:6px">${sign(p.change)}${fmt(p.change)} (${sign(p.changePercent)}${fmt(p.changePercent, 2)}%)</small></div>` : '<div class="summary">시세 수집 전</div>'}
+    </a>`;
+  }));
+  el.className = 'grid';
+  el.innerHTML = cards.join('');
+}).catch(() => { document.getElementById('list').innerHTML = '<div class="empty">목록을 불러오지 못했습니다.</div>'; });
+</script>
+</body>
+</html>
