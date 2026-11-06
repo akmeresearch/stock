@@ -169,6 +169,7 @@ def main() -> int:
     ap.add_argument("--consensus")
     ap.add_argument("--price")
     ap.add_argument("--dry-run", action="store_true", help="API 호출 없이 프롬프트만 출력")
+    ap.add_argument("--out", help="출력 파일명 (기본 {ticker}_{period}.md)")
     args = ap.parse_args()
 
     if not os.environ.get("ANTHROPIC_API_KEY") and not args.dry_run:
@@ -220,7 +221,7 @@ def main() -> int:
         "---\n\n"
     )
     REPORTS.mkdir(parents=True, exist_ok=True)
-    out = REPORTS / f"{entry.get('ticker')}_{args.period}.md"
+    out = REPORTS / (args.out or f"{entry.get('ticker')}_{args.period}.md")
     out.write_text(front + body.strip() + "\n", encoding="utf-8")
     print(f"written: {out.relative_to(ROOT)} ({len(body):,} chars)")
     return 0

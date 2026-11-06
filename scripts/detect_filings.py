@@ -79,10 +79,10 @@ def save_state(state: dict) -> None:
     STATE.write_text(json.dumps(state, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
-def generate(ticker: str, period: str, rcept_no: str, context_file: Path, kind: str) -> bool:
+def generate(ticker: str, period: str, rcept_no: str, context_file: Path, kind: str, out: str | None = None) -> bool:
     cmd = [sys.executable, str(ROOT / "scripts" / "generate_report.py"),
            "--ticker", ticker, "--period", period, "--rcept", rcept_no,
-           "--source", str(context_file), "--kind", kind]
+           "--source", str(context_file), "--kind", kind] + (["--out", out] if out else [])
     print("  run:", " ".join(cmd[2:]))
     return subprocess.call(cmd) == 0
 
@@ -91,6 +91,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, default=14)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--test", nargs=3, metavar=("TICKER", "PERIOD", "RCEPT"),
+                    help="이력과 무관하게 생성 경로를 한 번 태워본다. 결과는 {ticker}_{period}_test.md")
     args = ap.parse_args()
 
     api_key = os.environ.get("DART_API_KEY", "")
@@ -99,8 +101,17 @@ def main() -> int:
         return 1
 
     wl = json.loads((DATA / "watchlist.json").read_text(encoding="utf-8"))
+    if args.test:
+        ticker, period, rcept = args.test
+        s = next(x for x in wl["kr"] if x["ticker"] == ticker)
+        fdata = fin.collect_company(ticker, s["dart_corp_code"], api_key)
+        ctx_file = Path("/tmp") / f"ctx_{ticker}_{period}.txt"
+        ctx_file.write_text(fin.context_table(fdata), encoding="utf-8")
+        print(ctx_file.read_text(encoding="utf-8"))
+        return 0 if generate(ticker, period, rcept, ctx_file, "테스트", out=f"{ticker}_{period}_test.md") else 1
     state = load_state()
     generated = 0
+    failed = 0
 
     for s in wl.get("kr", []):
         corp = s.get("dart_corp_code")
@@ -147,12 +158,13 @@ def main() -> int:
                 generated += 1
             else:
                 print(f"  generate FAIL {key}", file=sys.stderr)
+                failed += 1
                 state["seen"].pop(rcept, None)  # 다음 실행에서 재시도
             save_state(state)
 
     save_state(state)
-    print(f"\ngenerated {generated} report(s)")
-    return 0
+    print(f"\ngenerated {generated} report(s), failed {failed}")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
