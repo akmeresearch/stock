@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>신용잔고 · AKME Research</title>
+<meta name="description" content="시장 전체 고객예탁금·신용융자 잔고와 예탁금 대비 비율의 일별 추이">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKME Research">
+<meta property="og:title" content="신용잔고 · AKME Research">
+<meta property="og:description" content="시장 전체 고객예탁금·신용융자 잔고와 예탁금 대비 비율의 일별 추이">
+<meta property="og:url" content="https://akmeresearch.github.io/stock/credit.html">
+<meta property="og:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="신용잔고 · AKME Research">
+<meta name="twitter:description" content="시장 전체 고객예탁금·신용융자 잔고와 예탁금 대비 비율의 일별 추이">
+<meta name="twitter:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="site/img/icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="site/img/icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="site/img/icon-180.png?v=2">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="site/style.css">
+<script src="site/vendor/chart.umd.min.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="site/img/logo-dark.png" alt="AKME Research"></a>
+  <a href="index.html">시장 현황</a>
+  <a href="credit.html" class="cur">신용잔고</a>
+  <a href="stocks.html">관심종목</a>
+  <a href="weekly.html">위클리</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap wide">
+  <section class="sec">
+    <div class="sec-head">
+      <div><div class="eyebrow">MARKET LIQUIDITY</div><h1>시장의 대기자금과 신용잔고</h1></div>
+      <div class="tabs" id="range">
+        <button class="tab" data-months="1">1개월</button>
+        <button class="tab" data-months="3">3개월</button>
+        <button class="tab" data-months="6">6개월</button>
+        <button class="tab on" data-months="12">1년</button>
+        <button class="tab" data-months="36">3년</button>
+        <button class="tab" data-months="0">전체</button>
+      </div>
+    </div>
+    <div id="credit-stat" class="stats"></div>
+    <div id="credit-asof" class="note"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">DEPOSIT</div><h2>고객예탁금 <small class="unit">조원</small></h2></div></div>
+    <div class="chart-box"><canvas id="chart-deposit"></canvas></div>
+    <div id="note-deposit" class="note"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">MARGIN LOAN</div><h2>신용융자 잔고 <small class="unit">조원</small></h2></div></div>
+    <div class="chart-box"><canvas id="chart-credit"></canvas></div>
+    <div id="note-credit" class="note"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">RATIO</div><h2>신용융자 / 고객예탁금 <small class="unit">%</small></h2></div></div>
+    <div class="chart-box"><canvas id="chart-ratio"></canvas></div>
+    <div id="note-ratio" class="note"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">TABLE</div><h2>최근 15 영업일</h2></div></div>
+    <div id="credit-table" class="md"></div>
+  </section>
+
+  <section class="sec">
+    <h2 style="font-size:16px">자료 읽는 방법</h2>
+    <div class="note" style="font-size:13px;line-height:1.7">
+      고객예탁금은 투자자가 증권사 계좌에 넣어둔 대기 자금, 신용융자 잔고는 증권사에서 빌려 주식을 산 금액의 합계입니다(국내 시장 전체).
+      비율은 같은 날의 신용융자 ÷ 예탁금 × 100으로, 대기 자금 대비 레버리지 수준을 봅니다. 비율이 높을수록 하락 시 반대매매 압력이 커집니다.<br>
+      금융투자협회가 영업일 기준으로 집계해 보통 2영업일 뒤 공개되며, 30분마다 자동 수집합니다. 출처: <a href="https://stock.naver.com/market/stock/kr/deposit" target="_blank" rel="noopener">네이버페이 증권 증시자금동향</a> · <a href="https://freesis.kofia.or.kr/" target="_blank" rel="noopener">금융투자협회 자본시장통계</a>
+    </div>
+  </section>
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</main>
+<script src="site/credit.js"></script>
+</body>
+</html>

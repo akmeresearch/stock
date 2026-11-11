@@ -90,3 +90,5 @@ h1 { font-size: 26px; letter-spacing: -0.5px; margin: 0 0 6px; }
 #fin-table td:not(:first-child), #fin-table th:not(:first-child) { text-align: right; }
 @media (max-width: 640px) { .stock-head { grid-template-columns: 1fr; } }
 .lnk { color: var(--accent); cursor: pointer; } .lnk:hover { text-decoration: underline; }
+.sec h2 .unit { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 6px; }
+#credit-table td:not(:first-child), #credit-table th:not(:first-child) { text-align: right; }
