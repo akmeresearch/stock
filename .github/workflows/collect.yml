@@ -41,6 +41,13 @@ jobs:
       - name: Collect data
         run: python scripts/collect_all.py
 
+      - name: Collect KIS investor flows
+        continue-on-error: true
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+        run: python scripts/collect_kis.py
+
       - name: Commit market data (fast path)
         run: |
           git config user.name "akme-bot"
