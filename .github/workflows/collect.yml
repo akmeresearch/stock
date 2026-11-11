@@ -41,11 +41,20 @@ jobs:
       - name: Collect data
         run: python scripts/collect_all.py
 
+      - name: Restore KIS token cache (하루 1회 발급 → 문자 1통)
+        id: kis-cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/kis_token.json
+          key: kis-token-${{ github.run_id }}
+          restore-keys: kis-token-
+
       - name: Collect KIS investor flows
         continue-on-error: true
         env:
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          KIS_TOKEN_CACHE: .cache/kis_token.json
         run: python scripts/collect_kis.py
 
       - name: Commit market data (fast path)

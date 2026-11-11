@@ -9,6 +9,7 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 
 import requests
 
@@ -18,13 +19,29 @@ BASE = "https://openapi.koreainvestment.com:9443"
 OUT = DATA / "flows"
 
 
+TOKEN_CACHE = Path(os.environ.get("KIS_TOKEN_CACHE", "/tmp/kis_token.json"))
+
+
 def get_token(key: str, secret: str) -> str:
+    """접근토큰은 발급될 때마다 고객에게 문자가 가므로, 24시간 유효한 토큰을 캐시해 하루 1회만 발급한다."""
+    try:
+        c = json.loads(TOKEN_CACHE.read_text())
+        if c.get("key_tail") == key[-6:] and time.time() < c.get("expires_at", 0) - 600:
+            print("kis token: cached")
+            return c["token"]
+    except Exception:
+        pass
     r = requests.post(f"{BASE}/oauth2/tokenP", json={"grant_type": "client_credentials", "appkey": key, "appsecret": secret},
                       headers={"content-type": "application/json; charset=utf-8"}, timeout=20)
     r.raise_for_status()
-    tok = r.json().get("access_token")
+    body = r.json()
+    tok = body.get("access_token")
     if not tok:
         raise RuntimeError(f"no access_token: {r.text[:200]}")
+    ttl = int(body.get("expires_in") or 86400)
+    TOKEN_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    TOKEN_CACHE.write_text(json.dumps({"token": tok, "expires_at": time.time() + ttl, "key_tail": key[-6:]}))
+    print("kis token: newly issued")
     return tok
 
 
