@@ -11,6 +11,8 @@ import sys
 from common import DATA, get_json, keep_previous, load_json, now_iso, num, save_json, today_kst
 
 MARKETS = {"KOSPI": "코스피", "KOSDAQ": "코스닥", "FUT": "K200 선물"}
+# 네이버 investorGubun → 키. 코드는 첫 실행 로그(netAmounts 전체 출력)로 확인해 맞춘다.
+INVESTORS = {"9000": "foreign", "8000": "indiv", "1000": "inst"}
 OUT = DATA / "market.json"
 DAILY = DATA / "flows_daily.json"
 
@@ -48,14 +50,24 @@ def collect_one(code: str) -> dict:
         records += page(i).get("content") or []
 
     points = {}
+    logged = False
     for r in records:
         t = str(r.get("time") or "")
         if r.get("bizdate") != base or len(t) != 6:
             continue
-        foreign = next((n for n in (r.get("netAmounts") or []) if n.get("investorGubun") == "9000"), None)
-        v = foreign_net_eok(code, foreign)
-        if v is not None:
-            points[f"{t[:2]}:{t[2:4]}"] = v
+        nets = r.get("netAmounts") or []
+        if not logged:
+            print(f"  {code} netAmounts sample: {[(n.get('investorGubun'), n.get('investorGubunName') or n.get('investorName') or n.get('name')) for n in nets]}")
+            logged = True
+        row = {}
+        for n in nets:
+            key = INVESTORS.get(str(n.get("investorGubun")))
+            if key:
+                v = foreign_net_eok(code, n)
+                if v is not None:
+                    row[key] = round(v, 1)
+        if "foreign" in row:
+            points[f"{t[:2]}:{t[2:4]}"] = row
     prices = [
         {"time": f"{p['localDateTime'][8:10]}:{p['localDateTime'][10:12]}", "price": num(p.get("currentPrice"))}
         for p in chart["priceInfos"]
@@ -64,7 +76,8 @@ def collect_one(code: str) -> dict:
     if not points or not prices:
         raise ValueError("no same-session points")
     lo, hi = prices[0]["time"], prices[-1]["time"]
-    pts = [{"time": t, "foreignNet": round(v, 1)} for t, v in sorted(points.items()) if lo <= t <= hi]
+    pts = [{"time": t, "foreignNet": row["foreign"], "indivNet": row.get("indiv"), "instNet": row.get("inst")}
+           for t, row in sorted(points.items()) if lo <= t <= hi]
     return {
         "status": "ok", "code": code, "name": MARKETS[code],
         "date": f"{base[:4]}-{base[4:6]}-{base[6:]}", "unit": "억원",
@@ -82,7 +95,10 @@ def update_daily(markets: dict) -> None:
     for code, m in markets.items():
         if m.get("status") != "ok" or not m.get("points"):
             continue
-        rows.setdefault(m["date"], {})[code] = m["points"][-1]["foreignNet"]
+        last = m["points"][-1]
+        rows.setdefault(m["date"], {})[code] = last["foreignNet"]
+        rows[m["date"]][f"{code}_indiv"] = last.get("indivNet")
+        rows[m["date"]][f"{code}_inst"] = last.get("instNet")
         rows[m["date"]][f"{code}_close"] = m.get("price")
     keys = sorted(rows)[-250:]
     daily["rows"] = {k: rows[k] for k in keys}
