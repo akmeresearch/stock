@@ -50,8 +50,14 @@ function readout(pts) {
   $('#sel-ratio').textContent = `${fmt(x.credit / x.deposit * 100, 1)}%`;
   const dd = jo(x.deposit - a.deposit), dc = jo(x.credit - a.credit);
   $('#sel-change').innerHTML = `<span class="${cls(dd)}">${sign(dd)}${fmt(dd, 2)}조</span> / <span class="${cls(dc)}">${sign(dc)}${fmt(dc, 2)}조</span>`;
-  const n = data.points.length - 1;
-  $('#dual-fill').style.left = `${iStart / n * 100}%`; $('#dual-fill').style.width = `${(iEnd - iStart) / n * 100}%`;
+  placeHandles();
+}
+
+function placeHandles() {
+  const n = data.points.length - 1, pa = iStart / n * 100, pb = iEnd / n * 100;
+  $('#rs-fill').style.left = `${pa}%`; $('#rs-fill').style.width = `${pb - pa}%`;
+  $('#rs-a').style.left = `${pa}%`; $('#rs-b').style.left = `${pb}%`;
+  $('#rs-tip-a').textContent = data.points[iStart].date.slice(2); $('#rs-tip-b').textContent = data.points[iEnd].date.slice(2);
 }
 
 function stats() {
@@ -68,24 +74,41 @@ function stats() {
   $('#credit-table').innerHTML = `<table><thead><tr><th>날짜</th><th>예탁금 (조)</th><th>전일비</th><th>신용융자 (조)</th><th>전일비</th><th>비율</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-/* 구간 슬라이더: 끌면 차트가 즉시 바뀜 */
-const sStart = $('#slider-start'), sEnd = $('#slider-end');
+/* 구간 슬라이더(바 하나, 손잡이 둘): 왼쪽 = 과거 시작, 오른쪽 = 최신 끝. 끌면 차트가 즉시 바뀜 */
 let raf = null;
 const schedule = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = null; draw(); }); };
 const clearTabs = () => document.querySelectorAll('#range .tab').forEach(x => x.classList.remove('on'));
-sStart.addEventListener('input', () => { iStart = Math.min(+sStart.value, iEnd - 1); sStart.value = iStart; clearTabs(); schedule(); });
-sEnd.addEventListener('input', () => { iEnd = Math.max(+sEnd.value, iStart + 1); sEnd.value = iEnd; clearTabs(); schedule(); });
+const rs = $('#rs');
+function idxFromX(clientX) {
+  const r = rs.getBoundingClientRect(); const t = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+  return Math.round(t * (data.points.length - 1));
+}
+function bindHandle(el, which) {
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); el.setPointerCapture(e.pointerId); el.classList.add('drag');
+    const move = ev => { const i = idxFromX(ev.clientX);
+      if (which === 'a') iStart = Math.min(i, iEnd - 1); else iEnd = Math.max(i, iStart + 1);
+      clearTabs(); schedule(); };
+    const up = () => { el.classList.remove('drag'); el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); };
+    el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  });
+  el.addEventListener('keydown', e => { const d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0; if (!d) return; e.preventDefault();
+    if (which === 'a') iStart = Math.max(0, Math.min(iStart + d, iEnd - 1)); else iEnd = Math.min(data.points.length - 1, Math.max(iEnd + d, iStart + 1));
+    clearTabs(); draw(); });
+}
+bindHandle($('#rs-a'), 'a'); bindHandle($('#rs-b'), 'b');
+// 트랙 클릭: 가까운 손잡이를 그 위치로
+rs.querySelector('.rs-track').addEventListener('pointerdown', e => { const i = idxFromX(e.clientX);
+  if (Math.abs(i - iStart) < Math.abs(i - iEnd)) iStart = Math.min(i, iEnd - 1); else iEnd = Math.max(i, iStart + 1);
+  clearTabs(); draw(); });
 
 document.querySelectorAll('#range .tab').forEach(b => b.onclick = () => {
   document.querySelectorAll('#range .tab').forEach(x => x.classList.toggle('on', x === b));
-  iEnd = data.points.length - 1; iStart = startIndexForMonths(data.points, +b.dataset.months);
-  sStart.value = iStart; sEnd.value = iEnd; draw();
+  iEnd = data.points.length - 1; iStart = startIndexForMonths(data.points, +b.dataset.months); draw();
 });
 
 fetch(`data/credit.json?v=${Math.floor(Date.now() / 60000)}`).then(r => r.json()).then(d => {
   if (!d?.points?.length) throw 0;
   data = d; stats();
-  sStart.max = sEnd.max = d.points.length - 1;
-  iEnd = d.points.length - 1; iStart = startIndexForMonths(d.points, 12);
-  sStart.value = iStart; sEnd.value = iEnd; draw();
+  iEnd = d.points.length - 1; iStart = startIndexForMonths(d.points, 12); draw();
 }).catch(() => { $('#credit-stat').innerHTML = '<div class="empty">신용잔고 자료를 아직 수집하지 못했습니다. 다음 수집 때 표시됩니다.</div>'; });

@@ -59,10 +59,10 @@
     </div>
     <div class="slider-box">
       <label>구간 조절 — 손잡이를 끌면 차트가 바로 바뀝니다 <b><span id="sel-start">—</span> ~ <span id="sel-end">—</span></b></label>
-      <div class="dual">
-        <div class="track"><div id="dual-fill" class="fill"></div></div>
-        <input id="slider-start" type="range" min="0" max="1" value="0">
-        <input id="slider-end" type="range" min="0" max="1" value="1">
+      <div id="rs" class="rs">
+        <div class="rs-track"><div id="rs-fill" class="rs-fill"></div></div>
+        <div id="rs-a" class="rs-handle" role="slider" aria-label="시작 날짜" tabindex="0"><span class="rs-tip" id="rs-tip-a"></span></div>
+        <div id="rs-b" class="rs-handle" role="slider" aria-label="끝 날짜" tabindex="0"><span class="rs-tip" id="rs-tip-b"></span></div>
       </div>
       <div class="readout">
         <div><span>끝 날짜 예탁금</span><b id="sel-deposit">—</b></div>
@@ -106,6 +106,6 @@
   </section>
   <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
 </main>
-<script src="site/credit.js?v=3"></script>
+<script src="site/credit.js?v=4"></script>
 </body>
 </html>
