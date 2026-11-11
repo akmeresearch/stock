@@ -14,18 +14,43 @@ if (!/^\d{6}$/.test(code)) { $('#head').innerHTML = '<div class="empty">잘못�
 let priceData = null, priceChart = null;
 
 async function main() {
-  const [wl, p, f, idx] = await Promise.all([
+  const [wl, p, f, idx, fl] = await Promise.all([
     fetch(`data/watchlist.json?v=${v}`).then(r => r.json()).catch(() => null),
     fetch(`data/prices/${code}.json?v=${v}`).then(r => r.ok ? r.json() : null).catch(() => null),
     fetch(`data/financials/${code}.json?v=${v}`).then(r => r.ok ? r.json() : null).catch(() => null),
     fetch(`data/reports/index.json?v=${v}`).then(r => r.json()).catch(() => []),
+    fetch(`data/flows/${code}.json?v=${v}`).then(r => r.ok ? r.json() : null).catch(() => null),
   ]);
   const meta = (wl?.kr || []).find(s => s.ticker === code) || { ticker: code, name: p?.name || code };
   document.title = `${meta.name} · AKME Research`;
   drawHead(meta, p);
   priceData = p; drawPrice(0);
+  drawFlows(fl);
   drawFin(f);
   drawReports(idx.filter(r => r.ticker === code));
+}
+
+function drawFlows(fl) {
+  const rows = (fl?.rows || []).slice(-20);
+  if (!fl || !['ok', 'stale'].includes(fl.status) || rows.length < 2) { $('#inv-note').textContent = '투자자별 순매수 자료가 아직 없습니다 (한국투자증권 API 수집 후 표시).'; return; }
+  const eok = x => x == null ? null : x / 100;  // 백만원 → 억원
+  const sum = (k, n) => rows.slice(-n).reduce((a, r) => a + (r[k] || 0), 0) / 100;
+  const f5 = sum('foreign_amt', 5), f20 = sum('foreign_amt', 20), i5 = sum('inst_amt', 5), i20 = sum('inst_amt', 20);
+  $('#flow-stat').innerHTML = `
+    <div class="stat"><div class="k">외국인 순매수 · 5일 / 20일</div><div class="v ${cls(f5)}">${sign(f5)}${fmt(f5)} <small>억원</small></div><div class="s ${cls(f20)}">20일 ${sign(f20)}${fmt(f20)}억</div></div>
+    <div class="stat"><div class="k">기관 순매수 · 5일 / 20일</div><div class="v ${cls(i5)}">${sign(i5)}${fmt(i5)} <small>억원</small></div><div class="s ${cls(i20)}">20일 ${sign(i20)}${fmt(i20)}억</div></div>`;
+  let cum = 0; const cumF = rows.map(r => (cum += (r.foreign_amt || 0) / 100));
+  new Chart($('#inv-chart'), { type: 'bar', data: { labels: rows.map(r => r.date.slice(5)), datasets: [
+      { label: '외국인', data: rows.map(r => eok(r.foreign_amt)), backgroundColor: 'rgba(214,69,69,.75)', yAxisID: 'y', order: 2 },
+      { label: '기관', data: rows.map(r => eok(r.inst_amt)), backgroundColor: 'rgba(37,99,235,.75)', yAxisID: 'y', order: 2 },
+      { label: '개인', data: rows.map(r => eok(r.indiv_amt)), backgroundColor: 'rgba(156,163,175,.6)', yAxisID: 'y', order: 2 },
+      { label: '외국인 누적', data: cumF, type: 'line', yAxisID: 'y1', borderColor: INK, borderWidth: 1.5, pointRadius: 0, tension: .2, order: 1 } ] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label} ${sign(c.parsed.y)}${fmt(c.parsed.y)}억` } } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 10 } },
+        y: { ticks: { callback: val => `${fmt(val)}억`, font: { size: 11 } }, grid: { color: GRID } },
+        y1: { position: 'right', ticks: { callback: val => `${fmt(val)}억`, font: { size: 11 } }, grid: { display: false } } } } });
+  $('#inv-note').textContent = `일별 순매수 거래대금(억원) · 누적선은 표시 구간 20일 기준 · ${fl.source} · 갱신 ${kst(fl.collectedAt)}`;
 }
 
 function drawHead(meta, p) {

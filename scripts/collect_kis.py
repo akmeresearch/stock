@@ -49,7 +49,7 @@ def investor_trend(token: str, key: str, secret: str, code: str) -> list[dict]:
             "date": f"{d[:4]}-{d[4:6]}-{d[6:]}",
             "close": num(o.get("stck_clpr")),
             "change": num(o.get("prdy_vrss")),
-            # 순매수 수량(주) / 순매수 거래대금(원)
+            # 순매수 수량(주) / 순매수 거래대금(백만원)
             "indiv_qty": num(o.get("prsn_ntby_qty")), "foreign_qty": num(o.get("frgn_ntby_qty")), "inst_qty": num(o.get("orgn_ntby_qty")),
             "indiv_amt": num(o.get("prsn_ntby_tr_pbmn")), "foreign_amt": num(o.get("frgn_ntby_tr_pbmn")), "inst_amt": num(o.get("orgn_ntby_tr_pbmn")),
         })
@@ -73,13 +73,13 @@ def main() -> int:
         code = s["ticker"]
         path = OUT / f"{code}.json"
         prev = load_json(path, {})
-        item = {"ticker": code, "name": s["name"], "status": "unavailable", "unit": {"qty": "주", "amt": "원"},
+        item = {"ticker": code, "name": s["name"], "status": "unavailable", "unit": {"qty": "주", "amt": "백만원"},
                 "source": "한국투자증권 Open API 투자자별 매매동향"}
         try:
             new_rows = investor_trend(token, key, secret, code)
             # 이전 자료와 병합해 최대 250거래일 보관
             merged = {r["date"]: r for r in prev.get("rows", [])}
-            merged.update({r["date"]: r for r in new_rows})
+            merged.update({r["date"]: r for r in new_rows if r.get("foreign_qty") is not None})  # 장중 미확정 행 제외
             item["rows"] = [merged[d] for d in sorted(merged)][-250:]
             item["status"] = "ok"
             last = item["rows"][-1] if item["rows"] else {}
