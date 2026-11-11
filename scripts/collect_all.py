@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-JOBS = ["collect_market.py", "collect_indicators.py", "collect_sentiment.py", "collect_prices.py"]
+JOBS = ["collect_market.py", "collect_indicators.py", "collect_sentiment.py", "collect_prices.py", "collect_credit.py"]
 
 
 def main() -> int:
