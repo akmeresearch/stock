@@ -11,8 +11,9 @@ import sys
 from common import DATA, get_json, keep_previous, load_json, now_iso, num, save_json, today_kst
 
 MARKETS = {"KOSPI": "코스피", "KOSDAQ": "코스닥", "FUT": "K200 선물"}
-# 네이버 investorGubun → 키. 코드는 첫 실행 로그(netAmounts 전체 출력)로 확인해 맞춘다.
-INVESTORS = {"9000": "foreign", "8000": "indiv", "1000": "inst"}
+# KRX 투자자 코드: 8000 개인, 9000 외국인, 기관계 = 1000 금융투자 + 2000 보험 + 3000 투신 + 3100 사모 + 4000 은행 + 5000 기타금융 + 6000 연기금
+INVESTORS = {"9000": "foreign", "8000": "indiv"}
+INSTITUTION = {"1000", "2000", "3000", "3100", "4000", "5000", "6000"}
 OUT = DATA / "market.json"
 DAILY = DATA / "flows_daily.json"
 
@@ -50,22 +51,23 @@ def collect_one(code: str) -> dict:
         records += page(i).get("content") or []
 
     points = {}
-    logged = False
     for r in records:
         t = str(r.get("time") or "")
         if r.get("bizdate") != base or len(t) != 6:
             continue
         nets = r.get("netAmounts") or []
-        if not logged:
-            print(f"  {code} netAmounts sample: {[(n.get('investorGubun'), n.get('investorGubunName') or n.get('investorName') or n.get('name')) for n in nets]}")
-            logged = True
-        row = {}
+        row, inst = {}, []
         for n in nets:
-            key = INVESTORS.get(str(n.get("investorGubun")))
-            if key:
-                v = foreign_net_eok(code, n)
-                if v is not None:
-                    row[key] = round(v, 1)
+            g = str(n.get("investorGubun"))
+            v = foreign_net_eok(code, n)
+            if v is None:
+                continue
+            if g in INVESTORS:
+                row[INVESTORS[g]] = round(v, 1)
+            elif g in INSTITUTION:
+                inst.append(v)
+        if inst:
+            row["inst"] = round(sum(inst), 1)
         if "foreign" in row:
             points[f"{t[:2]}:{t[2:4]}"] = row
     prices = [

@@ -27,25 +27,25 @@ function drawMarket() {
     note.textContent = '';
     return;
   }
-  const last = m.points.at(-1).foreignNet;
-  stat.innerHTML = `
-    <div class="stat"><div class="k">외국인 누적 순매수</div><div class="v ${cls(last)}">${sign(last)}${fmt(last)} <small>억원</small></div><div class="s">${m.date} ${m.points.at(-1).time} 기준</div></div>
-    <div class="stat"><div class="k">${m.name}</div><div class="v ${cls(m.changePercent)}">${fmt(m.price, 2)} <small>${sign(m.changePercent)}${fmt(m.changePercent, 2)}%</small></div><div class="s">${kst(m.priceTime)} · ${m.marketStatus === 'OPEN' ? '장중' : '장 마감'}${m.status === 'stale' ? ' · 이전 자료' : ''}</div></div>`;
+  const L = m.points.at(-1), last = L.foreignNet;
+  const card = (k, v) => `<div class="stat"><div class="k">${k}</div><div class="v ${cls(v)}">${v == null ? '—' : sign(v) + fmt(v)} <small>억원</small></div><div class="s">${m.date} ${L.time} 누적</div></div>`;
+  stat.innerHTML = card('외국인 순매수', L.foreignNet) + card('개인 순매수', L.indivNet) + card('기관 순매수', L.instNet) +
+    `<div class="stat"><div class="k">${m.name}</div><div class="v ${cls(m.changePercent)}">${fmt(m.price, 2)} <small>${sign(m.changePercent)}${fmt(m.changePercent, 2)}%</small></div><div class="s">${kst(m.priceTime)} · ${m.marketStatus === 'OPEN' ? '장중' : '장 마감'}${m.status === 'stale' ? ' · 이전 자료' : ''}</div></div>`;
   note.textContent = `갱신 ${kst(m.collectedAt)} · ${marketData.source}`;
 
   const labels = m.prices.map(p => p.time);
-  const flowMap = new Map(m.points.map(p => [p.time, p.foreignNet]));
-  let carry = null;
-  const flows = labels.map(t => { if (flowMap.has(t)) carry = flowMap.get(t); return carry; });
+  const series = key => { const map = new Map(m.points.map(p => [p.time, p[key]])); let carry = null; return labels.map(t => { if (map.has(t) && map.get(t) != null) carry = map.get(t); return carry; }); };
   const ctx = $('#flow-chart').getContext('2d');
   const cfg = {
     type: 'line',
     data: { labels, datasets: [
-      { label: '외국인 순매수 (억원)', data: flows, yAxisID: 'y', borderColor: last >= 0 ? COLORS.up : COLORS.down, backgroundColor: (last >= 0 ? 'rgba(214,69,69,.10)' : 'rgba(37,99,235,.10)'), fill: 'origin', borderWidth: 2, pointRadius: 0, tension: .2, spanGaps: true },
-      { label: m.name, data: m.prices.map(p => p.price), yAxisID: 'y1', borderColor: COLORS.line, borderWidth: 1.5, pointRadius: 0, tension: .2 }
+      { label: '외국인', data: series('foreignNet'), yAxisID: 'y', borderColor: COLORS.up, backgroundColor: 'rgba(214,69,69,.08)', fill: 'origin', borderWidth: 2, pointRadius: 0, tension: .2, spanGaps: true },
+      { label: '개인', data: series('indivNet'), yAxisID: 'y', borderColor: '#16a34a', borderWidth: 1.6, pointRadius: 0, tension: .2, spanGaps: true },
+      { label: '기관', data: series('instNet'), yAxisID: 'y', borderColor: COLORS.down, borderWidth: 1.6, pointRadius: 0, tension: .2, spanGaps: true },
+      { label: m.name, data: m.prices.map(p => p.price), yAxisID: 'y1', borderColor: COLORS.line, borderWidth: 1.2, borderDash: [4, 3], pointRadius: 0, tension: .2 }
     ] },
     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, animation: false,
-      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => c.datasetIndex === 0 ? ` 외국인 ${sign(c.parsed.y)}${fmt(c.parsed.y)}억` : ` ${m.name} ${fmt(c.parsed.y, 2)}` } } },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y' ? ` ${c.dataset.label} ${sign(c.parsed.y)}${fmt(c.parsed.y)}억` : ` ${m.name} ${fmt(c.parsed.y, 2)}` } } },
       scales: { x: { ticks: { maxTicksLimit: 8, font: { size: 11 } }, grid: { display: false } },
         y: { position: 'left', ticks: { callback: v => fmt(v), font: { size: 11 } }, grid: { color: COLORS.grid } },
         y1: { position: 'right', ticks: { callback: v => fmt(v, 0), font: { size: 11 } }, grid: { display: false } } } }
