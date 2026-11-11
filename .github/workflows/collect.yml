@@ -73,6 +73,12 @@ jobs:
       - name: Build report index
         run: python scripts/build_index.py
 
+      - name: Telegram — new reports
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python scripts/notify.py --reports
+
       - name: Commit financials & reports
         run: |
           git add data/

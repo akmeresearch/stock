@@ -27,11 +27,16 @@ jobs:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
         run: |
           if [ -n "${{ inputs.end }}" ]; then python scripts/weekly_brief.py --end "${{ inputs.end }}"; else python scripts/weekly_brief.py; fi
+      - name: Telegram — weekly
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python scripts/notify.py --weekly
       - name: Commit
         run: |
           git config user.name "akme-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/weekly/
+          git add data/weekly/ data/notify.json
           git diff --cached --quiet || git commit -m "weekly: $(TZ=Asia/Seoul date +%Y-%m-%d)"
           git pull --rebase origin main
           git push
