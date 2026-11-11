@@ -58,12 +58,17 @@
       <span id="period-note" class="note" style="margin:0"></span>
     </div>
     <div class="slider-box">
-      <label for="date-slider">날짜 선택 <b id="sel-date">—</b></label>
-      <input id="date-slider" type="range" min="0" max="1" value="1">
+      <label>구간 조절 — 손잡이를 끌면 차트가 바로 바뀝니다 <b><span id="sel-start">—</span> ~ <span id="sel-end">—</span></b></label>
+      <div class="dual">
+        <div class="track"><div id="dual-fill" class="fill"></div></div>
+        <input id="slider-start" type="range" min="0" max="1" value="0">
+        <input id="slider-end" type="range" min="0" max="1" value="1">
+      </div>
       <div class="readout">
-        <div><span>고객예탁금</span><b id="sel-deposit">—</b></div>
-        <div><span>신용융자 잔고</span><b id="sel-credit">—</b></div>
-        <div><span>신용 / 예탁금</span><b id="sel-ratio">—</b></div>
+        <div><span>끝 날짜 예탁금</span><b id="sel-deposit">—</b></div>
+        <div><span>끝 날짜 신용융자</span><b id="sel-credit">—</b></div>
+        <div><span>끝 날짜 비율</span><b id="sel-ratio">—</b></div>
+        <div><span>구간 변화 (예탁금 / 신용)</span><b id="sel-change">—</b></div>
       </div>
     </div>
   </section>
@@ -101,6 +106,6 @@
   </section>
   <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
 </main>
-<script src="site/credit.js?v=2"></script>
+<script src="site/credit.js?v=3"></script>
 </body>
 </html>
