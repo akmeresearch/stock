@@ -39,6 +39,14 @@
   <section class="sec">
     <div class="sec-head">
       <div><div class="eyebrow">MARKET LIQUIDITY</div><h1>시장의 대기자금과 신용잔고</h1></div>
+    </div>
+    <div id="credit-stat" class="stats"></div>
+    <div id="credit-asof" class="note"></div>
+  </section>
+
+  <section class="sec">
+    <div class="period-bar">
+      <span class="period-label">조회 기간</span>
       <div class="tabs" id="range">
         <button class="tab" data-months="1">1개월</button>
         <button class="tab" data-months="3">3개월</button>
@@ -47,9 +55,17 @@
         <button class="tab" data-months="36">3년</button>
         <button class="tab" data-months="0">전체</button>
       </div>
+      <span id="period-note" class="note" style="margin:0"></span>
     </div>
-    <div id="credit-stat" class="stats"></div>
-    <div id="credit-asof" class="note"></div>
+    <div class="slider-box">
+      <label for="date-slider">날짜 선택 <b id="sel-date">—</b></label>
+      <input id="date-slider" type="range" min="0" max="1" value="1">
+      <div class="readout">
+        <div><span>고객예탁금</span><b id="sel-deposit">—</b></div>
+        <div><span>신용융자 잔고</span><b id="sel-credit">—</b></div>
+        <div><span>신용 / 예탁금</span><b id="sel-ratio">—</b></div>
+      </div>
+    </div>
   </section>
 
   <section class="sec">
@@ -85,6 +101,6 @@
   </section>
   <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
 </main>
-<script src="site/credit.js"></script>
+<script src="site/credit.js?v=2"></script>
 </body>
 </html>

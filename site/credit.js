@@ -31,9 +31,12 @@ function line(id, labels, values, color, unitFmt, note, extra = {}) {
   $(note).innerHTML = `${labels[0]} → ${labels.at(-1)} · 구간 변화 <b class="${cls(ch)}">${sign(ch)}${unitFmt(ch)}</b> · 최저 ${unitFmt(lo)} · 최고 ${unitFmt(hi)}`;
 }
 
+let view = [];
 function draw() {
-  const pts = windowPoints(data.points, months);
+  const pts = windowPoints(data.points, months); view = pts;
   const labels = pts.map(p => p.date);
+  $('#period-note').textContent = `${labels[0]} ~ ${labels.at(-1)} · ${pts.length}영업일`;
+  const sl = $('#date-slider'); sl.max = pts.length - 1; sl.value = pts.length - 1; readout(pts.length - 1);
   line('#chart-deposit', labels, pts.map(p => jo(p.deposit)), RED, v => `${fmt(v, 1)}조`, '#note-deposit');
   line('#chart-credit', labels, pts.map(p => jo(p.credit)), BLUE, v => `${fmt(v, 1)}조`, '#note-credit');
   line('#chart-ratio', labels, pts.map(p => p.credit / p.deposit * 100), GREEN, v => `${fmt(v, 1)}%`, '#note-ratio');
@@ -53,7 +56,25 @@ function stats() {
   $('#credit-table').innerHTML = `<table><thead><tr><th>날짜</th><th>예탁금 (조)</th><th>전일비</th><th>신용융자 (조)</th><th>전일비</th><th>비율</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-document.querySelectorAll('#range .tab').forEach(b => b.onclick = () => { document.querySelectorAll('#range .tab').forEach(x => x.classList.toggle('on', x === b)); months = +b.dataset.months; draw(); });
+function readout(i) {
+  const x = view[i]; if (!x) return;
+  $('#sel-date').textContent = x.date;
+  $('#sel-deposit').textContent = `${fmt(jo(x.deposit), 2)}조`;
+  $('#sel-credit').textContent = `${fmt(jo(x.credit), 2)}조`;
+  $('#sel-ratio').textContent = `${fmt(x.credit / x.deposit * 100, 1)}%`;
+}
+$('#date-slider').addEventListener('input', e => readout(+e.target.value));
+
+document.querySelectorAll('#range .tab').forEach(b => b.onclick = () => { function readout(i) {
+  const x = view[i]; if (!x) return;
+  $('#sel-date').textContent = x.date;
+  $('#sel-deposit').textContent = `${fmt(jo(x.deposit), 2)}조`;
+  $('#sel-credit').textContent = `${fmt(jo(x.credit), 2)}조`;
+  $('#sel-ratio').textContent = `${fmt(x.credit / x.deposit * 100, 1)}%`;
+}
+$('#date-slider').addEventListener('input', e => readout(+e.target.value));
+
+document.querySelectorAll('#range .tab').forEach(x => x.classList.toggle('on', x === b)); months = +b.dataset.months; draw(); });
 
 fetch(`data/credit.json?v=${Math.floor(Date.now() / 60000)}`).then(r => r.json()).then(d => {
   if (!d?.points?.length) throw 0;
