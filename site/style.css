@@ -10,7 +10,8 @@ body { margin: 0; background: var(--bg); color: var(--text);
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .nav { display: flex; gap: 20px; align-items: center; padding: 14px 24px; border-bottom: 1px solid var(--line); }
-.nav .brand { font-weight: 700; letter-spacing: -0.3px; color: var(--text); margin-right: 12px; }
+.nav .brand { display: flex; align-items: center; margin-right: 12px; }
+.nav .brand img { height: 22px; width: auto; display: block; }
 .nav a.cur { color: var(--text); font-weight: 600; }
 .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
 h1 { font-size: 26px; letter-spacing: -0.5px; margin: 0 0 6px; }
