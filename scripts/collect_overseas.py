@@ -33,7 +33,7 @@ def front_month_codes(today: date | None = None) -> list[str]:
             if m > 12:
                 m, y = 1, y + 1
             continue
-        cands.append(f"101{YEAR_CODE.get(y, 'W')}{qm:02d}")
+        cands.append(f"A01{y % 10}{qm:02d}")  # KIS 선물 단축코드: A01 + 연도 끝자리 + 월 (예: A01612 = 2026년 12월물)
         m = qm + 1
         if m > 12:
             m, y = 1, y + 1
@@ -45,32 +45,44 @@ def kis_headers(token, key, secret, tr_id):
             "appkey": key, "appsecret": secret, "tr_id": tr_id, "custtype": "P"}
 
 
+def futures_quote(token, key, secret, div: str, code: str) -> dict | None:
+    r = requests.get(f"{KIS}/uapi/domestic-futureoption/v1/quotations/inquire-price",
+                     params={"FID_COND_MRKT_DIV_CODE": div, "FID_INPUT_ISCD": code},
+                     headers=kis_headers(token, key, secret, "FHMIF10000000"), timeout=20)
+    r.raise_for_status()
+    p = r.json()
+    if p.get("rt_cd") != "0":
+        raise RuntimeError(f"{div}/{code} rt_cd={p.get('rt_cd')} {p.get('msg1')}")
+    o1 = p.get("output1") or {}
+    price = num(o1.get("futs_prpr"))
+    if not price:
+        return None
+    k200 = p.get("output3") or {}
+    return {"price": price, "change": num(o1.get("futs_prdy_vrss")), "changePercent": num(o1.get("futs_prdy_ctrt")),
+            "prevClose": num(o1.get("futs_prdy_clpr")), "open": num(o1.get("futs_oprc")), "high": num(o1.get("futs_hgpr")), "low": num(o1.get("futs_lwpr")),
+            "volume": num(o1.get("acml_vol")), "openInterest": num(o1.get("hts_otst_stpl_qty")), "theory": num(o1.get("hts_thpr")),
+            "disparity": num(o1.get("dprt")), "remainDays": num(o1.get("hts_rmnn_dynu")), "name": o1.get("hts_kor_isnm"),
+            "kospi200": num(k200.get("bstp_nmix_prpr")), "kospi200ChangePct": num(k200.get("bstp_nmix_prdy_ctrt"))}
+
+
 def night_futures(token, key, secret) -> dict:
-    """야간선물 현재가. 시장구분 코드는 KIS 문서상 CM(야간선물)을 우선 시도하고, 실패 시 F(주간)로 대조한다."""
+    """야간(CM)·주간(F) 코스피200 선물 최근월물. 야간시장: KRX 18:00~06:00."""
     last_err = None
     for code in front_month_codes():
-        for div in ("CM", "F"):
-            try:
-                r = requests.get(f"{KIS}/uapi/domestic-futureoption/v1/quotations/inquire-price",
-                                 params={"FID_COND_MRKT_DIV_CODE": div, "FID_INPUT_ISCD": code},
-                                 headers=kis_headers(token, key, secret, "FHMIF10000000"), timeout=20)
-                r.raise_for_status()
-                p = r.json()
-                if p.get("rt_cd") != "0":
-                    raise RuntimeError(f"{div}/{code} rt_cd={p.get('rt_cd')} {p.get('msg1')}")
-                o1, o2 = p.get("output1", {}), p.get("output2", {})
-                price = num(o1.get("futs_prpr"))
-                if not price:
-                    raise RuntimeError(f"{div}/{code} no futs_prpr; keys={list(o1)[:12]}")
-                print(f"  night futures {div}/{code}: price={price} keys1={list(o1)[:25]} keys2={list(o2)[:20]}")
-                return {"status": "ok", "code": code, "market_div": div, "name": o1.get("hts_kor_isnm") or "코스피200 선물",
-                        "price": price, "change": num(o1.get("futs_prdy_vrss")), "changePercent": num(o1.get("futs_prdy_ctrt")),
-                        "prevClose": num(o1.get("futs_prdy_clpr")), "open": num(o1.get("futs_oprc")), "high": num(o1.get("futs_hgpr")), "low": num(o1.get("futs_lwpr")),
-                        "volume": num(o1.get("acml_vol")), "basis": num(o1.get("basis")), "theory": num(o1.get("futs_theory_pric") or o2.get("theory_price")),
-                        "kospi200": num(o1.get("kospi200_nmix") or o2.get("bstp_nmix_prpr")), "raw1": o1, "raw2": o2, "collectedAt": now_iso()}
-            except Exception as e:
-                last_err = e
-                print(f"  night futures try {div}/{code}: {e}", file=sys.stderr)
+        try:
+            night = futures_quote(token, key, secret, "CM", code)
+            day = futures_quote(token, key, secret, "F", code)
+            if not night and not day:
+                continue
+            out = {"status": "ok", "code": code, "night": night, "day": day, "collectedAt": now_iso()}
+            if night and day:
+                out["nightVsDay"] = round(night["price"] - day["price"], 2)
+                out["nightVsDayPct"] = round((night["price"] / day["price"] - 1) * 100, 2)
+            print(f"  futures {code}: night={night and night['price']} day={day and day['price']} diff={out.get('nightVsDay')}")
+            return out
+        except Exception as e:
+            last_err = e
+            print(f"  futures {code}: {e}", file=sys.stderr)
     return {"status": "unavailable", "error": str(last_err), "collectedAt": now_iso()}
 
 

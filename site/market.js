@@ -120,15 +120,16 @@ function drawOverseas() {
   if (!d) { el.innerHTML = '<div class="empty">자료를 아직 수집하지 못했습니다.</div>'; return; }
   const cards = [];
   const nf = d.nightFutures || {};
-  if (['ok', 'stale'].includes(nf.status)) {
+  if (['ok', 'stale'].includes(nf.status) && (nf.night || nf.day)) {
+    const n = nf.night, dd = nf.day;
     cards.push(`<div class="ind ov-card">
-      <div class="k">코스피200 야간선물 <span class="tag">${nf.code || ''}${nf.status === 'stale' ? ' · 이전' : ''}</span></div>
-      <div class="v ${cls(nf.changePercent)}">${fmt(nf.price, 2)}</div>
-      <div class="c ${cls(nf.change)}">${sign(nf.change)}${fmt(nf.change, 2)} (${sign(nf.changePercent)}${fmt(nf.changePercent, 2)}%)</div>
-      <div class="p"><span>고 <b>${fmt(nf.high, 2)}</b></span><span>저 <b>${fmt(nf.low, 2)}</b></span>${nf.basis != null ? `<span>베이시스 <b>${fmt(nf.basis, 2)}</b></span>` : ''}${nf.volume != null ? `<span>거래량 <b>${fmt(nf.volume)}</b></span>` : ''}</div>
-      <div class="s">KRX 야간시장 18:00~06:00 · 한국투자증권 · ${kst(nf.collectedAt)}</div></div>`);
+      <div class="k">코스피200 야간선물 <span class="tag">${nf.code || ''} · ${nf.status === 'stale' ? '이전 자료' : 'KRX 야간 18:00~06:00'}</span></div>
+      ${n ? `<div class="v ${cls(n.change)}">${fmt(n.price, 2)}</div>
+      <div class="c ${cls(n.change)}">${sign(n.change)}${fmt(n.change, 2)} (${sign(n.changePercent)}${fmt(n.changePercent, 2)}%) <small>야간 전일 대비</small></div>` : '<div class="v">—</div><div class="c"><small>야간 체결 없음</small></div>'}
+      <div class="p">${dd ? `<span>주간 선물 <b>${fmt(dd.price, 2)}</b></span>` : ''}${nf.nightVsDay != null ? `<span>야간−주간 <b class="${cls(nf.nightVsDay)}">${sign(nf.nightVsDay)}${fmt(nf.nightVsDay, 2)} (${sign(nf.nightVsDayPct)}${fmt(nf.nightVsDayPct, 2)}%)</b></span>` : ''}${n?.high != null ? `<span>야간 고/저 <b>${fmt(n.high, 2)} / ${fmt(n.low, 2)}</b></span>` : ''}${n?.volume != null ? `<span>야간 거래량 <b>${fmt(n.volume)}</b></span>` : ''}${(n || dd)?.kospi200 ? `<span>K200 지수 <b>${fmt((n || dd).kospi200, 2)}</b></span>` : ''}</div>
+      <div class="s">한국투자증권 · ${kst(nf.collectedAt)}</div></div>`);
   } else {
-    cards.push(`<div class="ind ov-card"><div class="k">코스피200 야간선물</div><div class="empty" style="padding:12px 0">시세 확인 중 — 야간시장(18:00~06:00) 개장 후 표시됩니다.</div></div>`);
+    cards.push(`<div class="ind ov-card"><div class="k">코스피200 야간선물</div><div class="empty" style="padding:12px 0">시세 확인 중 — 다음 수집 때 표시됩니다.</div></div>`);
   }
   for (const g of d.depositary || []) {
     if (!['ok', 'stale'].includes(g.status)) continue;
