@@ -134,14 +134,14 @@ function drawOverseas() {
     if (!['ok', 'stale'].includes(g.status)) continue;
     cards.push(`<div class="ind ov-card">
       <div class="k">${g.name} <span class="tag">${g.venue}${g.status === 'stale' ? ' · 이전' : ''}</span></div>
-      <div class="v ${cls(g.changePercent)}">$${fmt(g.price, 2)}</div>
+      <div class="v ${cls(g.changePercent)}">${g.currency === 'EUR' ? '€' : '$'}${fmt(g.price, 2)}</div>
       <div class="c ${cls(g.change)}">${sign(g.change)}${fmt(g.change, 2)} (${sign(g.changePercent)}${fmt(g.changePercent, 2)}%)</div>
       <div class="p">${g.impliedKrw ? `<span>원화 환산 <b>${fmt(g.impliedKrw)}원</b></span><span>국내 종가 <b>${fmt(g.krxPrice)}원</b></span><span>프리미엄 <b class="${cls(g.premiumPct)}">${sign(g.premiumPct)}${fmt(g.premiumPct, 1)}%</b></span>` : ''}</div>
-      <div class="s">1단위 = 보통주 ${g.sharesPerUnit}주 · Yahoo Finance ${g.asOf} · 환율 ${fmt(d.usdkrw, 1)}</div></div>`);
+      <div class="s">1단위 = 보통주 ${g.sharesPerUnit}주 · Yahoo Finance ${g.asOf} · 환율 ${fmt(g.fxToKrw, 1)}원/${g.currency}</div></div>`);
   }
   el.innerHTML = cards.join('') + `<div id="crypto-cards" class="crypto-row"></div>`;
   drawCrypto(d.crypto);
-  $('#ov-note').textContent = `GDR/ADR 프리미엄 = (해외가 × 환율 ÷ 주당 환산) ÷ 국내 종가 − 1. 코인은 업비트 KRW 시세를 브라우저에서 10초마다 직접 갱신하며, 김치프리미엄은 바이낸스 USDT × 환율 대비.`;
+  $('#ov-note').textContent = `GDR/ADR 프리미엄 = (해외가 × 환율 ÷ 주당 환산) ÷ 국내 종가 − 1. 코인은 업비트 KRW 시세를 브라우저에서 10초마다 직접 갱신하며, 김치프리미엄은 코인베이스 USD × 환율 대비.`;
 }
 const CRYPTO = { BTC: '비트코인', ETH: '이더리움', XRP: '리플', SOL: '솔라나' };
 function drawCrypto(c) {
@@ -161,9 +161,9 @@ async function liveCrypto() {
     const syms = Object.keys(CRYPTO);
     const [up, bn] = await Promise.all([
       fetch('https://api.upbit.com/v1/ticker?markets=' + syms.map(s => 'KRW-' + s).join(',')).then(r => r.json()),
-      fetch('https://api.binance.com/api/v3/ticker/price?symbols=' + encodeURIComponent(JSON.stringify(syms.map(s => s + 'USDT')))).then(r => r.json()).catch(() => []),
+      Promise.all(syms.map(s => fetch(`https://api.coinbase.com/v2/prices/${s}-USD/spot`).then(r => r.json()).then(j => [s, +j.data.amount]).catch(() => [s, null]))),
     ]);
-    const usd = Object.fromEntries((bn || []).map(b => [b.symbol.replace('USDT', ''), +b.price]));
+    const usd = Object.fromEntries(bn);
     const now = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     for (const t of up) {
       const sym = t.market.split('-')[1], card = document.querySelector(`.ov-card[data-sym="${sym}"]`); if (!card) continue;

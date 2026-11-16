@@ -95,17 +95,32 @@ def yahoo_quote(sym: str) -> dict:
             "asOf": dates[-1], "points": [{"date": d, "close": round(c, 2)} for d, c in zip(dates, closes)]}
 
 
+def fx_to_krw(currency: str, usdkrw: float | None) -> float | None:
+    if currency == "KRW":
+        return 1.0
+    if currency == "USD":
+        return usdkrw
+    try:
+        import yfinance as yf
+        h = yf.Ticker(f"{currency}KRW=X").history(period="5d", interval="1d")
+        return float(h["Close"].dropna().iloc[-1]) if h is not None and not h.empty else None
+    except Exception:
+        return None
+
+
 def depositary(usdkrw: float | None, prices: dict) -> list[dict]:
-    """GDR/ADR 시세 + 원화 환산 + 국내 종가 대비 프리미엄."""
+    """GDR 시세 + 원화 환산 + 국내 종가 대비 프리미엄."""
     items = []
     for sym, ticker, name, ratio, venue in (("SMSN.IL", "005930", "삼성전자 GDR", 25, "런던 LSE · USD"),
-                                            ("HXSCL", "000660", "SK하이닉스 ADR", 1, "미국 OTC · USD")):
+                                            ("HY9H.F", "000660", "SK하이닉스 GDR", 1, "프랑크푸르트 · EUR")):
         it = {"id": sym, "ticker": ticker, "name": name, "venue": venue, "sharesPerUnit": ratio, "status": "unavailable"}
         try:
             it.update(yahoo_quote(sym)); it["status"] = "ok"
             krx = prices.get(ticker) or {}
-            if usdkrw and krx.get("price"):
-                implied = it["price"] * usdkrw / ratio
+            rate = fx_to_krw(it.get("currency", "USD"), usdkrw)
+            it["fxToKrw"] = rate
+            if rate and krx.get("price"):
+                implied = it["price"] * rate / ratio
                 it["impliedKrw"] = round(implied)
                 it["krxPrice"] = krx["price"]; it["krxQuoteAt"] = krx.get("quoteAt")
                 it["premiumPct"] = round((implied / krx["price"] - 1) * 100, 2)
@@ -125,19 +140,18 @@ def crypto(usdkrw: float | None) -> dict:
         sym = t["market"].split("-")[1]
         out[sym] = {"krw": t.get("trade_price"), "changePct24h": round(t.get("signed_change_rate", 0) * 100, 2),
                     "high24h": t.get("high_price"), "low24h": t.get("low_price"), "volKrw24h": t.get("acc_trade_price_24h")}
-    try:
-        bn = get_json("https://api.binance.com/api/v3/ticker/price?symbols=" + json.dumps([f"{s}USDT" for s in out]).replace(" ", ""), timeout=15)
-        for b in bn:
-            sym = b["symbol"].replace("USDT", "")
-            usd = num(b.get("price"))
-            if sym in out and usd:
+    for sym in out:
+        try:
+            cb = get_json(f"https://api.coinbase.com/v2/prices/{sym}-USD/spot", timeout=15)
+            usd = num((cb.get("data") or {}).get("amount"))
+            if usd:
                 out[sym]["usd"] = usd
                 if usdkrw:
                     out[sym]["kimchiPremiumPct"] = round((out[sym]["krw"] / (usd * usdkrw) - 1) * 100, 2)
-    except Exception as e:
-        print(f"  binance: {e}", file=sys.stderr)
+        except Exception as e:
+            print(f"  coinbase {sym}: {e}", file=sys.stderr)
     print(f"  crypto: " + ", ".join(f"{k} {v['krw']:,.0f}원 ({v['changePct24h']:+.1f}%, 김프 {v.get('kimchiPremiumPct')})" for k, v in out.items()))
-    return {"status": "ok", "source": "업비트 KRW · 바이낸스 USDT", "items": out, "collectedAt": now_iso()}
+    return {"status": "ok", "source": "업비트 KRW · 코인베이스 USD", "items": out, "collectedAt": now_iso()}
 
 
 def main() -> int:
