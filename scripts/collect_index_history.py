@@ -13,15 +13,16 @@ def main() -> int:
     for code, sym in SYMS.items():
         merged = {p["date"]: p for p in (prev.get("series", {}).get(code) or [])}
         try:
-            df = yf.Ticker(sym).history(period="max" if not merged else "3mo", interval="1d", auto_adjust=False)
+            # 처음(또는 짧게만 쌓인 경우)엔 전체 이력, 이후엔 최근 3개월만 받아 병합
+            df = yf.Ticker(sym).history(period="max" if len(merged) < 3000 else "3mo", interval="1d", auto_adjust=False)
             for i, r in df.iterrows():
                 if r["Close"] == r["Close"]:
-                    merged[i.strftime("%Y-%m-%d")] = {"date": i.strftime("%Y-%m-%d"), "close": round(float(r["Close"]), 2), "volume": int(r["Volume"] or 0)}
+                    merged[i.strftime("%Y-%m-%d")] = {"date": i.strftime("%Y-%m-%d"), "close": round(float(r["Close"]), 2)}
             print(f"{code}: {len(merged)} days, last {max(merged)}")
         except Exception as e:
             print(f"{code}: FAIL {type(e).__name__}: {e}", file=sys.stderr)
         pts = [merged[d] for d in sorted(merged)]
-        out["series"][code] = pts[-1300:]  # 약 5년
+        out["series"][code] = pts  # 전체 이력 (Yahoo 제공 범위: 코스피 1997~)
     save_json(OUT, out)
     return 0
 
