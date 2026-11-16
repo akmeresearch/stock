@@ -57,6 +57,14 @@ jobs:
           KIS_TOKEN_CACHE: .cache/kis_token.json
         run: python scripts/collect_kis.py
 
+      - name: Collect night futures / GDR / crypto
+        continue-on-error: true
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          KIS_TOKEN_CACHE: .cache/kis_token.json
+        run: python scripts/collect_overseas.py
+
       - name: Commit market data (fast path)
         run: |
           git config user.name "akme-bot"
