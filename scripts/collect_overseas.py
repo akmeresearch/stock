@@ -89,7 +89,7 @@ def night_futures(token, key, secret) -> dict:
 def yahoo_quote(sym: str) -> dict:
     import yfinance as yf
     t = yf.Ticker(sym)
-    hist = t.history(period="1mo", interval="1d", auto_adjust=False)
+    hist = t.history(period="3mo", interval="1d", auto_adjust=False)
     if hist is None or hist.empty:
         raise ValueError("no history")
     closes = [float(c) for c in hist["Close"].tolist() if c == c]
@@ -145,7 +145,7 @@ def depositary(usdkrw: float | None, prices: dict) -> list[dict]:
 
 
 def crypto(usdkrw: float | None) -> dict:
-    markets = ["KRW-BTC", "KRW-ETH", "KRW-XRP", "KRW-SOL"]
+    markets = ["KRW-BTC"]
     up = get_json("https://api.upbit.com/v1/ticker?markets=" + ",".join(markets), timeout=15)
     out = {}
     for t in up:
@@ -181,7 +181,14 @@ def main() -> int:
             nf = night_futures(get_token(key, secret), key, secret)
         except Exception as e:
             print(f"  night futures: {type(e).__name__}: {e}", file=sys.stderr)
-    out["nightFutures"] = keep_previous(nf, prev.get("nightFutures"))
+    nf = keep_previous(nf, prev.get("nightFutures"))
+    # 야간선물 일별 이력 (스파크라인용): 날짜별 마지막 스냅샷 유지, 120일
+    hist = {h["date"]: h for h in (prev.get("nightFutures") or {}).get("history", [])}
+    if nf.get("status") == "ok":
+        d = datetime.now().astimezone().strftime("%Y-%m-%d")
+        hist[d] = {"date": d, "night": (nf.get("night") or {}).get("price"), "day": (nf.get("day") or {}).get("price")}
+    nf["history"] = [hist[k] for k in sorted(hist)][-120:]
+    out["nightFutures"] = nf
 
     out["depositary"] = depositary(usdkrw, prices)
     try:
