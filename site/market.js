@@ -15,7 +15,27 @@ async function loadMarket() {
     const r = await fetch(bust('data/market.json'), { cache: 'no-store' });
     marketData = await r.json();
   } catch { marketData = null; }
+  drawQuick();
   drawMarket();
+}
+
+/* 맨 위 요약 띠: 코스피·코스닥 지수 + 외국인·개인·기관 누적 순매수 */
+function drawQuick() {
+  const el = $('#quick');
+  const ms = marketData?.markets || {};
+  const rows = ['KOSPI', 'KOSDAQ'].map(code => {
+    const m = ms[code];
+    if (!m || !['ok', 'stale'].includes(m.status) || !m.points?.length) return `<div class="q-card"><div class="q-name">${code === 'KOSPI' ? '코스피' : '코스닥'}</div><div class="empty" style="padding:6px 0">자료 대기 중</div></div>`;
+    const L = m.points.at(-1);
+    const who = (k, v) => `<div class="q-who"><span>${k}</span><b class="${cls(v)}">${v == null ? '—' : sign(v) + fmt(v)}</b></div>`;
+    return `<div class="q-card">
+      <div class="q-head"><div class="q-name">${m.name}</div><div class="q-price ${cls(m.changePercent)}">${fmt(m.price, 2)} <small>${sign(m.changePercent)}${fmt(m.changePercent, 2)}%</small></div></div>
+      <div class="q-flows">${who('외국인', L.foreignNet)}${who('개인', L.indivNet)}${who('기관', L.instNet)}<div class="q-unit">억원 · ${L.time} 누적</div></div>
+    </div>`;
+  });
+  el.innerHTML = rows.join('');
+  const m = ms.KOSPI || ms.KOSDAQ;
+  $('#quick-note').textContent = m ? `${m.date} · ${m.marketStatus === 'OPEN' ? '장중' : '장 마감'} · 수급 갱신 ${kst(m.collectedAt)} (장중 10분 간격) · 지수 실시간은 위 티커` : '';
 }
 
 function drawMarket() {

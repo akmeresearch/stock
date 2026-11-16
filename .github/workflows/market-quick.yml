@@ -1,0 +1,35 @@
+name: Market quick (장중 10분)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 0-6 * * 1-5"    # KST 09:00~15:50 평일 10분 간격 (UTC 00~06)
+
+permissions:
+  contents: write
+
+concurrency:
+  group: market-quick
+  cancel-in-progress: true
+
+jobs:
+  quick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install requests
+      - name: Collect market flows only
+        run: python scripts/collect_market.py
+      - name: Commit
+        run: |
+          git config user.name "akme-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/market.json data/flows_daily.json
+          git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Seoul date +%H:%M) market quick"
+          git pull --rebase origin main
+          git push
