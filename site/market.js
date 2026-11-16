@@ -79,6 +79,53 @@ document.querySelectorAll('[data-market]').forEach(b => b.onclick = () => {
   drawMarket();
 });
 
+/* ---------- 1b. 코스피·코스닥 추이 (기간 조회) ---------- */
+let ihData = null, ihCode = 'KOSPI', ihChart = null, ihSlider = null, ihFlows = {};
+async function loadIndexHistory() {
+  try {
+    const [d, fl] = await Promise.all([
+      fetch(bust('data/index_history.json'), { cache: 'no-store' }).then(r => r.json()),
+      fetch(bust('data/flows_daily.json'), { cache: 'no-store' }).then(r => r.json()).catch(() => ({ rows: {} })),
+    ]);
+    ihData = d; ihFlows = fl.rows || {};
+  } catch { ihData = null; }
+  const pts = ihData?.series?.[ihCode] || [];
+  if (pts.length < 2) { $('#ih-note').textContent = '지수 일봉 자료를 아직 수집하지 못했습니다. 다음 수집 때 표시됩니다.'; return; }
+  const dates = pts.map(p => p.date);
+  if (!ihSlider) ihSlider = makeRangeSlider($('#ih-slider'), { labels: dates, onChange: (a, b) => { clearIhTabs(); drawIndexHistory(a, b); } });
+  else ihSlider.setLabels(dates);
+  ihSlider.set(startIndexForMonths(dates, 12), dates.length - 1, true);
+  drawIndexHistory(...ihSlider.get());
+}
+const clearIhTabs = () => document.querySelectorAll('#ih-range .tab').forEach(x => x.classList.remove('on'));
+function drawIndexHistory(a, b) {
+  const pts = (ihData?.series?.[ihCode] || []).slice(a, b + 1);
+  if (pts.length < 2) return;
+  const labels = pts.map(p => p.date), closes = pts.map(p => p.close);
+  const name = ihCode === 'KOSPI' ? '코스피' : '코스닥';
+  const flows = pts.map(p => { const r = ihFlows[p.date]; const v = r?.[ihCode]; return v == null ? null : v; });
+  const hasFlows = flows.some(v => v != null);
+  const up = closes.at(-1) >= closes[0];
+  const datasets = [{ label: name, data: closes, yAxisID: 'y', borderColor: up ? COLORS.up : COLORS.down, backgroundColor: up ? 'rgba(214,69,69,.07)' : 'rgba(37,99,235,.07)', fill: 'origin', borderWidth: 1.8, pointRadius: 0, tension: .12, order: 1 }];
+  if (hasFlows) datasets.push({ label: '외국인 순매수 (억원)', data: flows, type: 'bar', yAxisID: 'y1', backgroundColor: ctx => (ctx.raw ?? 0) >= 0 ? 'rgba(214,69,69,.45)' : 'rgba(37,99,235,.45)', borderWidth: 0, order: 2 });
+  const cfg = { type: 'line', data: { labels, datasets },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: hasFlows, position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y' ? ` ${name} ${fmt(c.parsed.y, 2)}` : ` 외국인 ${sign(c.parsed.y)}${fmt(c.parsed.y)}억` } } },
+      scales: { x: { ticks: { maxTicksLimit: 8, font: { size: 11 }, callback: (v, i) => labels[i]?.slice(2, 7) }, grid: { display: false } },
+        y: { position: 'right', ticks: { callback: v => fmt(v), font: { size: 11 } }, grid: { color: COLORS.grid } },
+        y1: { position: 'left', display: hasFlows, grid: { display: false }, ticks: { callback: v => fmt(v), font: { size: 11 } } } } } };
+  if (ihChart) { ihChart.data = cfg.data; ihChart.options = cfg.options; ihChart.update('none'); } else ihChart = new Chart($('#ih-chart'), cfg);
+  const ch = closes.at(-1) - closes[0], chp = ch / closes[0] * 100, hi = Math.max(...closes), lo = Math.min(...closes);
+  $('#ih-start').textContent = labels[0]; $('#ih-end').textContent = labels.at(-1);
+  $('#ih-last').textContent = fmt(closes.at(-1), 2);
+  $('#ih-change').innerHTML = `<span class="${cls(ch)}">${sign(ch)}${fmt(ch, 2)} (${sign(chp)}${fmt(chp, 1)}%)</span>`;
+  $('#ih-high').textContent = `${fmt(hi, 2)} (${labels[closes.indexOf(hi)].slice(2)})`; $('#ih-low').textContent = `${fmt(lo, 2)} (${labels[closes.indexOf(lo)].slice(2)})`;
+  $('#ih-period-note').textContent = `${labels[0]} ~ ${labels.at(-1)} · ${pts.length}영업일`;
+  $('#ih-note').textContent = `${ihData.source} · 갱신 ${kst(ihData.collectedAt)}${hasFlows ? ' · 외국인 일별 순매수(막대)는 이 사이트가 수집을 시작한 날부터 표시' : ''}`;
+}
+document.querySelectorAll('#ih-market .tab').forEach(b => b.onclick = () => { document.querySelectorAll('#ih-market .tab').forEach(x => x.classList.toggle('on', x === b)); ihCode = b.dataset.code; const dates = (ihData?.series?.[ihCode] || []).map(p => p.date); if (ihSlider) { ihSlider.setLabels(dates); const [a, b2] = ihSlider.get(); ihSlider.set(a, Math.min(b2, dates.length - 1), true); } drawIndexHistory(...ihSlider.get()); });
+document.querySelectorAll('#ih-range .tab').forEach(b => b.onclick = () => { document.querySelectorAll('#ih-range .tab').forEach(x => x.classList.toggle('on', x === b)); const dates = (ihData?.series?.[ihCode] || []).map(p => p.date); ihSlider.set(startIndexForMonths(dates, +b.dataset.months), dates.length - 1, true); drawIndexHistory(...ihSlider.get()); });
+
 /* ---------- 2. 주요 지표 ---------- */
 async function loadIndicators() {
   const el = $('#ind-grid');
@@ -199,7 +246,7 @@ async function liveCrypto() {
 }
 
 /* ---------- init ---------- */
-function refreshAll() { loadMarket(); loadIndicators(); loadSentiment(); }
+function refreshAll() { loadMarket(); loadIndexHistory(); loadIndicators(); loadSentiment(); }
 document.querySelectorAll('[data-refresh]').forEach(b => b.onclick = refreshAll);
 refreshAll();
 setInterval(() => { if (!document.hidden) { loadMarket(); loadIndicators(); } }, 5 * 60 * 1000);

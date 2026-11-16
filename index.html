@@ -82,6 +82,37 @@
   </section>
 
   <section class="sec">
+    <div class="sec-head">
+      <div><div class="eyebrow">INDEX HISTORY</div><h2>코스피 · 코스닥 추이</h2></div>
+      <div class="tabs" id="ih-market"><button class="tab on" data-code="KOSPI">코스피</button><button class="tab" data-code="KOSDAQ">코스닥</button></div>
+    </div>
+    <div class="period-bar">
+      <span class="period-label">조회 기간</span>
+      <div class="tabs" id="ih-range">
+        <button class="tab" data-months="1">1개월</button>
+        <button class="tab" data-months="3">3개월</button>
+        <button class="tab" data-months="6">6개월</button>
+        <button class="tab on" data-months="12">1년</button>
+        <button class="tab" data-months="36">3년</button>
+        <button class="tab" data-months="0">전체</button>
+      </div>
+      <span id="ih-period-note" class="note" style="margin:0"></span>
+    </div>
+    <div class="slider-box">
+      <label>구간 조절 — 손잡이를 끌면 차트가 바로 바뀝니다 <b><span id="ih-start">—</span> ~ <span id="ih-end">—</span></b></label>
+      <div id="ih-slider"></div>
+      <div class="readout">
+        <div><span>끝 날짜 지수</span><b id="ih-last">—</b></div>
+        <div><span>구간 변화</span><b id="ih-change">—</b></div>
+        <div><span>구간 최고</span><b id="ih-high">—</b></div>
+        <div><span>구간 최저</span><b id="ih-low">—</b></div>
+      </div>
+    </div>
+    <div class="chart-box" style="height:340px"><canvas id="ih-chart"></canvas></div>
+    <div id="ih-note" class="note"></div>
+  </section>
+
+  <section class="sec">
     <div class="sec-head"><div><div class="eyebrow">INDICATORS</div><h2>주요 지표</h2></div></div>
     <div id="ind-grid" class="grid"></div>
     <div id="ind-note" class="note"></div>
@@ -96,6 +127,7 @@
 
   <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다. 출처: 네이버페이 증권, Yahoo Finance, TradingView, CNN Business, FRED.</div>
 </main>
+<script src="site/rangeslider.js"></script>
 <script src="site/market.js"></script>
 </body>
 </html>
