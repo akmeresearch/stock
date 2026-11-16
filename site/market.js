@@ -103,11 +103,9 @@ function drawIndexHistory(a, b) {
   if (pts.length < 2) return;
   const labels = pts.map(p => p.date), closes = pts.map(p => p.close);
   const name = ihCode === 'KOSPI' ? '코스피' : '코스닥';
-  const flows = pts.map(p => { const r = ihFlows[p.date]; const v = r?.[ihCode]; return v == null ? null : v; });
-  const hasFlows = flows.some(v => v != null);
+  const hasFlows = false;  // 외국인 순매수 막대는 표시하지 않음 (요청)
   const up = closes.at(-1) >= closes[0];
   const datasets = [{ label: name, data: closes, yAxisID: 'y', borderColor: up ? COLORS.up : COLORS.down, backgroundColor: up ? 'rgba(214,69,69,.07)' : 'rgba(37,99,235,.07)', fill: 'origin', borderWidth: 1.8, pointRadius: 0, tension: .12, order: 1 }];
-  if (hasFlows) datasets.push({ label: '외국인 순매수 (억원)', data: flows, type: 'bar', yAxisID: 'y1', backgroundColor: ctx => (ctx.raw ?? 0) >= 0 ? 'rgba(214,69,69,.45)' : 'rgba(37,99,235,.45)', borderWidth: 0, order: 2 });
   const cfg = { type: 'line', data: { labels, datasets },
     options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
       plugins: { legend: { display: hasFlows, position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y' ? ` ${name} ${fmt(c.parsed.y, 2)}` : ` 외국인 ${sign(c.parsed.y)}${fmt(c.parsed.y)}억` } } },
@@ -121,7 +119,7 @@ function drawIndexHistory(a, b) {
   $('#ih-change').innerHTML = `<span class="${cls(ch)}">${sign(ch)}${fmt(ch, 2)} (${sign(chp)}${fmt(chp, 1)}%)</span>`;
   $('#ih-high').textContent = `${fmt(hi, 2)} (${labels[closes.indexOf(hi)].slice(2)})`; $('#ih-low').textContent = `${fmt(lo, 2)} (${labels[closes.indexOf(lo)].slice(2)})`;
   $('#ih-period-note').textContent = `${labels[0]} ~ ${labels.at(-1)} · ${pts.length}영업일`;
-  $('#ih-note').textContent = `${ihData.source} · 갱신 ${kst(ihData.collectedAt)}${hasFlows ? ' · 외국인 일별 순매수(막대)는 이 사이트가 수집을 시작한 날부터 표시' : ''}`;
+  $('#ih-note').textContent = `${ihData.source} · 갱신 ${kst(ihData.collectedAt)}`;
 }
 document.querySelectorAll('#ih-market .tab').forEach(b => b.onclick = () => { document.querySelectorAll('#ih-market .tab').forEach(x => x.classList.toggle('on', x === b)); ihCode = b.dataset.code; const dates = (ihData?.series?.[ihCode] || []).map(p => p.date); if (ihSlider) { ihSlider.setLabels(dates); const [a, b2] = ihSlider.get(); ihSlider.set(a, Math.min(b2, dates.length - 1), true); } drawIndexHistory(...ihSlider.get()); });
 document.querySelectorAll('#ih-range .tab').forEach(b => b.onclick = () => { document.querySelectorAll('#ih-range .tab').forEach(x => x.classList.toggle('on', x === b)); const dates = (ihData?.series?.[ihCode] || []).map(p => p.date); ihSlider.set(startIndexForMonths(dates, +b.dataset.months), dates.length - 1, true); drawIndexHistory(...ihSlider.get()); });
