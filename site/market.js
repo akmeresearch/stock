@@ -109,8 +109,77 @@ async function loadSentiment() {
   } catch { el.innerHTML = '<div class="empty">보조지표를 아직 불러오지 못했습니다.</div>'; }
 }
 
+/* ---------- 0. 야간선물 · GDR/ADR · 코인 ---------- */
+let ovData = null;
+async function loadOverseas() {
+  try { ovData = await (await fetch(bust('data/overseas.json'), { cache: 'no-store' })).json(); } catch { ovData = null; }
+  drawOverseas();
+}
+function drawOverseas() {
+  const el = $('#ov-grid'), d = ovData;
+  if (!d) { el.innerHTML = '<div class="empty">자료를 아직 수집하지 못했습니다.</div>'; return; }
+  const cards = [];
+  const nf = d.nightFutures || {};
+  if (['ok', 'stale'].includes(nf.status)) {
+    cards.push(`<div class="ind ov-card">
+      <div class="k">코스피200 야간선물 <span class="tag">${nf.code || ''}${nf.status === 'stale' ? ' · 이전' : ''}</span></div>
+      <div class="v ${cls(nf.changePercent)}">${fmt(nf.price, 2)}</div>
+      <div class="c ${cls(nf.change)}">${sign(nf.change)}${fmt(nf.change, 2)} (${sign(nf.changePercent)}${fmt(nf.changePercent, 2)}%)</div>
+      <div class="p"><span>고 <b>${fmt(nf.high, 2)}</b></span><span>저 <b>${fmt(nf.low, 2)}</b></span>${nf.basis != null ? `<span>베이시스 <b>${fmt(nf.basis, 2)}</b></span>` : ''}${nf.volume != null ? `<span>거래량 <b>${fmt(nf.volume)}</b></span>` : ''}</div>
+      <div class="s">KRX 야간시장 18:00~06:00 · 한국투자증권 · ${kst(nf.collectedAt)}</div></div>`);
+  } else {
+    cards.push(`<div class="ind ov-card"><div class="k">코스피200 야간선물</div><div class="empty" style="padding:12px 0">시세 확인 중 — 야간시장(18:00~06:00) 개장 후 표시됩니다.</div></div>`);
+  }
+  for (const g of d.depositary || []) {
+    if (!['ok', 'stale'].includes(g.status)) continue;
+    cards.push(`<div class="ind ov-card">
+      <div class="k">${g.name} <span class="tag">${g.venue}${g.status === 'stale' ? ' · 이전' : ''}</span></div>
+      <div class="v ${cls(g.changePercent)}">$${fmt(g.price, 2)}</div>
+      <div class="c ${cls(g.change)}">${sign(g.change)}${fmt(g.change, 2)} (${sign(g.changePercent)}${fmt(g.changePercent, 2)}%)</div>
+      <div class="p">${g.impliedKrw ? `<span>원화 환산 <b>${fmt(g.impliedKrw)}원</b></span><span>국내 종가 <b>${fmt(g.krxPrice)}원</b></span><span>프리미엄 <b class="${cls(g.premiumPct)}">${sign(g.premiumPct)}${fmt(g.premiumPct, 1)}%</b></span>` : ''}</div>
+      <div class="s">1단위 = 보통주 ${g.sharesPerUnit}주 · Yahoo Finance ${g.asOf} · 환율 ${fmt(d.usdkrw, 1)}</div></div>`);
+  }
+  el.innerHTML = cards.join('') + `<div id="crypto-cards" class="crypto-row"></div>`;
+  drawCrypto(d.crypto);
+  $('#ov-note').textContent = `GDR/ADR 프리미엄 = (해외가 × 환율 ÷ 주당 환산) ÷ 국내 종가 − 1. 코인은 업비트 KRW 시세를 브라우저에서 10초마다 직접 갱신하며, 김치프리미엄은 바이낸스 USDT × 환율 대비.`;
+}
+const CRYPTO = { BTC: '비트코인', ETH: '이더리움', XRP: '리플', SOL: '솔라나' };
+function drawCrypto(c) {
+  const el = $('#crypto-cards'); if (!el) return;
+  const items = c?.items || {};
+  el.innerHTML = Object.entries(CRYPTO).map(([sym, name]) => { const x = items[sym]; if (!x) return '';
+    return `<div class="ind ov-card" data-sym="${sym}">
+      <div class="k">${name} <span class="tag">${sym}</span></div>
+      <div class="v ${cls(x.changePct24h)}" data-f="krw">${fmt(x.krw)}<small>원</small></div>
+      <div class="c ${cls(x.changePct24h)}" data-f="chg">${sign(x.changePct24h)}${fmt(x.changePct24h, 2)}% <small>24h</small></div>
+      <div class="p"><span>USD <b data-f="usd">${x.usd ? '$' + fmt(x.usd, x.usd < 10 ? 3 : 0) : '—'}</b></span><span>김프 <b data-f="kp" class="${cls(x.kimchiPremiumPct)}">${x.kimchiPremiumPct == null ? '—' : sign(x.kimchiPremiumPct) + fmt(x.kimchiPremiumPct, 1) + '%'}</b></span></div>
+      <div class="s" data-f="t">업비트 · ${kst(c.collectedAt)}</div></div>`; }).join('');
+}
+async function liveCrypto() {
+  if (document.hidden || !ovData) return;
+  try {
+    const syms = Object.keys(CRYPTO);
+    const [up, bn] = await Promise.all([
+      fetch('https://api.upbit.com/v1/ticker?markets=' + syms.map(s => 'KRW-' + s).join(',')).then(r => r.json()),
+      fetch('https://api.binance.com/api/v3/ticker/price?symbols=' + encodeURIComponent(JSON.stringify(syms.map(s => s + 'USDT')))).then(r => r.json()).catch(() => []),
+    ]);
+    const usd = Object.fromEntries((bn || []).map(b => [b.symbol.replace('USDT', ''), +b.price]));
+    const now = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    for (const t of up) {
+      const sym = t.market.split('-')[1], card = document.querySelector(`.ov-card[data-sym="${sym}"]`); if (!card) continue;
+      const chg = t.signed_change_rate * 100, u = usd[sym], kp = u && ovData.usdkrw ? (t.trade_price / (u * ovData.usdkrw) - 1) * 100 : null;
+      card.querySelector('[data-f=krw]').innerHTML = `${fmt(t.trade_price)}<small>원</small>`; card.querySelector('[data-f=krw]').className = `v ${cls(chg)}`;
+      card.querySelector('[data-f=chg]').innerHTML = `${sign(chg)}${fmt(chg, 2)}% <small>24h</small>`; card.querySelector('[data-f=chg]').className = `c ${cls(chg)}`;
+      if (u) card.querySelector('[data-f=usd]').textContent = '$' + fmt(u, u < 10 ? 3 : 0);
+      const kpEl = card.querySelector('[data-f=kp]'); kpEl.textContent = kp == null ? '—' : sign(kp) + fmt(kp, 1) + '%'; kpEl.className = cls(kp);
+      card.querySelector('[data-f=t]').textContent = `업비트 실시간 · ${now}`;
+    }
+  } catch { /* 네트워크 실패 시 스냅샷 유지 */ }
+}
+
 /* ---------- init ---------- */
-function refreshAll() { loadMarket(); loadIndicators(); loadSentiment(); }
+function refreshAll() { loadOverseas(); loadMarket(); loadIndicators(); loadSentiment(); }
 document.querySelectorAll('[data-refresh]').forEach(b => b.onclick = refreshAll);
 refreshAll();
-setInterval(() => { if (!document.hidden) loadMarket(); }, 5 * 60 * 1000);
+setInterval(() => { if (!document.hidden) { loadMarket(); loadOverseas(); } }, 5 * 60 * 1000);
+setInterval(liveCrypto, 10 * 1000); setTimeout(liveCrypto, 1500);
