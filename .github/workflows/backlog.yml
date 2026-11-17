@@ -7,6 +7,9 @@ on:
         description: "이번 실행 최대 추출 건수"
         required: false
         default: "80"
+      redo:
+        description: "다시 추출할 종목코드 (선택)"
+        required: false
   schedule:
     - cron: "30 8 * * 1-5"   # 평일 17:30 KST — 새 분기보고서가 있으면 추출
 
@@ -28,7 +31,7 @@ jobs:
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python scripts/collect_backlog.py --years 3 --limit ${{ inputs.limit || 20 }}
+        run: python scripts/collect_backlog.py --years 3 --limit ${{ inputs.limit || 20 }} ${{ inputs.redo && format('--redo {0}', inputs.redo) || '' }}
       - name: Commit
         run: |
           git config user.name "akme-bot"

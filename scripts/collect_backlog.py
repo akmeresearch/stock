@@ -19,6 +19,7 @@ from datetime import date, timedelta
 
 import requests
 
+FX = None
 from common import DATA, get_json, load_json, now_iso, save_json
 from resolve_corp_codes import fetch_corp_map
 
@@ -26,6 +27,12 @@ WATCH = DATA / "backlog_watch.json"
 OUT = DATA / "backlog.json"
 MODEL = os.environ.get("BACKLOG_MODEL", os.environ.get("REPORT_MODEL", "claude-sonnet-5-5"))
 UNIT_MULT = {"원": 1e-8, "천원": 1e-5, "백만원": 1e-2, "억원": 1.0, "십억원": 10.0, "조원": 1e4}
+USD_UNITS = {"USD": 1.0, "천USD": 1e3, "백만USD": 1e6}
+
+
+def usdkrw() -> float | None:
+    ind = {i["id"]: i for i in load_json(DATA / "indicators.json", {}).get("items", [])}
+    return (ind.get("usdkrw") or {}).get("price")
 
 SYSTEM = """너는 한국 상장사 정기보고서에서 '수주상황' 표를 읽어 구조화하는 분석가다.
 입력은 보고서 본문 중 수주 관련 부분을 잘라낸 텍스트다. 아래 JSON만 출력한다(설명·마크다운 금지).
@@ -33,7 +40,7 @@ SYSTEM = """너는 한국 상장사 정기보고서에서 '수주상황' 표를 
 {
   "disclosed": true|false,            // 수주상황(수주잔고) 수치가 실제로 공시돼 있으면 true. "해당사항 없음"이거나 표가 없으면 false
   "as_of": "YYYY-MM-DD" | null,       // 표의 기준일 (보고서 기준일)
-  "unit": "원"|"천원"|"백만원"|"억원"|"십억원"|"조원" | null,   // 표에 적힌 금액 단위 ("(단위: 백만원)" 등)
+  "unit": "원"|"천원"|"백만원"|"억원"|"십억원"|"조원"|"USD"|"천USD"|"백만USD" | null,   // 표에 적힌 금액 단위 ("(단위: 백만원)", "(단위: 천USD)" 등)
   "order_total": number | null,       // 수주총액 합계 (표 단위 그대로)
   "delivered": number | null,         // 기납품액 합계
   "backlog": number | null,           // 수주잔고 합계. 합계 행이 없으면 품목별 수주잔고를 더한 값
@@ -135,10 +142,14 @@ def parse_json(txt: str):
         return None
 
 
-def to_eok(v, unit):
-    if v is None or unit not in UNIT_MULT:
+def to_eok(v, unit, fx=None):
+    if v is None:
         return None
-    return round(float(v) * UNIT_MULT[unit], 1)
+    if unit in UNIT_MULT:
+        return round(float(v) * UNIT_MULT[unit], 1)
+    if unit in USD_UNITS and fx:
+        return round(float(v) * USD_UNITS[unit] * fx / 1e8, 1)
+    return None
 
 
 def main() -> int:
@@ -146,14 +157,20 @@ def main() -> int:
     ap.add_argument("--years", type=int, default=3)
     ap.add_argument("--limit", type=int, default=60, help="이번 실행에서 추출할 최대 보고서 수 (비용 제한)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--redo", help="이 종목코드의 기존 추출을 지우고 다시 추출")
     args = ap.parse_args()
     key = os.environ.get("DART_API_KEY", "")
     if not key:
         print("DART_API_KEY not set", file=sys.stderr); return 1
 
+    global FX
+    FX = usdkrw()
     watch = load_json(WATCH, {"companies": []})
     out = load_json(OUT, {"schemaVersion": 1, "unit": "억원", "companies": {}})
     comps = out.setdefault("companies", {})
+    if args.redo and args.redo in comps:
+        comps[args.redo]["quarters"] = {}
+        print(f"redo {args.redo}")
     corp_map = None
     done = 0
     for c in watch["companies"]:
@@ -193,10 +210,15 @@ def main() -> int:
                     print(f"  {r['period']}: no 수주 text"); done += 1; continue
                 d = extract(chunk, c["name"], r["period"])
                 unit = d.get("unit")
+                fx = FX if unit in USD_UNITS else None
+                note = d.get("note", "")
+                if fx:
+                    note = f"달러 공시({unit}) → 현재 환율 {fx:,.0f}원 환산. " + note
                 q = {"rcept_no": r["rcept_no"], "rcept_dt": r["rcept_dt"], "report_nm": r["report_nm"], "disclosed": bool(d.get("disclosed")),
-                     "as_of": d.get("as_of"), "unit": unit, "note": d.get("note", ""),
-                     "backlog_eok": to_eok(d.get("backlog"), unit), "order_total_eok": to_eok(d.get("order_total"), unit), "delivered_eok": to_eok(d.get("delivered"), unit),
-                     "items": [{"name": i.get("name"), "backlog_eok": to_eok(i.get("backlog"), unit)} for i in (d.get("items") or [])[:8]],
+                     "as_of": d.get("as_of"), "unit": unit, "note": note, "fx": fx,
+                     "raw": {"backlog": d.get("backlog"), "order_total": d.get("order_total"), "delivered": d.get("delivered")},
+                     "backlog_eok": to_eok(d.get("backlog"), unit, fx), "order_total_eok": to_eok(d.get("order_total"), unit, fx), "delivered_eok": to_eok(d.get("delivered"), unit, fx),
+                     "items": [{"name": i.get("name"), "backlog_eok": to_eok(i.get("backlog"), unit, fx)} for i in (d.get("items") or [])[:8]],
                      "tokens": d.get("_tokens"), "extractedAt": now_iso()}
                 comps[t]["quarters"][r["period"]] = q
                 print(f"  {r['period']}: disclosed={q['disclosed']} backlog={q['backlog_eok']}억 unit={unit} note={q['note'][:40]}")
