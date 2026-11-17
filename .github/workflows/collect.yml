@@ -87,6 +87,13 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python scripts/detect_filings.py --days 14
 
+      - name: Detect SEC filings & generate reports (US)
+        id: detect_sec
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/detect_sec.py --days 14
+
       - name: Build report index
         run: python scripts/build_index.py
 
@@ -104,7 +111,7 @@ jobs:
           git push
 
       - name: Fail if report generation failed
-        if: steps.detect.outcome == 'failure'
+        if: steps.detect.outcome == 'failure' || steps.detect_sec.outcome == 'failure'
         run: |
           echo "::error::리포트 생성 실패 — 로그의 'Detect earnings filings' 단계를 확인하세요. 다음 실행에서 자동 재시도됩니다."
           exit 1
