@@ -99,25 +99,29 @@
       "ticker": "NVDA",
       "name": "NVIDIA",
       "market": "NASDAQ",
-      "sector": "반도체"
+      "sector": "반도체",
+      "cik": "0001045810"
     },
     {
       "ticker": "MU",
       "name": "Micron",
       "market": "NASDAQ",
-      "sector": "메모리"
+      "sector": "메모리",
+      "cik": "0000723125"
     },
     {
       "ticker": "AMD",
       "name": "AMD",
       "market": "NASDAQ",
-      "sector": "반도체"
+      "sector": "반도체",
+      "cik": "0000002488"
     },
     {
       "ticker": "BE",
       "name": "Bloom Energy",
       "market": "NYSE",
-      "sector": "연료전지·전력"
+      "sector": "연료전지·전력",
+      "cik": "0001664703"
     }
   ]
 }
