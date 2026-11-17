@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수주잔고 · AKME Research</title>
+<meta name="description" content="반도체 소부장 기업의 분기별 수주잔고 추이 — DART 정기보고서 수주상황 기준">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKME Research">
+<meta property="og:title" content="수주잔고 · AKME Research">
+<meta property="og:description" content="반도체 소부장 기업의 분기별 수주잔고 추이 — DART 정기보고서 수주상황 기준">
+<meta property="og:url" content="https://akmeresearch.github.io/stock/backlog.html">
+<meta property="og:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="수주잔고 · AKME Research">
+<meta name="twitter:description" content="반도체 소부장 기업의 분기별 수주잔고 추이">
+<meta name="twitter:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="site/img/icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="site/img/icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="site/img/icon-180.png?v=2">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="site/style.css?v=202611171120">
+<script src="site/vendor/chart.umd.min.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="site/img/logo-dark.png" alt="AKME Research"></a>
+  <a href="index.html">시장 현황</a>
+  <a href="credit.html">신용잔고</a>
+  <a href="backlog.html" class="cur">수주잔고</a>
+  <a href="stocks.html">관심종목</a>
+  <a href="weekly.html">위클리</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap wide">
+  <section class="sec">
+    <div class="sec-head">
+      <div><div class="eyebrow">ORDER BACKLOG · SEMICONDUCTOR EQUIPMENT &amp; MATERIALS</div><h1>반도체 소부장 수주잔고</h1></div>
+    </div>
+    <div class="note">DART 분기·반기·사업보고서의 "수주상황" 표를 AI가 읽어 분기별로 정리합니다. 회사마다 공시 범위·단위가 달라 절대 수준보다 <b>같은 회사의 추세(QoQ·YoY)</b>로 읽는 게 안전합니다. 단위: 억원.</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">OVERVIEW</div><h2>최신 분기 요약</h2></div></div>
+    <div id="bl-table" class="md"><div class="empty">불러오는 중…</div></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head">
+      <div><div class="eyebrow">COMPANY</div><h2 id="bl-title">분기별 수주잔고</h2></div>
+    </div>
+    <div class="tabs" id="bl-companies"></div>
+    <div id="bl-stat" class="stats"></div>
+    <div class="chart-box" style="height:340px"><canvas id="bl-chart"></canvas></div>
+    <div id="bl-note" class="note"></div>
+    <div id="bl-detail" class="md"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div><div class="eyebrow">COMPARE</div><h2>기업 비교 · 수주잔고 지수 (최초 분기 = 100)</h2></div></div>
+    <div class="chart-box" style="height:360px"><canvas id="bl-compare"></canvas></div>
+    <div class="note">공시 범위가 다른 기업을 한 축에 놓기 위해 각 기업의 첫 공시 분기를 100으로 놓은 지수. 수주잔고를 공시하지 않는 기업은 제외.</div>
+  </section>
+
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다. 출처: DART 전자공시 정기보고서 (각 기업 수주상황).</div>
+</main>
+<script src="site/backlog.js?v=202611171120"></script>
+</body>
+</html>
