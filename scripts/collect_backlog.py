@@ -95,16 +95,44 @@ def order_windows(text: str, max_windows: int = 3, span: int = 4500) -> str:
     return "\n\n[...]\n\n".join(chunks)
 
 
+def _safe_chunk(rcept_no: str, key: str):
+    try:
+        return order_windows(fetch_full_text(rcept_no, key))
+    except Exception as e:
+        print(f"  fetch {rcept_no}: {type(e).__name__}: {e}", file=sys.stderr)
+        return None
+
+
 def extract(chunk: str, name: str, period: str) -> dict:
     from anthropic import Anthropic
     client = Anthropic()
     user = f"회사: {name}\n보고서 분기: {period}\n\n=== 본문 발췌 ===\n{chunk}\n\n위 발췌에서 수주상황을 JSON으로."
     resp = client.messages.create(model=MODEL, max_tokens=1200, system=SYSTEM, messages=[{"role": "user", "content": user}])
     txt = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text").strip()
-    txt = re.sub(r"^```(?:json)?|```$", "", txt, flags=re.M).strip()
-    data = json.loads(txt)
+    data = parse_json(txt)
+    if data is None:  # 한 번 더: JSON만 다시 달라고
+        resp = client.messages.create(model=MODEL, max_tokens=1200, system=SYSTEM, messages=[
+            {"role": "user", "content": user}, {"role": "assistant", "content": txt},
+            {"role": "user", "content": "위 출력이 JSON 파싱에 실패했다. 주석·설명 없이 순수 JSON 객체 하나만 다시 출력하라."}])
+        txt = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text").strip()
+        data = parse_json(txt)
+        if data is None:
+            raise ValueError("JSON parse failed twice: " + txt[:120])
     data["_tokens"] = {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}
     return data
+
+
+def parse_json(txt: str):
+    t = re.sub(r"^```(?:json)?\s*|\s*```$", "", txt.strip(), flags=re.M)
+    t = re.sub(r"//[^\n]*", "", t)              # 줄 주석 제거
+    t = re.sub(r",\s*([}\]])", r"\1", t)        # 트레일링 콤마
+    m = re.search(r"\{.*\}", t, re.S)
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(0))
+    except json.JSONDecodeError:
+        return None
 
 
 def to_eok(v, unit):
@@ -147,14 +175,19 @@ def main() -> int:
             latest[r["period"]] = r
         todo = [r for p_, r in sorted(latest.items()) if comps[t]["quarters"].get(p_, {}).get("rcept_no") != r["rcept_no"]]
         print(f"{c['name']}: {len(reports)} reports, {len(todo)} to extract")
+        todo = todo[: max(0, args.limit - done)]
+        if args.dry_run:
+            for r in todo:
+                print(f"  would extract {r['period']} {r['report_nm']} ({r['rcept_no']})")
+            continue
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            chunks = dict(zip([r["rcept_no"] for r in todo], ex.map(lambda r: _safe_chunk(r["rcept_no"], key), todo)))
         for r in todo:
-            if done >= args.limit:
-                break
-            if args.dry_run:
-                print(f"  would extract {r['period']} {r['report_nm']} ({r['rcept_no']})"); continue
             try:
-                text = fetch_full_text(r["rcept_no"], key)
-                chunk = order_windows(text)
+                chunk = chunks.get(r["rcept_no"])
+                if chunk is None:
+                    raise RuntimeError("document download failed")
                 if not chunk:
                     comps[t]["quarters"][r["period"]] = {"rcept_no": r["rcept_no"], "rcept_dt": r["rcept_dt"], "disclosed": False, "note": "수주 관련 문구 없음", "extractedAt": now_iso()}
                     print(f"  {r['period']}: no 수주 text"); done += 1; continue
