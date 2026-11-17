@@ -19,3 +19,11 @@ try:
     r = c.get(URLS[1], impersonate="chrome", headers={"User-Agent": UAS[0]}, timeout=20); print(f"[{r.status_code}] curl_cffi chrome+UA {URLS[1]}")
 except Exception as e:
     print("curl_cffi", e)
+
+print("--- chrome impersonation, no custom UA ---")
+from curl_cffi import requests as c
+for u in URLS + ["https://www.sec.gov/Archives/edgar/data/1045810/000104581025000225/index.json"]:
+    try:
+        r = c.get(u, impersonate="chrome", timeout=20, headers={"Accept": "application/json,text/html,*/*"}); print(f"[{r.status_code}] {u[:80]} len={len(r.content)}")
+    except Exception as e:
+        print(f"[ERR] {u[:80]} {e}")

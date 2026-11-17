@@ -28,7 +28,16 @@ HEADERS = {"User-Agent": UA, "Accept-Encoding": "gzip, deflate"}
 FORMS = {"8-K": ("8-K 실적 보도자료", 1), "10-Q": ("10-Q 분기보고서", 2), "10-K": ("10-K 연차보고서", 2)}
 
 
-def sec_get(url: str, timeout: int = 30) -> requests.Response:
+def sec_get(url: str, timeout: int = 30):
+    """SEC는 데이터센터 IP + 선언형 UA 요청을 403으로 막는다. 브라우저 TLS 지문(curl_cffi chrome)으로 요청하고, 안 되면 기본 방식으로 재시도."""
+    try:
+        from curl_cffi import requests as cffi
+        r = cffi.get(url, impersonate="chrome", timeout=timeout, headers={"Accept": "application/json,text/html,*/*", "Accept-Language": "en-US,en;q=0.9"})
+        if r.status_code == 200:
+            return r
+        print(f"  sec {r.status_code} via chrome impersonation: {url[:80]}", file=sys.stderr)
+    except ImportError:
+        pass
     r = requests.get(url, headers=HEADERS, timeout=timeout)
     r.raise_for_status()
     return r
