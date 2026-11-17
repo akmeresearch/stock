@@ -19,20 +19,21 @@ function pctChange(cur, prev) { return prev ? (cur / prev - 1) * 100 : null; }
 function overview() {
   const rows = Object.values(data.companies).map(c => {
     const s = disclosedSeries(c);
-    if (!s.length) return { c, none: true, latestQ: series(c).at(-1)?.q };
+    if (!s.length) return { c, none: true, pending: !series(c).length, latestQ: series(c).at(-1)?.q };
     const L = s.at(-1), P = s.at(-2), Y = s.find(x => x.q === `${+L.q.slice(0, 4) - 1}${L.q.slice(4)}`);
     return { c, L, qoq: P ? pctChange(L.backlog_eok, P.backlog_eok) : null, yoy: Y ? pctChange(L.backlog_eok, Y.backlog_eok) : null, n: s.length };
   }).sort((a, b) => (b.L?.backlog_eok ?? -1) - (a.L?.backlog_eok ?? -1));
   $('#bl-table').innerHTML = `<table><thead><tr><th>기업</th><th>세그먼트</th><th>기준 분기</th><th>수주잔고</th><th>QoQ</th><th>YoY</th><th>공시 분기 수</th></tr></thead><tbody>${rows.map(r => r.none
-    ? `<tr><td><span class="lnk" data-t="${r.c.ticker}">${r.c.name}</span></td><td>${r.c.segment}</td><td>${r.latestQ ? qLabel(r.latestQ) : '—'}</td><td colspan="4" style="color:var(--muted)">수주잔고 미공시</td></tr>`
+    ? `<tr><td><span class="lnk" data-t="${r.c.ticker}">${r.c.name}</span></td><td>${r.c.segment}</td><td>${r.latestQ ? qLabel(r.latestQ) : '—'}</td><td colspan="4" style="color:var(--muted)">${r.pending ? '추출 대기 중' : '수주잔고 미공시'}</td></tr>`
     : `<tr><td><span class="lnk" data-t="${r.c.ticker}">${r.c.name}</span></td><td>${r.c.segment}</td><td>${qLabel(r.L.q)}</td><td><b>${jo(r.L.backlog_eok)}</b></td><td class="${cls(r.qoq)}">${r.qoq == null ? '—' : sign(r.qoq) + fmt(r.qoq, 1) + '%'}</td><td class="${cls(r.yoy)}">${r.yoy == null ? '—' : sign(r.yoy) + fmt(r.yoy, 1) + '%'}</td><td>${r.n}</td></tr>`).join('')}</tbody></table>
     <div class="note">갱신 ${kst(data.collectedAt)} · 기업명을 누르면 아래 차트가 바뀝니다.</div>`;
   $('#bl-table').querySelectorAll('.lnk').forEach(el => el.onclick = () => select(el.dataset.t));
+  return rows.map(r => r.c);
 }
 
-function chips() {
+function chips(order) {
   const el = $('#bl-companies');
-  el.innerHTML = Object.values(data.companies).map(c => `<button class="tab" data-t="${c.ticker}">${c.name}</button>`).join('');
+  el.innerHTML = order.map(c => `<button class="tab" data-t="${c.ticker}">${c.name}</button>`).join('');
   el.querySelectorAll('.tab').forEach(b => b.onclick = () => select(b.dataset.t));
 }
 
@@ -42,7 +43,7 @@ function select(t) {
   const c = data.companies[t]; const s = series(c), d = disclosedSeries(c);
   $('#bl-title').textContent = `${c.name} 분기별 수주잔고`;
   if (!d.length) {
-    $('#bl-stat').innerHTML = `<div class="empty">${c.name}은(는) 정기보고서에 수주잔고를 공시하지 않습니다${s.length ? ` (확인한 보고서 ${s.length}건)` : ''}.</div>`;
+    $('#bl-stat').innerHTML = `<div class="empty">${s.length ? `${c.name}은(는) 정기보고서에 수주잔고를 공시하지 않습니다 (확인한 보고서 ${s.length}건).` : `${c.name}은(는) 아직 추출 전입니다. 추출이 끝나면 표시됩니다.`}</div>`;
     if (chart) { chart.destroy(); chart = null; }
     $('#bl-note').textContent = ''; $('#bl-detail').innerHTML = ''; return;
   }
@@ -82,7 +83,7 @@ function compare() {
 fetch(`data/backlog.json?v=${Math.floor(Date.now() / 60000)}`).then(r => r.json()).then(d => {
   data = d;
   if (!d.companies || !Object.keys(d.companies).length) throw 0;
-  overview(); chips(); compare();
+  const order = overview(); chips(order); compare();
   const first = Object.values(d.companies).find(c => disclosedSeries(c).length) || Object.values(d.companies)[0];
   select(new URLSearchParams(location.search).get('t') || first.ticker);
 }).catch(() => { $('#bl-table').innerHTML = '<div class="empty">수주잔고 자료를 아직 추출하지 못했습니다. 첫 추출이 끝나면 표시됩니다.</div>'; });
