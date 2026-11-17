@@ -76,7 +76,7 @@ function compare() {
   const cfg = { type: 'line', data: { labels: allQ.map(qLabel), datasets: sets.map(s => ({ ...s, data: allQ.map(q => s.data.find(p => p.x === q)?.y ?? null), spanGaps: true })) },
     options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'nearest', intersect: false },
       plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label} ${fmt(c.parsed.y, 0)}` } } },
-      scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { ticks: { callback: v => fmt(v), font: { size: 11 } }, grid: { color: GRID } } } } };
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { type: 'logarithmic', ticks: { callback: v => [25, 50, 100, 200, 400, 800, 1600, 3200].includes(v) ? fmt(v) : '', font: { size: 11 } }, grid: { color: GRID } } } } };
   if (cmpChart) { cmpChart.data = cfg.data; cmpChart.update('none'); } else cmpChart = new Chart($('#bl-compare'), cfg);
 }
 
