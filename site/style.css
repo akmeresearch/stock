@@ -126,3 +126,4 @@ h1 { font-size: 26px; letter-spacing: -0.5px; margin: 0 0 6px; }
 .q-unit { font-size: 11px; color: var(--muted); margin-left: auto; }
 #bl-table td:nth-child(n+4), #bl-table th:nth-child(n+4) { text-align: right; }
 #bl-detail td:nth-child(2), #bl-detail td:nth-child(3), #bl-detail td:nth-child(4), #bl-detail td:nth-child(5) { text-align: right; }
+.divider { border: 0; border-top: 1px solid var(--line); margin: 28px 0 14px; }

@@ -94,5 +94,30 @@
       "dart_corp_code": "01205851"
     }
   ],
-  "us": []
+  "us": [
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA",
+      "market": "NASDAQ",
+      "sector": "반도체"
+    },
+    {
+      "ticker": "MU",
+      "name": "Micron",
+      "market": "NASDAQ",
+      "sector": "메모리"
+    },
+    {
+      "ticker": "AMD",
+      "name": "AMD",
+      "market": "NASDAQ",
+      "sector": "반도체"
+    },
+    {
+      "ticker": "BE",
+      "name": "Bloom Energy",
+      "market": "NYSE",
+      "sector": "연료전지·전력"
+    }
+  ]
 }

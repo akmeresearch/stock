@@ -6,10 +6,12 @@ const cls = n => n == null ? '' : n > 0 ? 'up' : n < 0 ? 'down' : '';
 const kst = iso => { if (!iso) return '—'; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }); };
 const v = Math.floor(Date.now() / 60000);
 const RED = '#d64545', BLUE = '#2563eb', INK = '#111827', GRID = '#eceff3', MUTED = '#9ca3af';
-const jo = n => n == null ? '—' : Math.abs(n) >= 1e12 ? `${(n / 1e12).toFixed(1)}조` : `${fmt(n / 1e8)}억`;
+const jo = n => n == null ? '—' : USD ? (Math.abs(n) >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${fmt(n / 1e6)}M`) : Math.abs(n) >= 1e12 ? `${(n / 1e12).toFixed(1)}조` : `${fmt(n / 1e8)}억`;
 
 const code = new URLSearchParams(location.search).get('code') || '';
-if (!/^\d{6}$/.test(code)) { $('#head').innerHTML = '<div class="empty">잘못된 종목코드입니다.</div>'; throw new Error('bad code'); }
+if (!/^(\d{6}|[A-Z]{1,5})$/.test(code)) { $('#head').innerHTML = '<div class="empty">잘못된 종목코드입니다.</div>'; throw new Error('bad code'); }
+let USD = false;
+const px = (n, d) => USD ? '$' + fmt(n, d ?? 2) : fmt(n, d ?? 0);
 
 let priceData = null, priceChart = null;
 
@@ -21,7 +23,8 @@ async function main() {
     fetch(`data/reports/index.json?v=${v}`).then(r => r.json()).catch(() => []),
     fetch(`data/flows/${code}.json?v=${v}`).then(r => r.ok ? r.json() : null).catch(() => null),
   ]);
-  const meta = (wl?.kr || []).find(s => s.ticker === code) || { ticker: code, name: p?.name || code };
+  const meta = [...(wl?.kr || []), ...(wl?.us || [])].find(s => s.ticker === code) || { ticker: code, name: p?.name || code };
+  USD = p?.currency === 'USD' || /^[A-Z]+$/.test(code);
   document.title = `${meta.name} · AKME Research`;
   drawHead(meta, p);
   priceData = p; drawPrice(0);
@@ -31,6 +34,7 @@ async function main() {
 }
 
 function drawFlows(fl) {
+  if (USD) { document.querySelector('#inv-chart').closest('section').style.display = 'none'; return; }
   const rows = (fl?.rows || []).slice(-20);
   if (!fl || !['ok', 'stale'].includes(fl.status) || rows.length < 2) { $('#inv-note').textContent = '투자자별 순매수 자료가 아직 없습니다 (한국투자증권 API 수집 후 표시).'; return; }
   const eok = x => x == null ? null : x / 100;  // 백만원 → 억원
@@ -62,9 +66,9 @@ function drawHead(meta, p) {
     </div>
     ${ok ? `
     <div class="stock-quote">
-      <div class="v ${cls(p.changePercent)}">${fmt(p.price)}<small>원</small></div>
-      <div class="c ${cls(p.change)}">${sign(p.change)}${fmt(p.change)} (${sign(p.changePercent)}${fmt(p.changePercent, 2)}%)</div>
-      <div class="s">${kst(p.quoteAt)} · ${p.marketStatus === 'OPEN' ? '장중' : '장 마감'}${p.status === 'stale' ? ' · 이전 자료' : ''}</div>
+      <div class="v ${cls(p.changePercent)}">${px(p.price)}<small>${USD ? 'USD' : '원'}</small></div>
+      <div class="c ${cls(p.change)}">${sign(p.change)}${USD ? fmt(p.change, 2) : fmt(p.change)} (${sign(p.changePercent)}${fmt(p.changePercent, 2)}%)</div>
+      <div class="s">${kst(p.quoteAt)} · ${USD ? 'Yahoo Finance (15분 지연)' : p.marketStatus === 'OPEN' ? '장중' : '장 마감'}${p.status === 'stale' ? ' · 이전 자료' : ''}</div>
     </div>
     <div class="kv">
       <div><span>시가총액</span><b>${p.marketCap || '—'}</b></div>
@@ -72,7 +76,7 @@ function drawHead(meta, p) {
       <div><span>PBR</span><b>${p.pbr || '—'}</b></div>
       <div><span>EPS</span><b>${p.eps || '—'}</b></div>
       <div><span>52주 최고 / 최저</span><b>${p.high52 || '—'} / ${p.low52 || '—'}</b></div>
-      <div><span>외인소진율</span><b>${p.foreignRate || '—'}</b></div>
+      ${USD ? '' : `<div><span>외인소진율</span><b>${p.foreignRate || '—'}</b></div>`}
       <div><span>배당수익률</span><b>${p.dividendYield || '—'}</b></div>
     </div>` : '<div class="empty">시세는 다음 수집 때 표시됩니다.</div>'}`;
 }
@@ -86,9 +90,9 @@ function drawPrice(days) {
       { label: '종가', data: sel.map(p => p.close), yAxisID: 'y', borderColor: up ? RED : BLUE, backgroundColor: up ? 'rgba(214,69,69,.08)' : 'rgba(37,99,235,.08)', fill: 'origin', borderWidth: 1.8, pointRadius: 0, tension: .15 },
       { label: '거래량', data: sel.map(p => p.volume), yAxisID: 'y1', type: 'bar', backgroundColor: 'rgba(107,114,128,.25)', borderWidth: 0 } ] },
     options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.datasetIndex === 0 ? ` 종가 ${fmt(c.parsed.y)}원` : ` 거래량 ${fmt(c.parsed.y)}` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.datasetIndex === 0 ? ` 종가 ${px(c.parsed.y)}` : ` 거래량 ${fmt(c.parsed.y)}` } } },
       scales: { x: { ticks: { maxTicksLimit: 8, font: { size: 11 }, callback: (val, i) => sel[i]?.date.slice(2, 7) }, grid: { display: false } },
-        y: { position: 'right', ticks: { callback: val => fmt(val), font: { size: 11 } }, grid: { color: GRID } },
+        y: { position: 'right', ticks: { callback: val => px(val, USD ? 0 : 0), font: { size: 11 } }, grid: { color: GRID } },
         y1: { position: 'left', display: false, max: Math.max(...sel.map(p => p.volume)) * 4 } } } };
   if (priceChart) { priceChart.data = cfg.data; priceChart.options = cfg.options; priceChart.update(); } else priceChart = new Chart($('#price-chart'), cfg);
   const perf = (sel.at(-1).close / sel[0].close - 1) * 100;
@@ -104,13 +108,13 @@ function drawFin(f) {
   const sales = keys.map(k => g(k, '매출액')), op = keys.map(k => g(k, '영업이익')), ni = keys.map(k => g(k, '당기순이익'));
   const opm = keys.map((k, i) => sales[i] && op[i] != null ? op[i] / sales[i] * 100 : null);
   new Chart($('#fin-chart'), { type: 'bar', data: { labels: keys.map(k => k.replace('Q', ' Q')), datasets: [
-      { label: '매출액', data: sales.map(x => x == null ? null : x / 1e8), backgroundColor: 'rgba(17,24,39,.75)', yAxisID: 'y', order: 2 },
-      { label: '영업이익', data: op.map(x => x == null ? null : x / 1e8), backgroundColor: 'rgba(37,99,235,.75)', yAxisID: 'y', order: 2 },
+      { label: '매출액', data: sales.map(x => x == null ? null : x / (USD ? 1e6 : 1e8)), backgroundColor: 'rgba(17,24,39,.75)', yAxisID: 'y', order: 2 },
+      { label: '영업이익', data: op.map(x => x == null ? null : x / (USD ? 1e6 : 1e8)), backgroundColor: 'rgba(37,99,235,.75)', yAxisID: 'y', order: 2 },
       { label: '영업이익률', data: opm, type: 'line', yAxisID: 'y1', borderColor: RED, borderWidth: 2, pointRadius: 3, tension: .2, order: 1 } ] },
     options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` 영업이익률 ${fmt(c.parsed.y, 1)}%` : ` ${c.dataset.label} ${jo(c.parsed.y * 1e8)}` } } },
+      plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y1' ? ` 영업이익률 ${fmt(c.parsed.y, 1)}%` : ` ${c.dataset.label} ${jo(c.parsed.y * (USD ? 1e6 : 1e8))}` } } },
       scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-        y: { ticks: { callback: val => Math.abs(val) >= 1e4 ? `${fmt(val / 1e4, 0)}조` : `${fmt(val)}억`, font: { size: 11 } }, grid: { color: GRID } },
+        y: { ticks: { callback: val => USD ? (Math.abs(val) >= 1e3 ? `$${fmt(val / 1e3, 1)}B` : `$${fmt(val)}M`) : Math.abs(val) >= 1e4 ? `${fmt(val / 1e4, 0)}조` : `${fmt(val)}억`, font: { size: 11 } }, grid: { color: GRID } },
         y1: { position: 'right', ticks: { callback: val => `${fmt(val, 0)}%`, font: { size: 11 } }, grid: { display: false } } } } });
   const allKeys = Object.keys(q).sort();
   const rows = keys.slice().reverse().map((k, i) => { const j = keys.length - 1 - i;
@@ -118,12 +122,12 @@ function drawFin(f) {
       if (prev == null || cur == null || prev === 0) return '—'; if (prev < 0) return '흑전/적지'; const r = (cur / prev - 1) * 100; return `<span class="${cls(r)}">${sign(r)}${fmt(r, 1)}%</span>`; };
     return `<tr><td>${k}${q[k].derived ? ' <span class="tag">역산</span>' : ''}</td><td>${jo(sales[j])}</td><td>${yoy('매출액', sales)}</td><td>${jo(op[j])}</td><td>${yoy('영업이익', op)}</td><td>${opm[j] == null ? '—' : fmt(opm[j], 1) + '%'}</td><td>${jo(ni[j])}</td></tr>`; }).join('');
   $('#fin-table').innerHTML = `<table><thead><tr><th>분기</th><th>매출액</th><th>YoY</th><th>영업이익</th><th>YoY</th><th>영업이익률</th><th>순이익</th></tr></thead><tbody>${rows}</tbody></table>`;
-  $('#fin-note').textContent = `DART 전체 재무제표(연결 CFS 우선) · 3개월 손익 · Q4는 연간−3분기누적 역산 · 갱신 ${kst(f.updatedAt)}`;
+  $('#fin-note').textContent = USD ? `Yahoo Finance 분기 손익계산서 · 회계분기 종료일 기준 달력 분기 라벨 · 갱신 ${kst(f.updatedAt)}` : `DART 전체 재무제표(연결 CFS 우선) · 3개월 손익 · Q4는 연간−3분기누적 역산 · 갱신 ${kst(f.updatedAt)}`;
 }
 
 function drawReports(list) {
   const el = $('#reports');
-  if (!list.length) { el.innerHTML = '<div class="empty">아직 이 종목의 리포트가 없습니다. 실적 공시가 나오면 자동으로 생성됩니다.</div>'; return; }
+  if (!list.length) { el.innerHTML = `<div class="empty">${USD ? '미국 종목 리포트는 아직 지원하지 않습니다 (SEC 공시 연동 예정).' : '아직 이 종목의 리포트가 없습니다. 실적 공시가 나오면 자동으로 생성됩니다.'}</div>`; return; }
   el.innerHTML = list.map(r => `<a class="card" href="report.html?f=${encodeURIComponent(r.file)}">
     <div class="meta">${r.published} · ${r.period}${r.source_type === 'auto' ? '<span class="badge">자동 생성</span>' : '<span class="badge">샘플</span>'}</div>
     <div class="title">${r.title}</div><div class="summary">${r.summary}</div></a>`).join('');
