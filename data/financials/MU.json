@@ -1,0 +1,107 @@
+{
+ "ticker": "MU",
+ "currency": "USD",
+ "quarters": {
+  "2026Q3": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-08-31",
+   "매출액": {
+    "q": 54229000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 43751000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 37701000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2026Q2": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-05-31",
+   "매출액": {
+    "q": 41456000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 33318000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 28243000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2026Q1": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-02-28",
+   "매출액": {
+    "q": 23860000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 16135000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 13785000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2025Q4": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2025-11-30",
+   "매출액": {
+    "q": 13643000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 6136000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 5240000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2025Q3": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2025-08-31",
+   "매출액": {
+    "q": 11315000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 3693000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 3201000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  }
+ },
+ "updatedAt": "2026-11-17T08:07:06Z"
+}

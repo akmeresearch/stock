@@ -1,0 +1,107 @@
+{
+ "ticker": "AMD",
+ "currency": "USD",
+ "quarters": {
+  "2026Q3": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-09-30",
+   "매출액": {
+    "q": 13377000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 2832000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 2428000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2026Q2": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-06-30",
+   "매출액": {
+    "q": 11536000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 1990000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 2297000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2026Q1": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-03-31",
+   "매출액": {
+    "q": 10253000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 1476000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 1383000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2025Q4": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2025-12-31",
+   "매출액": {
+    "q": 10270000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 1752000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 1511000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2025Q3": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2025-09-30",
+   "매출액": {
+    "q": 9246000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 1270000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 1243000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  }
+ },
+ "updatedAt": "2026-11-17T08:07:07Z"
+}

@@ -1,0 +1,107 @@
+{
+ "ticker": "NVDA",
+ "currency": "USD",
+ "quarters": {
+  "2026Q3": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-07-31",
+   "매출액": {
+    "q": 96221000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 63734000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 59688000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2026Q2": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-04-30",
+   "매출액": {
+    "q": 81615000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 53536000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 58321000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2026Q1": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-01-31",
+   "매출액": {
+    "q": 68127000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 44299000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 42960000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2025Q4": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2025-10-31",
+   "매출액": {
+    "q": 57006000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 36010000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 31910000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  },
+  "2025Q3": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2025-07-31",
+   "매출액": {
+    "q": 46743000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "영업이익": {
+    "q": 28440000000.0,
+    "acc": null,
+    "prev_year_q": null
+   },
+   "당기순이익": {
+    "q": 26422000000.0,
+    "acc": null,
+    "prev_year_q": null
+   }
+  }
+ },
+ "updatedAt": "2026-11-17T08:07:06Z"
+}
