@@ -1,0 +1,19 @@
+{
+  "note": "수주잔고 추적 대상 (반도체 소부장). ticker/name만 넣으면 DART 기업코드는 자동으로 채워진다.",
+  "companies": [
+    { "ticker": "084370", "name": "유진테크", "segment": "전공정 장비" },
+    { "ticker": "095610", "name": "테스", "segment": "전공정 장비" },
+    { "ticker": "003160", "name": "디아이", "segment": "검사 장비" },
+    { "ticker": "042700", "name": "한미반도체", "segment": "후공정 장비" },
+    { "ticker": "036930", "name": "주성엔지니어링", "segment": "전공정 장비" },
+    { "ticker": "240810", "name": "원익IPS", "segment": "전공정 장비" },
+    { "ticker": "319660", "name": "피에스케이", "segment": "전공정 장비" },
+    { "ticker": "039030", "name": "이오테크닉스", "segment": "레이저 장비" },
+    { "ticker": "281820", "name": "케이씨텍", "segment": "CMP 장비·소재" },
+    { "ticker": "039440", "name": "에스티아이", "segment": "인프라 장비" },
+    { "ticker": "089030", "name": "테크윙", "segment": "검사 장비" },
+    { "ticker": "403870", "name": "HPSP", "segment": "전공정 장비" },
+    { "ticker": "067310", "name": "하나마이크론", "segment": "후공정 서비스" },
+    { "ticker": "007810", "name": "코리아써키트", "segment": "PCB" }
+  ]
+}
