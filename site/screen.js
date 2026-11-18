@@ -35,6 +35,8 @@
       fetch(`data/screen.json?v=${v}`).then(r => r.ok ? r.json() : { items: {} }).catch(() => ({ items: {} })),
     ]);
     listing = l.items || []; base = b.items || {};
+    const secs = {}; for (const s of listing) if (s.sector) secs[s.sector] = (secs[s.sector] || 0) + 1;
+    $('sec').insertAdjacentHTML('beforeend', Object.keys(secs).sort((a, b) => a.localeCompare(b, 'ko')).map(k => `<option value="${esc(k)}">${esc(k)} (${secs[k]})</option>`).join(''));
     const upd = l.updatedAt ? ` · 목록 ${l.updatedAt.slice(0, 10)}` : '';
     $('stats').dataset.upd = upd;
     apply();
@@ -42,8 +44,9 @@
 
   /* ---------- 필터·정렬·렌더 ---------- */
   function apply() {
-    const q = $('q').value.trim().toLowerCase(), mk = $('mk').value, cf = $('cf').value, showP = cf === 'P' || $('showp').checked;
+    const q = $('q').value.trim().toLowerCase(), mk = $('mk').value, cf = $('cf').value, sec = $('sec').value, showP = cf === 'P' || $('showp').checked;
     view = listing.filter(s => {
+      if (sec && s.sector !== sec) return false;
       if (!showP && clsOf(s) === 'P') return false;   // P(Pass)는 기본 숨김
       if (mk === 'ETF' ? !s.etf : mk ? s.market !== mk : false) return false;
       if (cf === '_none' ? clsOf(s) !== '' : cf === '_memo' ? !memoOf(s) : cf ? clsOf(s) !== cf : false) return false;
@@ -132,11 +135,16 @@
     const nx = e.target.closest('tr').nextElementSibling?.querySelector('.memo');
     if (nx) nx.focus(); else if (page < pages()) { goto(page + 1); $('rows').querySelector('.memo')?.focus(); }
   });
-  ['q', 'mk', 'cf', 'showp'].forEach(id => $(id).addEventListener('input', () => { page = 1; apply(); }));
+  ['q', 'mk', 'sec', 'cf', 'showp'].forEach(id => $(id).addEventListener('input', () => { page = 1; apply(); }));
   document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
     if (sortKey === th.dataset.k) sortDir = -sortDir; else { sortKey = th.dataset.k; sortDir = 1; }
     apply();
   }));
+
+  /* ---------- ⋯ 메뉴 ---------- */
+  $('menu-btn').addEventListener('click', e => { e.stopPropagation(); $('menu').hidden = !$('menu').hidden; });
+  document.addEventListener('click', e => { if (!e.target.closest('.sc-menu')) $('menu').hidden = true; });
+  $('menu').addEventListener('click', () => { $('menu').hidden = true; });
 
   /* ---------- 저장 (GitHub Contents API) ---------- */
   const token = () => ls.get(LS_TOKEN, '');
