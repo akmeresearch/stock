@@ -27,6 +27,9 @@ from pathlib import Path
 
 import requests
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import clean_markdown
+
 ROOT = Path(__file__).resolve().parent.parent
 PROMPT = ROOT / "prompts" / "earnings_analysis.md"
 WATCHLIST = ROOT / "data" / "watchlist.json"
@@ -222,7 +225,7 @@ def main() -> int:
     )
     REPORTS.mkdir(parents=True, exist_ok=True)
     out = REPORTS / (args.out or f"{entry.get('ticker')}_{args.period}.md")
-    out.write_text(front + body.strip() + "\n", encoding="utf-8")
+    out.write_text(front + clean_markdown(body.strip()) + "\n", encoding="utf-8")
     print(f"written: {out.relative_to(ROOT)} ({len(body):,} chars)")
     return 0
 

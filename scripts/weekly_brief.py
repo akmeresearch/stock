@@ -12,7 +12,7 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from common import DATA, KST, ROOT, get_json, load_json, now_iso
+from common import DATA, KST, ROOT, clean_markdown, get_json, load_json, now_iso
 
 OUT = DATA / "weekly"
 PROMPT = ROOT / "prompts" / "weekly_brief.md"
@@ -185,7 +185,7 @@ def main() -> int:
     front = ("---\n" f"week_start: {start}\nweek_end: {end}\npublished: {today}\nmodel: {MODEL}\n"
              f"tokens_in: {meta['in']}\ntokens_out: {meta['out']}\n---\n\n")
     out = OUT / f"{end}.md"
-    out.write_text(front + body.strip() + "\n", encoding="utf-8")
+    out.write_text(front + clean_markdown(body.strip()) + "\n", encoding="utf-8")
     print(f"written: {out.relative_to(ROOT)}")
     build_index()
     return 0

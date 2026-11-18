@@ -69,3 +69,9 @@ def keep_previous(new_item: dict, old_item: dict | None, ok_statuses=("ok", "sta
     if old_item and old_item.get("status") in ok_statuses:
         return {**old_item, "status": "stale", "errorAt": now_iso()}
     return new_item
+
+
+def clean_markdown(text: str) -> str:
+    """Claude가 쓴 마크다운의 렌더링 함정 제거: '71~72%' 같은 숫자 범위의 ~ 는 marked(GFM)에서 취소선으로 해석되므로 – 로 바꾼다."""
+    import re
+    return re.sub(r"(?<=[0-9%])~(?=[0-9$])", "–", text)
