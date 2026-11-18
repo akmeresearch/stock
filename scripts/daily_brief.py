@@ -48,7 +48,6 @@ KR_FEEDS = [
     ("한국경제 증권", "https://www.hankyung.com/feed/finance"),
     ("매일경제 증권", "https://www.mk.co.kr/rss/50200011/"),
     ("매일경제 경제", "https://www.mk.co.kr/rss/30100041/"),
-    ("이데일리 증권", "https://www.edaily.co.kr/rss/edaily_stock.xml"),
     ("연합인포맥스", "https://news.einfomax.co.kr/rss/allArticle.xml"),
 ]
 
@@ -195,7 +194,7 @@ def kr_movers() -> list[str]:
     try:
         import pandas as pd
         html = requests.get("https://finance.naver.com/sise/sise_group.naver?type=upjong", headers=UA, timeout=20).content.decode("euc-kr", errors="replace")
-        tbs = [t for t in pd.read_html(io.StringIO(html)) if "업종명" in "".join(map(str, t.columns))]
+        tbs = [t for t in pd.read_html(io.StringIO(html), flavor="lxml") if "업종명" in "".join(map(str, t.columns))]
         if tbs:
             t = tbs[0].dropna(subset=[tbs[0].columns[0]])
             t = t[[t.columns[0], t.columns[1]]]
@@ -290,11 +289,22 @@ def kr_pack(today: date) -> tuple[str, str | None]:
 
 # ---------------------------------------------------------------- 공통
 def call_claude(system: str, user: str) -> tuple[str, dict]:
+    """출력이 max_tokens에 걸리면 이어서 요청 (thinking 토큰이 한도를 먹는 경우 대비)."""
     from anthropic import Anthropic
     client = Anthropic()
-    resp = client.messages.create(model=MODEL, max_tokens=6000, system=system, messages=[{"role": "user", "content": user}])
-    text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-    return text, {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens, "stop": resp.stop_reason}
+    messages = [{"role": "user", "content": user}]
+    body, meta = "", {"stop": "", "in": 0, "out": 0}
+    for _ in range(3):
+        resp = client.messages.create(model=MODEL, max_tokens=16000, system=system, messages=messages)
+        chunk = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        body += chunk
+        meta["stop"] = resp.stop_reason; meta["in"] += resp.usage.input_tokens; meta["out"] += resp.usage.output_tokens
+        print(f"stop_reason={resp.stop_reason} in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+        if resp.stop_reason != "max_tokens":
+            break
+        messages += [{"role": "assistant", "content": chunk},
+                     {"role": "user", "content": "출력이 잘렸다. 마지막 문장 바로 다음부터 이어서, 반복 없이 끝까지 작성하라."}]
+    return body, meta
 
 
 def build_index():

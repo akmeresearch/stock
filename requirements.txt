@@ -6,3 +6,4 @@ python-dateutil>=2.9
 beautifulsoup4>=4.12
 curl_cffi>=0.7
 lxml>=5.0
+html5lib>=1.1
