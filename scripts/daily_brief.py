@@ -38,7 +38,9 @@ US_SYMBOLS = [  # (심볼, 이름, 그룹)
 US_FEEDS = [
     ("CNBC Markets", "https://www.cnbc.com/id/10000664/device/rss/rss.html"),
     ("CNBC Top News", "https://www.cnbc.com/id/100003114/device/rss/rss.html"),
-    ("Yahoo Finance", "https://finance.yahoo.com/news/rssindex"),
+    ("CNBC Finance", "https://www.cnbc.com/id/15839135/device/rss/rss.html"),
+    ("CNBC Economy", "https://www.cnbc.com/id/20910258/device/rss/rss.html"),
+    ("WSJ Markets", "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"),
     ("MarketWatch", "https://feeds.content.dowjones.io/public/rss/mw_topstories"),
     ("Investing.com", "https://www.investing.com/rss/news_25.rss"),
 ]
