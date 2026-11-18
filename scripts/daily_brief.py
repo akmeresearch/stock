@@ -7,7 +7,6 @@
 환경변수: ANTHROPIC_API_KEY (필수), DART_API_KEY (kr 모드 공시, 선택)
 """
 import argparse
-import io
 import json
 import os
 import re
@@ -190,21 +189,21 @@ def kr_movers() -> list[str]:
             if rows:
                 lines.append(f"- {mk} {label} 상위: " + ", ".join(
                     f"{r.get('stockName')} {r.get('fluctuationsRatio', '')}%" for r in rows[:8]))
-    # 업종 등락
-    try:
-        import pandas as pd
-        html = requests.get("https://finance.naver.com/sise/sise_group.naver?type=upjong", headers=UA, timeout=20).content.decode("euc-kr", errors="replace")
-        tbs = [t for t in pd.read_html(io.StringIO(html), flavor="lxml") if "업종명" in "".join(map(str, t.columns))]
-        if tbs:
-            t = tbs[0].dropna(subset=[tbs[0].columns[0]])
-            t = t[[t.columns[0], t.columns[1]]]
-            t.columns = ["업종", "등락"]
-            t["등락"] = t["등락"].astype(str).str.replace("%", "").str.replace("+", "").astype(float)
-            t = t.sort_values("등락", ascending=False)
-            lines.append("- 업종 상승 상위: " + ", ".join(f"{r.업종} {r.등락:+.2f}%" for r in t.head(8).itertuples()))
-            lines.append("- 업종 하락 상위: " + ", ".join(f"{r.업종} {r.등락:+.2f}%" for r in t.tail(8).iloc[::-1].itertuples()))
-    except Exception as e:
-        print(f"  upjong: {e}", file=sys.stderr)
+    # 업종 등락 (네이버 업종 그룹, 등락률·상승/하락 종목 수)
+    j = naver_json("https://m.stock.naver.com/api/stocks/industry?page=1&pageSize=100")
+    groups = (j or {}).get("groups") or []
+    rows = []
+    for g in groups:
+        try:
+            rows.append((g.get("name"), float(str(g.get("changeRate", "")).replace("%", "")), g.get("riseCount"), g.get("fallCount"), g.get("totalCount")))
+        except ValueError:
+            pass
+    if rows:
+        rows.sort(key=lambda x: x[1], reverse=True)
+        fmt = lambda r: f"{r[0]} {r[1]:+.2f}% (상승 {r[2]}/하락 {r[3]}/전체 {r[4]})"
+        lines.append("- 업종 상승 상위: " + ", ".join(fmt(r) for r in rows[:10]))
+        lines.append("- 업종 하락 상위: " + ", ".join(fmt(r) for r in rows[-10:][::-1]))
+        up = sum(1 for r in rows if r[1] > 0); lines.append(f"- 업종 {len(rows)}개 중 상승 {up}, 하락 {len(rows) - up}")
     return lines
 
 
