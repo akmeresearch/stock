@@ -169,7 +169,12 @@ tr.c-C select.cls, .chip.c-C { background: #f3f4f6; color: #374151; }
 tr.c-D select.cls, .chip.c-D { background: #f3f4f6; color: #6b7280; }
 tr.c-F select.cls, .chip.c-F { background: #fee2e2; border-color: #f87171; color: #991b1b; }
 tr.c-P select.cls, .chip.c-P { background: #ede9fe; border-color: #a78bfa; color: #5b21b6; }
-.sc-more { text-align: center; font-size: 12.5px; color: var(--muted); padding: 12px; }
+.sc-check { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; color: var(--text); cursor: pointer; white-space: nowrap; }
+.sc-pager { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; padding: 10px 0; font-size: 13.5px; }
+.sc-pager .pg-info { padding: 0 6px; white-space: nowrap; }
+.sc-pager .pg-info small { color: var(--muted); font-size: 12px; }
+.sc-pager .pg-num { width: 56px; padding: 5px 6px; border: 1px solid var(--line); border-radius: 7px; font-size: 13.5px; text-align: center; font-family: inherit; }
+.sc-pager .pg-size { padding: 5px 6px; font-size: 13px; }
 @media (max-width: 640px) {
   .sc-sector { display: none; }
   .sc-name { width: 44%; }

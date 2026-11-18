@@ -7,7 +7,7 @@
   const CLASSES = ['S', 'A', 'B', 'C', 'D', 'F', 'P'];
   const RANK = Object.fromEntries(CLASSES.map((c, i) => [c, i]));
   const LS_DIRTY = 'akme_screen_dirty', LS_TOKEN = 'akme_gh_token';
-  const PAGE = 300;
+  const LS_SIZE = 'akme_screen_size';
   const v = Math.floor(Date.now() / 60000);
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -16,7 +16,7 @@
                del(k) { try { localStorage.removeItem(k); } catch {} } };
 
   let listing = [], base = {}, dirty = ls.get(LS_DIRTY, {});
-  let sortKey = 'cls', sortDir = 1, view = [], shown = 0;
+  let sortKey = 'cls', sortDir = 1, view = [], page = 1, size = +ls.get(LS_SIZE, 10) || 10;
 
   const entry = code => dirty[code] ?? base[code] ?? null;
   const clsOf = s => { const e = entry(s.code); return e && 'c' in e ? e.c : (s.etf ? 'P' : ''); };
@@ -42,8 +42,9 @@
 
   /* ---------- 필터·정렬·렌더 ---------- */
   function apply() {
-    const q = $('q').value.trim().toLowerCase(), mk = $('mk').value, cf = $('cf').value;
+    const q = $('q').value.trim().toLowerCase(), mk = $('mk').value, cf = $('cf').value, showP = cf === 'P' || $('showp').checked;
     view = listing.filter(s => {
+      if (!showP && clsOf(s) === 'P') return false;   // P(Pass)는 기본 숨김
       if (mk === 'ETF' ? !s.etf : mk ? s.market !== mk : false) return false;
       if (cf === '_none' ? clsOf(s) !== '' : cf === '_memo' ? !memoOf(s) : cf ? clsOf(s) !== cf : false) return false;
       if (q && !(s.name.toLowerCase().includes(q) || s.code.includes(q) || (s.sector || '').toLowerCase().includes(q))) return false;
@@ -59,9 +60,10 @@
     });
     document.querySelectorAll('th.sortable').forEach(th => th.classList.toggle('on', th.dataset.k === sortKey));
     document.querySelector('th.on')?.setAttribute('data-dir', sortDir > 0 ? '▲' : '▼');
-    $('rows').innerHTML = view.length ? '' : '<tr><td colspan="4" class="empty">조건에 맞는 종목이 없습니다.</td></tr>';
-    shown = 0; renderMore(); stats();
+    page = Math.min(page, pages()) || 1; renderPage(); stats();
   }
+  const pages = () => Math.max(1, Math.ceil(view.length / size));
+  function goto(n) { page = Math.max(1, Math.min(pages(), n)); renderPage(); window.scrollTo({ top: $('pager-top').offsetTop - 70, behavior: 'smooth' }); }
 
   function row(s) {
     const c = clsOf(s), m = memoOf(s), d = dirty[s.code] ? ' dirty' : '';
@@ -76,13 +78,28 @@
     </tr>`;
   }
 
-  function renderMore() {
-    const next = view.slice(shown, shown + PAGE);
-    if (next.length) $('rows').insertAdjacentHTML('beforeend', next.map(row).join(''));
-    shown += next.length;
-    $('more').textContent = shown < view.length ? `${shown.toLocaleString()} / ${view.length.toLocaleString()} 표시 — 스크롤하면 더 불러옵니다` : (view.length ? `${view.length.toLocaleString()}종목 전체 표시` : '');
+  function renderPage() {
+    const slice = view.slice((page - 1) * size, page * size);
+    $('rows').innerHTML = slice.length ? slice.map(row).join('') : '<tr><td colspan="4" class="empty">조건에 맞는 종목이 없습니다.</td></tr>';
+    const n = pages(), from = view.length ? (page - 1) * size + 1 : 0, to = Math.min(view.length, page * size);
+    for (const el of document.querySelectorAll('.sc-pager')) {
+      el.innerHTML = `<button class="btn pg" data-go="1" ${page <= 1 ? 'disabled' : ''}>«</button>
+        <button class="btn pg" data-go="${page - 1}" ${page <= 1 ? 'disabled' : ''}>‹ 이전</button>
+        <span class="pg-info"><input class="pg-num" type="number" min="1" max="${n}" value="${page}"> / ${n.toLocaleString()} 페이지
+          <small>(${from.toLocaleString()}–${to.toLocaleString()} / ${view.length.toLocaleString()})</small></span>
+        <button class="btn pg" data-go="${page + 1}" ${page >= n ? 'disabled' : ''}>다음 ›</button>
+        <button class="btn pg" data-go="${n}" ${page >= n ? 'disabled' : ''}>»</button>
+        <select class="sc-select pg-size">${[10, 25, 50, 100].map(x => `<option value="${x}"${x === size ? ' selected' : ''}>${x}개씩</option>`).join('')}</select>`;
+    }
   }
-  new IntersectionObserver(es => { if (es[0].isIntersecting && shown < view.length) renderMore(); }, { rootMargin: '600px' }).observe($('more'));
+  document.addEventListener('click', e => { const b = e.target.closest('button.pg'); if (b && !b.disabled) goto(+b.dataset.go); });
+  document.addEventListener('change', e => {
+    if (e.target.classList.contains('pg-num')) goto(+e.target.value || 1);
+    if (e.target.classList.contains('pg-size')) { size = +e.target.value; ls.set(LS_SIZE, size); page = 1; renderPage(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.classList.contains('pg-num') && e.key === 'Enter') { e.preventDefault(); goto(+e.target.value || 1); }
+  });
 
   function stats() {
     const cnt = Object.fromEntries(CLASSES.map(c => [c, 0])); let none = 0;
@@ -112,9 +129,10 @@
   rows.addEventListener('keydown', e => {
     if (e.key !== 'Enter' || !e.target.classList.contains('memo')) return;
     e.preventDefault(); e.target.blur();
-    const nx = e.target.closest('tr').nextElementSibling?.querySelector('.memo'); nx?.focus();
+    const nx = e.target.closest('tr').nextElementSibling?.querySelector('.memo');
+    if (nx) nx.focus(); else if (page < pages()) { goto(page + 1); $('rows').querySelector('.memo')?.focus(); }
   });
-  ['q', 'mk', 'cf'].forEach(id => $(id).addEventListener('input', apply));
+  ['q', 'mk', 'cf', 'showp'].forEach(id => $(id).addEventListener('input', () => { page = 1; apply(); }));
   document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
     if (sortKey === th.dataset.k) sortDir = -sortDir; else { sortKey = th.dataset.k; sortDir = 1; }
     apply();
