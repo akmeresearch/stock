@@ -170,6 +170,7 @@ tr.c-C select.cls, .chip.c-C { background: #f3f4f6; color: #374151; }
 tr.c-D select.cls, .chip.c-D { background: #f3f4f6; color: #6b7280; }
 tr.c-F select.cls, .chip.c-F { background: #fee2e2; border-color: #f87171; color: #991b1b; }
 tr.c-P select.cls, .chip.c-P { background: #ede9fe; border-color: #a78bfa; color: #5b21b6; }
+.sc-hint { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; border-radius: 10px; padding: 9px 12px; font-size: 13px; margin: -6px 0 14px; }
 .sc-menu { position: relative; }
 .sc-menu-list { position: absolute; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.08); padding: 6px; min-width: 170px; z-index: 5; display: flex; flex-direction: column; }
 .sc-menu-list .mi { background: none; border: 0; text-align: left; padding: 8px 10px; font-size: 13.5px; border-radius: 7px; cursor: pointer; color: var(--text); font-family: inherit; }

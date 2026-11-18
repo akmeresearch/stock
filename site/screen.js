@@ -25,14 +25,15 @@
 
   function setDirty(code, patch) {
     const cur = { ...(base[code] || {}), ...(dirty[code] || {}), ...patch };
-    dirty[code] = cur; ls.set(LS_DIRTY, dirty); stats();
+    dirty[code] = cur; ls.set(LS_DIRTY, dirty); stats(); scheduleSave();
   }
 
   /* ---------- 데이터 ---------- */
   async function load() {
     const [l, b] = await Promise.all([
       fetch(`data/listing.json?v=${v}`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
-      fetch(`data/screen.json?v=${v}`).then(r => r.ok ? r.json() : { items: {} }).catch(() => ({ items: {} })),
+      (token() ? remoteRead().then(r => ({ items: r.items })) : Promise.reject()).catch(() =>
+        fetch(`data/screen.json?v=${v}`).then(r => r.ok ? r.json() : { items: {} }).catch(() => ({ items: {} }))),
     ]);
     listing = l.items || []; base = b.items || {};
     const secs = {}; for (const s of listing) if (s.sector) secs[s.sector] = (secs[s.sector] || 0) + 1;
@@ -111,10 +112,18 @@
     $('stats').innerHTML = `<span>${listing.length.toLocaleString()}종목</span>` +
       CLASSES.map(c => `<span class="chip c-${c}">${c} ${cnt[c].toLocaleString()}</span>`).join('') +
       `<span class="chip">미분류 ${none.toLocaleString()}</span>` +
-      (nd ? `<span class="chip warn">미저장 ${nd}</span>` : '<span class="chip ok">저장됨</span>') +
-      `<span class="sc-upd">${$('stats').dataset.upd || ''}</span>`;
-    $('save').disabled = !nd; $('save').textContent = nd ? `GitHub에 저장 (${nd})` : 'GitHub에 저장';
+      syncChip(nd) + `<span class="sc-upd">${$('stats').dataset.upd || ''}</span>`;
+    $('save').disabled = !nd || saving; $('save').textContent = nd ? `지금 저장 (${nd})` : '저장할 변경 없음';
+    $('hint').hidden = !!token();
   }
+  let saving = false, saveErr = '', savedAt = '';
+  function syncChip(nd) {
+    if (saving) return '<span class="chip">저장 중…</span>';
+    if (saveErr) return `<span class="chip warn" id="retry" title="${esc(saveErr)}">저장 실패 — 눌러서 재시도</span>`;
+    if (nd) return token() ? `<span class="chip warn">저장 대기 ${nd}</span>` : `<span class="chip warn">이 기기에만 저장됨 ${nd}</span>`;
+    return `<span class="chip ok">${token() ? '동기화됨' : '저장됨'}${savedAt ? ' ' + savedAt : ''}</span>`;
+  }
+  document.addEventListener('click', e => { if (e.target.id === 'retry') save(true); });
 
   /* ---------- 입력 ---------- */
   const rows = $('rows');
@@ -152,37 +161,53 @@
     const t = prompt('GitHub 토큰 (fine-grained, 저장소 stock 의 Contents: Read and write 권한).\n비우면 삭제합니다.', token() || '');
     if (t === null) return;
     t.trim() ? ls.set(LS_TOKEN, t.trim()) : ls.del(LS_TOKEN);
-    alert(t.trim() ? '토큰을 이 브라우저에 저장했습니다.' : '토큰을 삭제했습니다.');
+    if (t.trim()) { save(true).then(() => load()); } else stats();
   });
 
   const b64 = s => { const u = new TextEncoder().encode(s); let b = ''; for (let i = 0; i < u.length; i += 8192) b += String.fromCharCode.apply(null, u.subarray(i, i + 8192)); return btoa(b); };
   const unb64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, '')), c => c.charCodeAt(0)));
 
-  async function save() {
-    if (!token()) { alert('먼저 ⚙ 버튼으로 GitHub 토큰을 넣어주세요.'); return; }
-    const btn = $('save'); btn.disabled = true; btn.textContent = '저장 중…';
+  const gh = () => ({ Authorization: `Bearer ${token()}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' });
+  const URL_ = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
+  async function remoteRead() {
+    const g = await fetch(`${URL_}?ref=main&t=${Date.now()}`, { headers: gh() });
+    if (g.status === 404) return { sha: undefined, items: {} };
+    if (!g.ok) throw new Error(`읽기 실패 ${g.status}${g.status === 401 ? ' (토큰이 틀리거나 만료)' : ''}`);
+    const j = await g.json(); let items = {};
+    try { items = JSON.parse(unb64(j.content)).items || {}; } catch {}
+    return { sha: j.sha, items };
+  }
+
+  let saveTimer;
+  function scheduleSave() { if (!token()) return; clearTimeout(saveTimer); saveTimer = setTimeout(() => save(false), 2500); }
+
+  async function save(manual) {
+    if (!token()) { if (manual) alert('⋯ 메뉴의 "GitHub 토큰 설정"을 먼저 해주세요. 한 번만 하면 됩니다.'); return; }
+    if (saving) { scheduleSave(); return; }
+    const keys = Object.keys(dirty); if (!keys.length) return;
+    const snapshot = { ...dirty };
+    saving = true; saveErr = ''; stats();
     try {
-      const h = { Authorization: `Bearer ${token()}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
-      const url = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
-      // 최신 파일을 먼저 읽어 다른 기기에서 저장한 내용과 합친다
-      let sha, remote = {};
-      const g = await fetch(`${url}?ref=main&t=${Date.now()}`, { headers: h });
-      if (g.ok) { const j = await g.json(); sha = j.sha; try { remote = JSON.parse(unb64(j.content)).items || {}; } catch {} }
-      else if (g.status !== 404) throw new Error(`읽기 실패 ${g.status}`);
-      const merged = { ...remote, ...dirty };
+      const { sha, items: remote } = await remoteRead();   // 다른 기기에서 저장한 내용과 합친다
+      const merged = { ...remote, ...snapshot };
       for (const k of Object.keys(merged)) { const e = merged[k]; if (!e || ((e.c ?? '') === '' && !(e.m || ''))) delete merged[k]; }
       const items = Object.fromEntries(Object.keys(merged).sort().map(k => [k, merged[k]]));
-      const body = { message: `screen: ${new Date().toISOString().slice(0, 16).replace('T', ' ')} ${Object.keys(dirty).length}건`, branch: 'main',
+      const body = { message: `screen: ${new Date().toISOString().slice(0, 16).replace('T', ' ')} ${keys.length}건`, branch: 'main',
                      content: b64(JSON.stringify({ updatedAt: new Date().toISOString(), count: Object.keys(items).length, items }, null, 1) + '\n') };
       if (sha) body.sha = sha;
-      const p = await fetch(url, { method: 'PUT', headers: { ...h, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const p = await fetch(URL_, { method: 'PUT', headers: { ...gh(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (!p.ok) throw new Error(`저장 실패 ${p.status}: ${(await p.json().catch(() => ({}))).message || ''}`);
-      base = items; dirty = {}; ls.del(LS_DIRTY);
-      document.querySelectorAll('tr.dirty').forEach(tr => tr.classList.remove('dirty'));
-      stats();
-    } catch (e) { alert(String(e.message || e)); stats(); }
+      base = items;
+      for (const k of keys) if (dirty[k] === snapshot[k]) delete dirty[k];   // 저장 중 새로 고친 건은 남긴다
+      Object.keys(dirty).length ? ls.set(LS_DIRTY, dirty) : ls.del(LS_DIRTY);
+      document.querySelectorAll('tr.dirty').forEach(tr => { if (!dirty[tr.dataset.code]) tr.classList.remove('dirty'); });
+      savedAt = new Date().toTimeString().slice(0, 5);
+    } catch (e) { saveErr = String(e.message || e); if (manual) alert(saveErr); }
+    saving = false; stats();
+    if (Object.keys(dirty).length && !saveErr) scheduleSave();
   }
-  $('save').addEventListener('click', save);
+  document.addEventListener('visibilitychange', () => { if (document.hidden && Object.keys(dirty).length) { clearTimeout(saveTimer); save(false); } });
+  $('save').addEventListener('click', () => { clearTimeout(saveTimer); save(true); });
 
   /* ---------- 내보내기 / 가져오기 ---------- */
   $('export').addEventListener('click', () => {
