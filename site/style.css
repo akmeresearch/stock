@@ -12,7 +12,9 @@ a:hover { text-decoration: underline; }
 .nav { display: flex; gap: 20px; align-items: center; padding: 14px 24px; border-bottom: 1px solid var(--line); }
 .nav .brand { display: flex; align-items: center; margin-right: 12px; }
 .nav .brand img { height: 22px; width: auto; display: block; }
+.nav a { white-space: nowrap; flex-shrink: 0; }
 .nav a.cur { color: var(--text); font-weight: 600; }
+@media (max-width: 720px) { .nav { gap: 14px; padding: 12px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; } .nav::-webkit-scrollbar { display: none; } .nav .brand img { height: 18px; } }
 .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
 h1 { font-size: 26px; letter-spacing: -0.5px; margin: 0 0 6px; }
 .sub { color: var(--muted); margin-bottom: 28px; }
@@ -129,3 +131,48 @@ h1 { font-size: 26px; letter-spacing: -0.5px; margin: 0 0 6px; }
 #bl-table td:nth-child(n+4), #bl-table th:nth-child(n+4) { text-align: right; }
 #bl-detail td:nth-child(2), #bl-detail td:nth-child(3), #bl-detail td:nth-child(4), #bl-detail td:nth-child(5) { text-align: right; }
 .divider { border: 0; border-top: 1px solid var(--line); margin: 28px 0 14px; }
+
+/* 종목 스크린 */
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:disabled { opacity: .45; cursor: default; }
+.sc-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.sc-spacer { flex: 1; }
+.sc-input, .sc-select { border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 14px; background: #fff; color: var(--text); font-family: inherit; }
+.sc-input { min-width: 240px; flex: 1 1 240px; }
+.sc-stats { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+.sc-stats .chip { border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; background: var(--panel); }
+.sc-stats .chip.warn { border-color: #f59e0b; color: #b45309; background: #fffbeb; }
+.sc-stats .chip.ok { color: #15803d; }
+.sc-upd { margin-left: auto; }
+.sc-tablewrap { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sc-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.sc-table th { position: sticky; top: 0; background: var(--panel); color: var(--muted); font-weight: 600; font-size: 12.5px; text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); z-index: 1; white-space: nowrap; }
+.sc-table th.sortable { cursor: pointer; user-select: none; }
+.sc-table th.sortable.on { color: var(--text); }
+.sc-table th.sortable.on::after { content: ' ' attr(data-dir); font-size: 10px; }
+.sc-table td { padding: 7px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.sc-table tr:last-child td { border-bottom: 0; }
+.sc-name { width: 30%; }
+.sc-name .lnk { color: var(--text); font-weight: 600; }
+.sc-meta { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.sc-sector { width: 22%; color: #374151; font-size: 13px; }
+.sc-cls { width: 74px; }
+.sc-table select.cls { width: 62px; padding: 5px 6px; border: 1px solid var(--line); border-radius: 7px; font-size: 14px; font-weight: 700; background: #fff; color: var(--text); font-family: inherit; }
+.sc-table input.memo { width: 100%; padding: 6px 9px; border: 1px solid transparent; border-radius: 7px; background: transparent; font-size: 13.5px; font-family: inherit; color: var(--text); }
+.sc-table input.memo:hover { border-color: var(--line); }
+.sc-table input.memo:focus { border-color: var(--accent); background: #fff; outline: none; }
+.sc-table tr.dirty .sc-name::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; margin-right: 6px; vertical-align: middle; }
+tr.c-S select.cls, .chip.c-S { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+tr.c-A select.cls, .chip.c-A { background: #dcfce7; border-color: #22c55e; color: #166534; }
+tr.c-B select.cls, .chip.c-B { background: #dbeafe; border-color: #60a5fa; color: #1e40af; }
+tr.c-C select.cls, .chip.c-C { background: #f3f4f6; color: #374151; }
+tr.c-D select.cls, .chip.c-D { background: #f3f4f6; color: #6b7280; }
+tr.c-F select.cls, .chip.c-F { background: #fee2e2; border-color: #f87171; color: #991b1b; }
+tr.c-P select.cls, .chip.c-P { background: #ede9fe; border-color: #a78bfa; color: #5b21b6; }
+.sc-more { text-align: center; font-size: 12.5px; color: var(--muted); padding: 12px; }
+@media (max-width: 640px) {
+  .sc-sector { display: none; }
+  .sc-name { width: 44%; }
+  .sc-table td { padding: 7px 8px; }
+  .sc-meta { max-width: 150px; }
+}

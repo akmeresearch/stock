@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>종목 스크린 · AKME Research</title>
+<meta name="description" content="전체 상장종목을 훑어보며 S·A·B·C·D·F·P 클래스와 메모를 직접 기록하는 스크린.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKME Research">
+<meta property="og:title" content="종목 스크린 · AKME Research">
+<meta property="og:description" content="전체 상장종목을 훑어보며 S·A·B·C·D·F·P 클래스와 메모를 직접 기록하는 스크린.">
+<meta property="og:url" content="https://akmeresearch.github.io/stock/screen.html">
+<meta property="og:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="종목 스크린 · AKME Research">
+<meta name="twitter:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="site/img/icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="site/img/icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="site/img/icon-180.png?v=2">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="site/style.css?v=202611181540">
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="site/img/logo-dark.png" alt="AKME Research"></a>
+  <a href="index.html">시장 현황</a>
+  <a href="credit.html">신용잔고</a>
+  <a href="backlog.html">수주잔고</a>
+  <a href="stocks.html">관심종목</a>
+  <a href="screen.html" class="cur">종목 스크린</a>
+  <a href="weekly.html">위클리</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap wide">
+  <h1>종목 스크린</h1>
+  <div class="sub">전체 상장종목(코스피·코스닥·ETF/ETN)을 훑어보며 클래스와 메모를 직접 기록합니다. ETF·ETN은 기본 <b>P</b>. 입력은 이 브라우저에 바로 저장되고, <b>GitHub에 저장</b>을 누르면 사이트에 반영되어 다른 기기에서도 보입니다.</div>
+
+  <div class="sc-toolbar">
+    <input id="q" class="sc-input" type="search" placeholder="종목명 · 코드 · 업종 검색" autocomplete="off">
+    <select id="mk" class="sc-select">
+      <option value="">전체 시장</option>
+      <option value="KOSPI">코스피</option>
+      <option value="KOSDAQ">코스닥</option>
+      <option value="ETF">ETF/ETN</option>
+    </select>
+    <select id="cf" class="sc-select">
+      <option value="">전체 클래스</option>
+      <option value="_none">미분류</option>
+      <option value="S">S</option><option value="A">A</option><option value="B">B</option><option value="C">C</option>
+      <option value="D">D</option><option value="F">F</option><option value="P">P</option>
+      <option value="_memo">메모 있음</option>
+    </select>
+    <span class="sc-spacer"></span>
+    <button id="save" class="btn primary">GitHub에 저장</button>
+    <button id="export" class="btn">내보내기</button>
+    <button id="import" class="btn">가져오기</button>
+    <button id="token" class="btn" title="GitHub 토큰 설정">⚙</button>
+    <input id="file" type="file" accept="application/json" hidden>
+  </div>
+  <div id="stats" class="sc-stats"></div>
+
+  <div class="sc-tablewrap">
+    <table class="sc-table">
+      <thead><tr>
+        <th data-k="name" class="sortable">종목</th>
+        <th data-k="sector" class="sortable">업종</th>
+        <th data-k="cls" class="sortable sc-cls-h">클래스</th>
+        <th>메모</th>
+      </tr></thead>
+      <tbody id="rows"><tr><td colspan="4" class="empty">불러오는 중…</td></tr></tbody>
+    </table>
+    <div id="more" class="sc-more"></div>
+  </div>
+  <div class="footer">종목 목록: KRX KIND 상장법인목록 · 네이버 금융 ETF/ETN 목록 (주 1회 갱신). 정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</main>
+<script src="site/screen.js?v=202611181520"></script>
+</body>
+</html>
