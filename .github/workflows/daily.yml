@@ -1,0 +1,60 @@
+name: Daily brief (데일리)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "us = 전일 미국장, kr = 오늘 한국장 (비우면 시각으로 판단)"
+        required: false
+        default: ""
+      force:
+        description: "휴장·중복 검사 무시 (true)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "0 22 * * 1-5"   # 화~토 07:00 KST — 전일 미국장
+    - cron: "0 11 * * 1-5"   # 월~금 20:00 KST — 오늘 한국장
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Refresh market data (kr)
+        if: github.event.inputs.mode == 'kr' || (github.event_name == 'schedule' && github.event.schedule == '0 11 * * 1-5')
+        continue-on-error: true
+        run: python scripts/collect_market.py
+      - name: Generate daily brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          FORCE="${{ github.event.inputs.force }}"
+          python scripts/daily_brief.py ${MODE:+--mode $MODE} ${FORCE:+--force}
+      - name: Telegram
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python scripts/notify.py --daily
+      - name: Commit
+        run: |
+          git config user.name "akme-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "daily: $(TZ=Asia/Seoul date +%Y-%m-%d\ %H:%M)"
+          git pull --rebase origin main
+          git push

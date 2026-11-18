@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>데일리 · AKME Research</title>
+<meta name="description" content="아침 7시 전일 미국장, 저녁 8시 오늘 한국장. 지수·수급·섹터·뉴스를 AI가 정리한 데일리 브리핑.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKME Research">
+<meta property="og:title" content="데일리 · AKME Research">
+<meta property="og:description" content="아침 7시 전일 미국장, 저녁 8시 오늘 한국장. 지수·수급·섹터·뉴스를 AI가 정리한 데일리 브리핑.">
+<meta property="og:url" content="https://akmeresearch.github.io/stock/daily.html">
+<meta property="og:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="데일리 · AKME Research">
+<meta name="twitter:description" content="아침 7시 전일 미국장, 저녁 8시 오늘 한국장. 지수·수급·섹터·뉴스를 AI가 정리한 데일리 브리핑.">
+<meta name="twitter:image" content="https://akmeresearch.github.io/stock/site/img/og-logo-2026-11.png">
+<link rel="icon" href="favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="site/img/icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="site/img/icon-192.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="site/img/icon-180.png?v=2">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="site/style.css?v=202611181800">
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="index.html"><img src="site/img/logo-dark.png" alt="AKME Research"></a>
+  <a href="index.html">시장 현황</a>
+  <a href="credit.html">신용잔고</a>
+  <a href="backlog.html">수주잔고</a>
+  <a href="stocks.html">관심종목</a>
+  <a href="screen.html">종목 스크린</a>
+  <a href="daily.html" class="cur">데일리</a>
+  <a href="weekly.html">위클리</a>
+  <a href="reports.html">실적 리포트</a>
+</nav>
+<main class="wrap">
+  <h1>데일리</h1>
+  <div class="sub">아침 7시 <b>전일 미국장</b>, 저녁 8시 <b>오늘 한국장</b>. 발행 즉시 텔레그램으로도 보냅니다.</div>
+  <div class="tabs" id="tabs"><button class="tab on" data-k="">전체</button><button class="tab" data-k="us">미국장</button><button class="tab" data-k="kr">한국장</button></div>
+  <div id="list"><div class="empty">불러오는 중…</div></div>
+  <div class="footer">정보 제공 목적이며 투자 권유가 아닙니다.</div>
+</main>
+<script>
+let items = [], kind = '';
+const KIND = { us: '미국장', kr: '한국장' };
+function render() {
+  const el = document.getElementById('list');
+  const rows = items.filter(r => !kind || r.kind === kind);
+  if (!rows.length) { el.innerHTML = '<div class="empty">아직 브리핑이 없습니다. 첫 발행은 다음 아침 7시(미국장) / 저녁 8시(한국장)입니다.</div>'; return; }
+  el.innerHTML = rows.map(r => `
+    <a class="card" href="report.html?t=daily&f=${encodeURIComponent(r.file)}">
+      <div class="meta"><span class="tag">${KIND[r.kind] || r.kind}</span> ${r.date} · 발행 ${r.published}</div>
+      <div class="title">${r.title}</div>
+      <div class="summary">${r.summary}</div>
+    </a>`).join('');
+}
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('.tab'); if (!b) return;
+  kind = b.dataset.k; document.querySelectorAll('#tabs .tab').forEach(t => t.classList.toggle('on', t === b)); render();
+});
+fetch('data/daily/index.json?v=' + Date.now()).then(r => r.ok ? r.json() : []).then(j => { items = j; render(); })
+  .catch(() => { items = []; render(); });
+</script>
+</body>
+</html>

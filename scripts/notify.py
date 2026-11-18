@@ -5,6 +5,7 @@
   python scripts/notify.py --text "메시지"      # 단발 발송
   python scripts/notify.py --reports           # data/reports 중 아직 알리지 않은 리포트 알림 (워크플로에서 호출)
   python scripts/notify.py --weekly            # 최신 위클리 알림
+  python scripts/notify.py --daily             # 아직 알리지 않은 데일리 알림
 환경변수: TELEGRAM_BOT_TOKEN. chat_id 는 data/notify.json 에 저장 (비밀 아님).
 """
 import argparse
@@ -96,12 +97,33 @@ def notify_weekly(token: str) -> int:
     return 0
 
 
+def notify_daily(token: str) -> int:
+    state = load_json(STATE, {})
+    chat_id = state.get("chat_id")
+    if not chat_id:
+        return 0
+    done = set(state.get("notified_daily", []))
+    idx = load_json(DATA / "daily" / "index.json", [])
+    kind = {"us": "🇺🇸 미국장", "kr": "🇰🇷 한국장"}
+    for w in sorted(idx, key=lambda x: (x["date"], x["published"])):
+        key = w["file"]
+        if key in done:
+            continue
+        send(token, chat_id, f"{kind.get(w['kind'], '')} <b>{w['title']}</b>\n{w['summary']}\n\n<a href=\"{SITE}report.html?t=daily&f={w['file']}\">데일리 열기</a>")
+        done.add(key)
+        print("notified:", key)
+    state["notified_daily"] = sorted(done)[-60:]
+    save_json(STATE, state)
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--setup", action="store_true")
     ap.add_argument("--text")
     ap.add_argument("--reports", action="store_true")
     ap.add_argument("--weekly", action="store_true")
+    ap.add_argument("--daily", action="store_true")
     args = ap.parse_args()
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     if not token:
@@ -118,6 +140,8 @@ def main() -> int:
         rc |= notify_reports(token)
     if args.weekly:
         rc |= notify_weekly(token)
+    if args.daily:
+        rc |= notify_daily(token)
     return rc
 
 
