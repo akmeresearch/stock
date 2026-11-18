@@ -64,6 +64,13 @@ def parse_json(txt: str):
 
 
 def classify_batch(items: list[dict]) -> dict:
+    try:
+        return _classify(items)
+    except Exception as e:
+        print(f"  batch FAIL {e}", file=sys.stderr); return {}
+
+
+def _classify(items: list[dict]) -> dict:
     from anthropic import Anthropic
     client = Anthropic()
     lines = [f"{x['code']} | {x['name']} | {x.get('sector', '')} | {x.get('products', '')}" for x in items]
@@ -71,7 +78,7 @@ def classify_batch(items: list[dict]) -> dict:
     out = {}
     for attempt in range(2):
         resp = client.messages.create(model=MODEL, max_tokens=4000, system=SYSTEM, messages=[{"role": "user", "content": user}])
-        j = parse_json(resp.content[0].text)
+        j = parse_json("".join(b.text for b in resp.content if getattr(b, "type", "") == "text"))
         if isinstance(j, dict):
             for code, pair in j.items():
                 if isinstance(pair, list) and len(pair) == 2 and (pair[0], pair[1]) in VALID:

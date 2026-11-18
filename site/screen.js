@@ -16,7 +16,7 @@
                del(k) { try { localStorage.removeItem(k); } catch {} } };
 
   let listing = [], base = {}, dirty = ls.get(LS_DIRTY, {});
-  let sortKey = 'cls', sortDir = 1, view = [], page = 1, size = +ls.get(LS_SIZE, 10) || 10;
+  let taxonomy = {}, fillL2 = () => {}, sortKey = 'cls', sortDir = 1, view = [], page = 1, size = +ls.get(LS_SIZE, 10) || 10;
 
   const entry = code => dirty[code] ?? base[code] ?? null;
   const clsOf = s => { const e = entry(s.code); return e && 'c' in e ? e.c : (s.etf ? 'P' : ''); };
@@ -30,14 +30,26 @@
 
   /* ---------- 데이터 ---------- */
   async function load() {
-    const [l, b] = await Promise.all([
+    const [l, sm, b] = await Promise.all([
       fetch(`data/listing.json?v=${v}`).then(r => r.ok ? r.json() : Promise.reject(r.status)),
+      fetch(`data/sector_map.json?v=${v}`).then(r => r.ok ? r.json() : { items: {}, taxonomy: {} }).catch(() => ({ items: {}, taxonomy: {} })),
       (token() ? remoteRead().then(r => ({ items: r.items })) : Promise.reject()).catch(() =>
         fetch(`data/screen.json?v=${v}`).then(r => r.ok ? r.json() : { items: {} }).catch(() => ({ items: {} }))),
     ]);
     listing = l.items || []; base = b.items || {};
-    const secs = {}; for (const s of listing) if (s.sector) secs[s.sector] = (secs[s.sector] || 0) + 1;
-    $('sec').insertAdjacentHTML('beforeend', Object.keys(secs).sort((a, b) => a.localeCompare(b, 'ko')).map(k => `<option value="${esc(k)}">${esc(k)} (${secs[k]})</option>`).join(''));
+    taxonomy = sm.taxonomy || {}; const map = sm.items || {};
+    for (const s of listing) { const m = map[s.code]; s.l1 = m?.l1 || (s.etf ? s.market : ''); s.l2 = m?.l2 || (s.etf ? s.market : ''); }
+    const c1 = {}, c2 = {};
+    for (const s of listing) { if (s.l1) c1[s.l1] = (c1[s.l1] || 0) + 1; if (s.l2) c2[s.l1 + '|' + s.l2] = (c2[s.l1 + '|' + s.l2] || 0) + 1; }
+    const l1s = [...Object.keys(taxonomy), ...Object.keys(c1).filter(k => !taxonomy[k])];
+    $('l1').insertAdjacentHTML('beforeend', l1s.filter(k => c1[k]).map(k => `<option value="${esc(k)}">${esc(k)} (${c1[k]})</option>`).join(''));
+    fillL2 = () => {
+      const l1 = $('l1').value, cur = $('l2').value;
+      const l2s = l1 ? (taxonomy[l1] || [...new Set(listing.filter(s => s.l1 === l1).map(s => s.l2))]) : [];
+      $('l2').innerHTML = '<option value="">전체 산업(중)</option>' + l2s.filter(k => c2[l1 + '|' + k]).map(k => `<option value="${esc(k)}">${esc(k)} (${c2[l1 + '|' + k]})</option>`).join('');
+      $('l2').disabled = !l1; if (l2s.includes(cur)) $('l2').value = cur;
+    };
+    fillL2();
     const upd = l.updatedAt ? ` · 목록 ${l.updatedAt.slice(0, 10)}` : '';
     $('stats').dataset.upd = upd;
     apply();
@@ -45,20 +57,21 @@
 
   /* ---------- 필터·정렬·렌더 ---------- */
   function apply() {
-    const q = $('q').value.trim().toLowerCase(), mk = $('mk').value, cf = $('cf').value, sec = $('sec').value, showP = cf === 'P' || $('showp').checked;
+    const q = $('q').value.trim().toLowerCase(), mk = $('mk').value, cf = $('cf').value, l1 = $('l1').value, l2 = $('l2').value, showP = cf === 'P' || $('showp').checked;
     view = listing.filter(s => {
-      if (sec && s.sector !== sec) return false;
+      if (l1 && s.l1 !== l1) return false;
+      if (l2 && s.l2 !== l2) return false;
       if (!showP && clsOf(s) === 'P') return false;   // P(Pass)는 기본 숨김
       if (mk === 'ETF' ? !s.etf : mk ? s.market !== mk : false) return false;
       if (cf === '_none' ? clsOf(s) !== '' : cf === '_memo' ? !memoOf(s) : cf ? clsOf(s) !== cf : false) return false;
-      if (q && !(s.name.toLowerCase().includes(q) || s.code.includes(q) || (s.sector || '').toLowerCase().includes(q))) return false;
+      if (q && !(s.name.toLowerCase().includes(q) || s.code.includes(q) || (s.sector || '').toLowerCase().includes(q) || (s.l1 || '').toLowerCase().includes(q) || (s.l2 || '').toLowerCase().includes(q))) return false;
       return true;
     });
     const col = (a, b) => a.localeCompare(b, 'ko');
     view.sort((a, b) => {
       let d = 0;
       if (sortKey === 'cls') d = rank(a) - rank(b);
-      else if (sortKey === 'sector') d = col(a.sector || '힣', b.sector || '힣');
+      else if (sortKey === 'sector') d = col((a.l1 || '힣') + (a.l2 || ''), (b.l1 || '힣') + (b.l2 || ''));
       else d = col(a.name, b.name);
       return (d || col(a.name, b.name)) * (d ? sortDir : 1);
     });
@@ -74,7 +87,7 @@
     return `<tr data-code="${s.code}" class="c-${c || 'none'}${d}">
       <td class="sc-name"><a class="lnk" href="https://m.stock.naver.com/domestic/stock/${s.code}/total" target="_blank" rel="noopener">${esc(s.name)}</a>
         <div class="sc-meta">${s.code} · ${esc(s.market)}${s.products ? ' · ' + esc(s.products) : ''}</div></td>
-      <td class="sc-sector">${esc(s.sector || '—')}</td>
+      <td class="sc-sector" title="${esc(s.sector || '')}">${s.l1 ? `<span class="l1">${esc(s.l1)}</span> <span class="l2">${esc(s.l2)}</span>` : `<span class="l2 ksic">${esc(s.sector || '—')}</span>`}</td>
       <td class="sc-cls"><select class="cls" data-code="${s.code}">
         <option value="">—</option>${CLASSES.map(x => `<option value="${x}"${x === c ? ' selected' : ''}>${x}</option>`).join('')}
       </select></td>
@@ -144,7 +157,7 @@
     const nx = e.target.closest('tr').nextElementSibling?.querySelector('.memo');
     if (nx) nx.focus(); else if (page < pages()) { goto(page + 1); $('rows').querySelector('.memo')?.focus(); }
   });
-  ['q', 'mk', 'sec', 'cf', 'showp'].forEach(id => $(id).addEventListener('input', () => { page = 1; apply(); }));
+  ['q', 'mk', 'l1', 'l2', 'cf', 'showp'].forEach(id => $(id).addEventListener('input', () => { if (id === 'l1') fillL2(); page = 1; apply(); }));
   document.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
     if (sortKey === th.dataset.k) sortDir = -sortDir; else { sortKey = th.dataset.k; sortDir = 1; }
     apply();

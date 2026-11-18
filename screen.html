@@ -22,7 +22,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="site/img/icon-192.png?v=2">
 <link rel="apple-touch-icon" sizes="180x180" href="site/img/icon-180.png?v=2">
 <meta name="theme-color" content="#000000">
-<link rel="stylesheet" href="site/style.css?v=202611181700">
+<link rel="stylesheet" href="site/style.css?v=202611181730">
 </head>
 <body>
 <nav class="nav">
@@ -38,14 +38,15 @@
 <main class="wrap wide">
   <h1>종목 스크린</h1>
   <div class="sc-toolbar">
-    <input id="q" class="sc-input" type="search" placeholder="종목명 · 코드 · 업종 검색" autocomplete="off">
+    <input id="q" class="sc-input" type="search" placeholder="종목명 · 코드 · 산업 검색" autocomplete="off">
     <select id="mk" class="sc-select">
       <option value="">전체 시장</option>
       <option value="KOSPI">코스피</option>
       <option value="KOSDAQ">코스닥</option>
       <option value="ETF">ETF/ETN</option>
     </select>
-    <select id="sec" class="sc-select"><option value="">전체 업종</option></select>
+    <select id="l1" class="sc-select"><option value="">전체 산업(대)</option></select>
+    <select id="l2" class="sc-select" disabled><option value="">전체 산업(중)</option></select>
     <select id="cf" class="sc-select">
       <option value="">전체 클래스</option>
       <option value="_none">미분류</option>
@@ -74,7 +75,7 @@
     <table class="sc-table">
       <thead><tr>
         <th data-k="name" class="sortable">종목</th>
-        <th data-k="sector" class="sortable">업종</th>
+        <th data-k="sector" class="sortable">산업 (대 · 중)</th>
         <th data-k="cls" class="sortable sc-cls-h">클래스</th>
         <th>메모</th>
       </tr></thead>
@@ -84,6 +85,6 @@
   <div class="sc-pager"></div>
   <div class="footer">종목 목록: KRX KIND 상장법인목록 · 네이버 금융 ETF/ETN 목록 (주 1회 갱신). 정보 제공 목적이며 투자 권유가 아닙니다.</div>
 </main>
-<script src="site/screen.js?v=202611181650"></script>
+<script src="site/screen.js?v=202611181730"></script>
 </body>
 </html>
