@@ -1,0 +1,35 @@
+name: Listing (전체 상장종목 목록)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 22 * * 0"   # 월요일 07:00 KST 주 1회
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  listing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Collect listing
+        run: python scripts/collect_listing.py
+      - name: Commit
+        run: |
+          git config user.name "akme-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/listing.json
+          git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Seoul date +%Y-%m-%d) listing"
+          git pull --rebase origin main
+          git push
