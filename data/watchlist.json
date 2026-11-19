@@ -97,7 +97,8 @@
       "ticker": "031980",
       "name": "브이엠",
       "market": "KOSDAQ",
-      "sector": "반도체장비"
+      "sector": "반도체장비",
+      "dart_corp_code": "00208444"
     }
   ],
   "us": [
