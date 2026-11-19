@@ -27,6 +27,7 @@ def parse(md_path: Path) -> dict | None:
         "period": meta.get("period", ""),
         "published": meta.get("published", ""),
         "source_type": meta.get("source_type", ""),
+        "kind": meta.get("kind", "earnings"),
         "title": title,
         "summary": summary,
     }

@@ -1,0 +1,62 @@
+name: Deep analysis (기업 분석)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: "관심종목 티커 (예: 031980)"
+        required: true
+      model:
+        description: "모델 (기본 claude-opus-5-5)"
+        required: false
+        default: "claude-opus-5-5"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Resolve DART corp codes
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: python scripts/resolve_corp_codes.py
+      - name: Prices & quarterly financials
+        continue-on-error: true
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: |
+          python scripts/collect_prices.py
+          python scripts/dart_financials.py
+      - name: Deep analysis
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/deep_analysis.py --ticker "${{ inputs.ticker }}" --model "${{ inputs.model }}"
+      - name: Build report index
+        run: python scripts/build_index.py
+      - name: Telegram
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python scripts/notify.py --reports
+      - name: Commit
+        run: |
+          git config user.name "akme-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "analysis: ${{ inputs.ticker }} $(TZ=Asia/Seoul date +%Y-%m-%d)"
+          git pull --rebase origin main
+          git push

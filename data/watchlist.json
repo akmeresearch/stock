@@ -92,6 +92,12 @@
       "market": "KOSPI",
       "sector": "전력기기",
       "dart_corp_code": "01205851"
+    },
+    {
+      "ticker": "031980",
+      "name": "브이엠",
+      "market": "KOSDAQ",
+      "sector": "반도체장비"
     }
   ],
   "us": [

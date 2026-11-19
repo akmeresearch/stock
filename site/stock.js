@@ -125,7 +125,14 @@ function drawFin(f) {
   $('#fin-note').textContent = USD ? `Yahoo Finance 분기 손익계산서 · 회계분기 종료일 기준 달력 분기 라벨 · 갱신 ${kst(f.updatedAt)}` : `DART 전체 재무제표(연결 CFS 우선) · 3개월 손익 · Q4는 연간−3분기누적 역산 · 갱신 ${kst(f.updatedAt)}`;
 }
 
-function drawReports(list) {
+function drawReports(all) {
+  const an = all.filter(r => r.kind === 'analysis'), list = all.filter(r => r.kind !== 'analysis');
+  if (an.length) {
+    $('#sec-analysis').hidden = false;
+    $('#analysis').innerHTML = an.map(r => `<a class="card" href="report.html?f=${encodeURIComponent(r.file)}">
+      <div class="meta">${r.published} · ${r.period}<span class="badge">심층 분석</span></div>
+      <div class="title">${r.title}</div><div class="summary">${r.summary}</div></a>`).join('');
+  }
   const el = $('#reports');
   if (!list.length) { el.innerHTML = `<div class="empty">${USD ? '미국 종목 리포트는 아직 지원하지 않습니다 (SEC 공시 연동 예정).' : '아직 이 종목의 리포트가 없습니다. 실적 공시가 나오면 자동으로 생성됩니다.'}</div>`; return; }
   el.innerHTML = list.map(r => `<a class="card" href="report.html?f=${encodeURIComponent(r.file)}">
