@@ -15,6 +15,8 @@ INDICATORS = [
     ("nasdaq", ".IXIC",    "index",    "index",          "^IXIC", "나스닥",         "pt",  2),
     ("sp500",  ".INX",     "index",    "index",          "^GSPC", "S&P 500",        "pt",  2),
     ("dow",    ".DJI",     "index",    "index",          "^DJI",  "다우",           "pt",  2),
+    ("nikkei", ".N225",    "index",    "index",          "^N225", "니케이 225",     "pt",  2),
+    ("taiex",  ".TWII",    "index",    "index",          "^TWII", "대만 가권",      "pt",  2),
     ("vix",    ".VIX",     "index",    "index",          "^VIX",  "VIX",            "pt",  2),
     ("wti",    "CLcv1",    "energy",   "futures",        "CL=F",  "WTI",            "$",   2),
     ("gold",   "GCcv1",    "metals",   "futures",        "GC=F",  "금",             "$",   1),
