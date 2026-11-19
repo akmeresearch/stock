@@ -101,7 +101,12 @@
     "acc": null,
     "prev_year_q": null
    }
+  },
+  "2026Q4": {
+   "fs_div": "CFS",
+   "unit": "USD",
+   "period_end": "2026-10-31"
   }
  },
- "updatedAt": "2026-11-19T03:16:46Z"
+ "updatedAt": "2026-11-19T04:25:48Z"
 }
