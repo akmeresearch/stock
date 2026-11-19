@@ -94,11 +94,10 @@
       "dart_corp_code": "01205851"
     },
     {
-      "ticker": "031980",
+      "ticker": "089970",
       "name": "브이엠",
       "market": "KOSDAQ",
-      "sector": "반도체장비",
-      "dart_corp_code": "00208444"
+      "sector": "반도체장비"
     }
   ],
   "us": [

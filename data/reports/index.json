@@ -1,16 +1,5 @@
 [
   {
-    "file": "031980_analysis_202611.md",
-    "ticker": "031980",
-    "name": "브이엠",
-    "period": "기업분석 2026-11",
-    "published": "2026-11-19",
-    "source_type": "auto",
-    "kind": "analysis",
-    "title": "피에스케이홀딩스(031980) 기업 분석 · 2026-11",
-    "summary": "이 회사는 반도체 후공정(패키징)용 Descum 장비와, 미국 자회사 SEMIgear의 Fluxless Reflow 장비를 고객 주문에 맞춰 만들어 파는 회사입니다. 순이익의 일부는 관계사 피에스케이㈜ 지분 32%에서 나옵니다."
-  },
-  {
     "file": "AMD_2026Q3.md",
     "ticker": "AMD",
     "name": "AMD",

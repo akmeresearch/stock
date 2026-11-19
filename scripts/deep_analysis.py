@@ -120,8 +120,12 @@ def section(text: str, start_pat: str, end_pat: str, min_len: int = 3000, limit:
     return best[:limit]
 
 
-def windows(text: str, pats: list[str], span: int = 5000, max_windows: int = 4) -> str:
-    idx = sorted({m.start() for p in pats for m in re.finditer(p, text)})
+def windows(text: str, pats: list[str], span: int = 5000, max_windows: int = 4, last: bool = False) -> str:
+    """패턴 주변 창. last=True 면 패턴별 마지막 출현(목차가 아닌 본문)만 쓴다."""
+    if last:
+        idx = sorted({ms[-1].start() for p in pats if (ms := list(re.finditer(p, text)))})
+    else:
+        idx = sorted({m.start() for p in pats for m in re.finditer(p, text)})
     chunks, last = [], -1
     for i in idx:
         if i < last:
@@ -142,7 +146,7 @@ def report_pack(r: dict, key: str, full: bool) -> str:
     if notes:
         parts.append("--- 재무제표 주석: 부문·지역·고객 ---\n" + notes)
     if full:
-        corp = windows(text, [r"최대주주\s*및\s*(그\s*)?특수관계인의\s*주식소유", r"직원\s*등의\s*현황", r"주요\s*종속회사", r"연결대상\s*종속회사", r"배당에\s*관한\s*사항"], 3500, 5)
+        corp = windows(text, [r"최대주주\s*및\s*(그\s*)?특수관계인의\s*주식소유", r"직원\s*등의\s*현황", r"주요\s*종속회사", r"연결대상\s*종속회사", r"배당에\s*관한\s*사항", r"자기주식\s*취득\s*및\s*처분", r"소액주주"], 4000, 7, last=True)
         if corp:
             parts.append("--- 지배구조·종속회사·직원·배당 ---\n" + corp)
         mda = section(text, r"경영진단\s*및\s*분석의견|이사의\s*경영진단", r"IV\.|감사인의\s*감사의견", min_len=2000, limit=30_000)
