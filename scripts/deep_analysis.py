@@ -255,7 +255,11 @@ def call_claude(system: str, user: str, model: str) -> tuple[str, dict]:
     messages = [{"role": "user", "content": user}]
     body, meta = "", {"stop": "", "in": 0, "out": 0, "model": model}
     for _ in range(4):
-        resp = client.messages.create(model=model, max_tokens=32000, system=system, messages=messages)
+        # 긴 출력은 SDK가 스트리밍을 요구한다
+        with client.messages.stream(model=model, max_tokens=32000, system=system, messages=messages) as stream:
+            for _ in stream.text_stream:
+                pass
+            resp = stream.get_final_message()
         chunk = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
         body += chunk
         meta["stop"] = resp.stop_reason; meta["in"] += resp.usage.input_tokens; meta["out"] += resp.usage.output_tokens
