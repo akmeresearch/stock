@@ -73,7 +73,7 @@ def fetch_quarter(corp_code: str, year: int, q: str, api_key: str) -> dict | Non
     return None
 
 
-def collect_company(ticker: str, corp_code: str, api_key: str, n_quarters: int = 12) -> dict:
+def collect_company(ticker: str, corp_code: str, api_key: str, n_quarters: int = 13) -> dict:
     from concurrent.futures import ThreadPoolExecutor
     path = FIN_DIR / f"{ticker}.json"
     data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"ticker": ticker, "quarters": {}}

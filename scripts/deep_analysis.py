@@ -216,7 +216,7 @@ def disclosures(corp: str, key: str) -> str:
     rows.sort(key=lambda r: r["rcept_dt"], reverse=True)
     out = [f"주요 공시 목록 (최근 3년, {len(rows)}건)"] + [f"- {r['rcept_dt']} {r['report_nm']}" for r in rows[:40]]
     detail = []
-    for r in [r for r in rows if re.search(r"공급계약|신규시설투자|유상증자", r["report_nm"])][:10]:
+    for r in [r for r in rows if re.search(r"공급계약|신규시설투자|유상증자", r["report_nm"])][:20]:
         try:
             t = fetch_full_text(r["rcept_no"], key)
             i = max(t.find("계약금액"), t.find("투자금액"), t.find("자금조달"), 0)
