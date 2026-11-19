@@ -1,5 +1,16 @@
 [
   {
+    "file": "089970_analysis_202611.md",
+    "ticker": "089970",
+    "name": "브이엠",
+    "period": "기업분석 2026-11",
+    "published": "2026-11-19",
+    "source_type": "auto",
+    "kind": "analysis",
+    "title": "브이엠 기업 분석 · 2026-11",
+    "summary": "브이엠은 300mm Poly·Metal 건식 식각장비를 SK하이닉스 그룹에 발주(PO) 단위로 납품하는 회사입니다. 2026년 3분기 누적 매출의 99.99%가 상위 2개 고객(A 90.3%, B 9.7%)에서 나왔습니다."
+  },
+  {
     "file": "AMD_2026Q3.md",
     "ticker": "AMD",
     "name": "AMD",
