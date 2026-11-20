@@ -48,37 +48,51 @@ def article_core(text: str) -> str:
     return text[i:].strip()
 
 
-def trendforce_links(days: int) -> list[tuple[str, str]]:
+def trendforce_links(days: int) -> list[tuple[str, str, str]]:
+    """(url, date, title) — 보도자료 목록 페이지(5건/페이지)를 기간이 찰 때까지 넘긴다."""
     links = {}
-    for kw in ("DRAM", "NAND", "HBM", "SSD", "memory", "Micron", "hynix"):
-        for page in (1, 2):
-            url = f"https://www.trendforce.com/presscenter/news?keyword={kw}&page={page}"
-            try:
-                t = requests.get(url, headers=UA, timeout=30).text
-            except Exception as e:
-                print(f"  {url}: {e}", file=sys.stderr); continue
-            for m in re.finditer(r"href=\"((?:https?://www\.trendforce\.com)?/presscenter/news/(\d{8})-\d+\.html)\"", t):
-                u = m.group(1) if m.group(1).startswith("http") else "https://www.trendforce.com" + m.group(1)
-                d = m.group(2); day = f"{d[:4]}-{d[4:6]}-{d[6:]}"
-                if (date.today() - date.fromisoformat(day)).days <= days:
-                    links[u] = day
-    print(f"  trendforce press links: {len(links)}")
-    return sorted(links.items(), key=lambda x: x[1], reverse=True)
+    for page in range(1, 40):
+        url = f"https://www.trendforce.com/presscenter/news?page={page}"
+        try:
+            t = requests.get(url, headers=UA, timeout=30).text
+        except Exception as e:
+            print(f"  {url}: {e}", file=sys.stderr); break
+        found = re.findall(r"<a[^>]+href=\"((?:https?://www\.trendforce\.com)?/presscenter/news/(\d{8})-\d+\.html)\"[^>]*>(.*?)</a>", t, re.S)
+        if not found:
+            break
+        oldest = None
+        for href, d, inner in found:
+            u = href if href.startswith("http") else "https://www.trendforce.com" + href
+            day = f"{d[:4]}-{d[4:6]}-{d[6:]}"
+            title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", inner)).strip()
+            if title and (u not in links or len(title) > len(links[u][1])):
+                links[u] = (day, title)
+            elif u not in links:
+                links[u] = (day, "")
+            oldest = min(oldest or day, day)
+        if oldest and (date.today() - date.fromisoformat(oldest)).days > days:
+            break
+    rows = [(u, d, ti) for u, (d, ti) in links.items() if (date.today() - date.fromisoformat(d)).days <= days]
+    print(f"  trendforce press links: {len(rows)}")
+    return sorted(rows, key=lambda x: x[1], reverse=True)
 
 
 def fetch_trendforce(cache: dict, days: int):
-    for u, day in trendforce_links(days):
+    for u, day, title in trendforce_links(days):
         if u in cache:
+            if title and cache[u].get("title") in ("", "Press Center"):
+                cache[u]["title"] = title
             continue
         try:
             html = requests.get(u, headers=UA, timeout=30).text
         except Exception as e:
             print(f"  {u}: {e}", file=sys.stderr); continue
-        title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", (re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S) or re.search(r"<title>(.*?)</title>", html, re.S)).group(1))).strip() if re.search(r"<h1|<title", html) else u
         text = article_core(html_text(html))[:9000]
-        if not KW.search(title + text[:500]):
+        if not title:
+            title = text.split("\n", 1)[0][:160]
+        if not KW.search(title + text[:600]):
             continue
-        cache[u] = {"source": "TrendForce", "date": day, "title": title.replace(" | TrendForce", ""), "text": text}
+        cache[u] = {"source": "TrendForce", "date": day, "title": title, "text": text}
         print(f"  TF {day} {title[:70]}")
 
 

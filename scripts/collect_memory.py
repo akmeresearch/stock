@@ -142,6 +142,37 @@ def collect_today(d: dict) -> int:
 
 # ------------------------------------------------------------------ 주간 기사 백필
 SEED = [  # 검색으로 확인한 주간 기사 (목록 페이지를 못 읽을 때의 시드)
+    "https://www.trendforce.com/news/2025/03/19/insights-memory-spot-price-update-ddr4-ddr3-prices-rise-amid-strong-ddr5-rebound-led-by-sk-hynix/",
+    "https://www.trendforce.com/news/2025/06/11/insights-memory-spot-price-update-ddr4-and-ddr5-chips-hit-price-parity-in-early-june-amid-soaring-hikes/",
+    "https://www.trendforce.com/news/2025/07/16/insights-memory-spot-price-update-prices-slightly-cool-off-after-recent-surge-with-ddr4-leading-the-drop",
+    "https://www.trendforce.com/news/2025/08/13/insights-memory-spot-price-update-ddr4-price-surge-slows-amid-samsung-eol-delay-rumors/",
+    "https://www.trendforce.com/news/2025/09/03/insights-memory-spot-price-update-ddr4-prices-outpace-ddr5-as-memory-giants-eol-impact-lingers/",
+    "https://www.trendforce.com/news/2025/09/10/insights-memory-spot-price-update-sandisks-10-price-hike-meets-demand-side-resistance/",
+    "https://www.trendforce.com/news/2025/09/17/insights-memory-spot-price-update-ddr4-spot-prices-surge-amid-tight-supply-buyers-struggle-to-keep-pace/",
+    "https://www.trendforce.com/news/2025/10/15/insights-memory-spot-price-update-dram-module-sellers-mostly-halt-quotes-as-mainstream-ddr4-soars-7-21/",
+    "https://www.trendforce.com/news/2025/10/22/insights-memory-spot-price-update-ddr4-ddr5-trading-surges-as-buyers-hedge-price-risks-mainstream-ddr4-up-9/",
+    "https://www.trendforce.com/news/2025/11/05/insights-memory-spot-price-update-dram-buyers-rush-in-as-ddr5-spot-prices-jump-30-amid-tight-supply/",
+    "https://www.trendforce.com/news/2025/11/12/insights-memory-spot-price-update-dram-chip-prices-surpass-module-prices-signaling-imminent-surge/",
+    "https://www.trendforce.com/news/2025/11/19/insights-memory-spot-price-update-ddr5-prices-up-307-since-september-as-module-costs-poised-to-surge/",
+    "https://www.trendforce.com/news/2025/12/03/insights-memory-spot-price-update-ddr4-stays-above-ddr5-as-spot-prices-show-no-sign-of-letup/",
+    "https://www.trendforce.com/news/2025/12/10/insights-memory-spot-price-update-ddr4-rally-strengthens-on-16gb-gains-ddr5-ddr3-see-mild-pullbacks/",
+    "https://www.trendforce.com/news/2025/12/24/insights-memory-spot-price-update-kingston-leads-dram-price-surge-as-ddr4-ddr5-and-modules-hold-strong/",
+    "https://www.trendforce.com/news/2025/12/31/insights-memory-spot-price-update-ddr4-spot-prices-climb-as-samsung-holds-eol-line",
+    "https://www.trendforce.com/news/2026/01/14/insights-memory-spot-price-update-dram-surges-as-sellers-hold-back-inventory-mainstream-ddr4-up-nearly-10/",
+    "https://www.trendforce.com/news/2026/01/28/insights-memory-spot-price-update-ddr4ddr5-hit-highs-buyers-hesitant-ddr3-sees-uptick/",
+    "https://www.trendforce.com/news/2026/02/04/insights-memory-spot-price-update-dram-stalls-ahead-of-late-feb-contract-price-settlements/",
+    "https://www.trendforce.com/news/2026/03/04/insights-memory-spot-price-update-dram-spots-top-contracts-sentiment-cautious-ahead-of-q2-negotiations/",
+    "https://www.trendforce.com/news/2026/03/25/insights-memory-spot-price-update-dram-spot-momentum-constrained-as-march-contracts-hold-ddr4-weakest/",
+    "https://www.trendforce.com/news/2026/04/01/insights-memory-spot-price-update-ddr3-strength-contrasts-weak-ddr4-and-ddr5-amid-high-prices-and-soft-demand/",
+    "https://www.trendforce.com/news/2026/04/08/insights-memory-spot-price-update-dram-extends-gradual-downtrend-on-contained-selling-pressure-ddr4-drops-1-18/",
+    "https://www.trendforce.com/news/2026/04/15/insights-memory-spot-price-update-dram-spot-sellers-hold-firm-ahead-of-mid-april-pricing-ddr4-edges-lower-0-48/",
+    "https://www.trendforce.com/news/2026/04/29/insights-memory-spot-price-update-ddr5-sees-sporadic-buying-interest-ddr4-price-cuts-fail-to-revive-demand/",
+    "https://www.trendforce.com/news/2026/05/27/insights-memory-spot-price-update-ddr5-spot-price-gains-narrow-amid-sluggish-trading-ddr4-rebounds/",
+    "https://www.trendforce.com/news/2026/07/22/insights-memory-spot-price-update-dram-spot-market-edges-higher-as-branded-ddr4-demand-supports-prices/",
+    "https://www.trendforce.com/news/2026/09/23/insights-memory-spot-price-update-dram-spot-prices-hold-cautious-tone-ddr4-2gx8-drops-3-6/",
+    "https://www.trendforce.com/news/2026/09/30/insights-memory-spot-price-update-dram-market-quiet-amid-holidays-nand-buying-stays-weak/",
+    "https://www.trendforce.com/news/2026/11/04/insights-memory-spot-price-update-mainstream-ddr4-prices-dip-0-09-as-spot-premium-keeps-buyers-on-sidelines/",
+    "https://www.trendforce.com/news/2026/11/18/insights-memory-spot-price-update-nand-spot-contract-price-gap-exceeds-20-amid-weak-demand/",
     "https://www.trendforce.com/news/2026/06/03/insights-memory-spot-price-update-ddr4-and-ddr5-extend-gains-though-higher-quotes-temper-procurement-demand/",
     "https://www.trendforce.com/news/2026/06/10/insights-memory-spot-price-update-ddr5-spot-momentum-continues-as-ddr4-tightness-spills-over-to-ddr3/",
     "https://www.trendforce.com/news/2026/06/17/insights-memory-spot-price-update-ddr3-strengthens-while-ddr4-faces-constraints-and-spec-downgrading",
@@ -156,21 +187,19 @@ SEED = [  # 검색으로 확인한 주간 기사 (목록 페이지를 못 읽을
 
 
 def weekly_article_urls() -> list[str]:
+    """시드 + 최근 뉴스 목록(/news/page/N, 페이지당 6건)에서 주간 Insights 기사 URL."""
     urls = set(SEED)
-    for kw in ("Memory+Spot+Price+Update", "spot+price+update"):
-        for page in range(1, 8):
-            for base in (f"https://www.trendforce.com/news?keyword={kw}&page={page}", f"https://www.trendforce.com/news/page/{page}?keyword={kw}"):
-                try:
-                    t = requests.get(base, headers=UA, timeout=30).text
-                except Exception:
-                    continue
-                found = set(re.findall(r"https?://www\.trendforce\.com/news/20\d\d/\d\d/\d\d/insights-memory-spot-price-update[^\"'\s<]*", t))
-                found |= {"https://www.trendforce.com" + u for u in re.findall(r"\"(/news/20\d\d/\d\d/\d\d/insights-memory-spot-price-update[^\"]*)\"", t)}
-                if not found:
-                    break
-                before = len(urls); urls |= found
-                if len(urls) == before:
-                    break
+    for page in range(1, 60):
+        try:
+            t = requests.get(f"https://www.trendforce.com/news/page/{page}", headers=UA, timeout=30).text
+        except Exception:
+            break
+        found = set(re.findall(r"https?://www\.trendforce\.com/news/20\d\d/\d\d/\d\d/insights-memory-spot-price-update[^\"'\s<]*", t))
+        dates = re.findall(r"trendforce\.com/news/(20\d\d/\d\d/\d\d)/", t)
+        urls |= found
+        # 2주 이상 지난 페이지까지 가면 중단 (주간 기사는 시드로 커버)
+        if dates and (date.today() - date.fromisoformat(min(dates).replace("/", "-"))).days > 21:
+            break
     return sorted(urls)
 
 
