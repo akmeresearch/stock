@@ -1,0 +1,53 @@
+name: Memory prices (AI 지표)
+
+on:
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "주간 기사 백필 (true)"
+        required: false
+        default: ""
+      outlook:
+        description: "전망·요약 재생성 (true)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "40 2 * * 1-5"    # 11:40 KST 평일 — TrendForce 11:00 세션 반영
+    - cron: "40 9 * * 1-5"    # 18:40 KST 평일 — 오후 세션
+    - cron: "0 23 * * 0"      # 월요일 08:00 KST — 전망·요약 주 1회
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Collect prices
+        run: |
+          BF="${{ github.event.inputs.backfill }}"
+          python scripts/collect_memory.py ${BF:+--backfill}
+      - name: Outlook (weekly or on demand)
+        if: github.event.inputs.outlook == 'true' || (github.event_name == 'schedule' && github.event.schedule == '0 23 * * 0')
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scripts/memory_outlook.py
+      - name: Commit
+        run: |
+          git config user.name "akme-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Seoul date +%Y-%m-%d\ %H:%M) memory"
+          git pull --rebase origin main
+          git push
