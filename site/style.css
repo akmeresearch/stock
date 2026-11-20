@@ -199,3 +199,31 @@ tr.c-P select.cls, .chip.c-P { background: #ede9fe; border-color: #a78bfa; color
   .sc-table td { padding: 7px 8px; }
   .sc-meta { max-width: 150px; }
 }
+
+/* AI 지표 */
+.ai-related { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-rel { display: inline-flex; align-items: baseline; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-size: 13px; color: var(--text); text-decoration: none; }
+.ai-rel b { font-size: 14px; } .ai-rel small { font-size: 12px; font-weight: 600; }
+a.ai-rel:hover { border-color: var(--accent); text-decoration: none; }
+.ai-ind { cursor: pointer; } .ai-ind:hover { border-color: var(--accent); }
+.ai-ind .title { font-weight: 600; font-size: 15px; }
+.chart-box.tall { height: 380px; }
+.ai-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; }
+.ai-table { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; overflow-x: auto; }
+.ai-table-h { font-size: 13px; font-weight: 700; margin: 2px 0 8px; }
+.ai-table table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ai-table th, .ai-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.ai-table th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.ai-table tr:last-child td { border-bottom: 0; }
+.ai-table td.muted { color: var(--muted); font-size: 12px; }
+.ai-table a { color: var(--accent); }
+#fc-table { margin-top: 12px; grid-template-columns: 1fr; }
+.ai-summary { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 6px 18px; margin-bottom: 12px; }
+.ai-summary h2 { font-size: 17px; margin: 18px 0 8px; border: 0; padding: 0; }
+.ai-points { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+.ai-pt { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 13.5px; }
+.ai-pt ul { margin: 0; padding-left: 18px; } .ai-pt li { margin: 6px 0; }
+.ai-pt .src { color: var(--muted); font-size: 12px; }
+.badge.dir-up { background: #fee2e2; color: #991b1b; } .badge.dir-down { background: #dbeafe; color: #1e40af; } .badge.dir-mixed { background: #f3f4f6; color: #374151; }
+.ai-sources { margin-top: 14px; font-size: 13px; } .ai-sources summary { cursor: pointer; color: var(--muted); }
+.ai-sources ul { padding-left: 18px; } .ai-sources li { margin: 4px 0; }
