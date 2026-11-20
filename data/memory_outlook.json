@@ -2,17 +2,121 @@
  "asOf": "2026-11-20",
  "forecasts": [
   {
+   "market": "DRAM",
+   "segment": "DRAM 전체",
+   "period": "4Q26",
+   "metric": "계약가 QoQ",
+   "text": "범용(conventional) DRAM +10–15%",
+   "low": 10,
+   "high": 15,
+   "source": "TrendForce",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html",
+   "prev": null
+  },
+  {
+   "market": "DRAM",
+   "segment": "PC DRAM",
+   "period": "4Q26",
+   "metric": "계약가 QoQ",
+   "text": "+13–18% (직전 분기 대비 인상폭 둔화)",
+   "low": 13,
+   "high": 18,
+   "source": "TrendForce",
+   "date": "2026-11-11",
+   "url": "https://www.trendforce.com/presscenter/news/20261111-13303.html",
+   "prev": null
+  },
+  {
+   "market": "DRAM",
+   "segment": "서버 DRAM",
+   "period": "4Q26",
+   "metric": "계약가 QoQ",
+   "text": "공급 부족 지속, 일부 공급사는 LTA 가격 조항 탓에 시장 평균보다 낮게 인상",
+   "low": null,
+   "high": null,
+   "source": "TrendForce",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html",
+   "prev": null
+  },
+  {
+   "market": "DRAM",
+   "segment": "모바일 DRAM",
+   "period": "4Q26",
+   "metric": "계약가 QoQ",
+   "text": "상승 지속, 앞선 분기에 큰 폭 반영돼 인상폭 둔화",
+   "low": null,
+   "high": null,
+   "source": "TrendForce",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html",
+   "prev": null
+  },
+  {
+   "market": "DRAM",
+   "segment": "그래픽 DRAM",
+   "period": "4Q26",
+   "metric": "계약가 QoQ",
+   "text": "상승 기조 유지(GDDR6 감산·퇴출, GDDR7 물량 제한)",
+   "low": null,
+   "high": null,
+   "source": "TrendForce",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html",
+   "prev": null
+  },
+  {
+   "market": "DRAM",
+   "segment": "소비자용 DRAM",
+   "period": "4Q26",
+   "metric": "계약가 QoQ",
+   "text": "상승 지속, 속도는 둔화",
+   "low": null,
+   "high": null,
+   "source": "TrendForce",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html",
+   "prev": null
+  },
+  {
+   "market": "DRAM",
+   "segment": "DRAM 전체",
+   "period": "1Q27",
+   "metric": "계약가 QoQ",
+   "text": "DRAM 가격 상승 탄력 강화 전망(스마트폰 리포트 내 언급)",
+   "low": null,
+   "high": null,
+   "source": "TrendForce",
+   "date": "2026-11-06",
+   "url": "https://www.trendforce.com/presscenter/news/20261106-13297.html",
+   "prev": null
+  },
+  {
+   "market": "DRAM",
+   "segment": "PC DRAM",
+   "period": "2027년",
+   "metric": "공급",
+   "text": "AI 수요로 공급사가 PC DRAM 공급 축소를 잠정 계획",
+   "low": null,
+   "high": null,
+   "source": "TrendForce",
+   "date": "2026-11-11",
+   "url": "https://www.trendforce.com/presscenter/news/20261111-13303.html",
+   "prev": null
+  },
+  {
    "market": "NAND",
    "segment": "NAND 전체",
    "period": "4Q26",
    "metric": "계약가 QoQ",
-   "text": "+8–13% (상승폭 하향 조정)",
+   "text": "+8–13% (인상폭 하향 조정)",
    "low": 8,
    "high": 13,
    "source": "TrendForce",
    "date": "2026-11-19",
    "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html",
-   "prev": null
+   "prev": "+15–20% (2026-09-30)"
   },
   {
    "market": "NAND",
@@ -32,7 +136,7 @@
    "segment": "NAND 전체",
    "period": "2Q27",
    "metric": "계약가 QoQ",
-   "text": "전 제품군 하락 사이클 진입 (수치 없음)",
+   "text": "전 제품군 하락 사이클 진입, 연중 분기별 하락폭 확대 가능",
    "low": null,
    "high": null,
    "source": "TrendForce",
@@ -58,7 +162,7 @@
    "segment": "NAND 전체",
    "period": "2027년",
    "metric": "CAPEX YoY",
-   "text": "+26.7% (299억 달러)",
+   "text": "+26.7%, 299억 달러",
    "low": 26.7,
    "high": 26.7,
    "source": "TrendForce",
@@ -67,24 +171,11 @@
    "prev": null
   },
   {
-   "market": "DRAM",
-   "segment": "PC DRAM",
-   "period": "4Q26",
-   "metric": "계약가 QoQ",
-   "text": "+13–18% (직전 분기 대비 상승폭 둔화)",
-   "low": 13,
-   "high": 18,
-   "source": "TrendForce",
-   "date": "2026-11-11",
-   "url": "https://www.trendforce.com/presscenter/news/20261111-13303.html",
-   "prev": null
-  },
-  {
    "market": "NAND",
    "segment": "클라이언트 SSD",
    "period": "4Q26",
    "metric": "계약가 QoQ",
-   "text": "+5% 미만 (직전 분기 대비 뚜렷이 둔화)",
+   "text": "5% 미만 상승 (직전 분기 대비 뚜렷한 둔화)",
    "low": null,
    "high": 5,
    "source": "TrendForce",
@@ -93,105 +184,170 @@
    "prev": null
   },
   {
-   "market": "DRAM",
-   "segment": "DRAM 전체",
-   "period": "1Q27",
+   "market": "NAND",
+   "segment": "eSSD",
+   "period": "4Q26",
    "metric": "계약가 QoQ",
-   "text": "상승 모멘텀 강화 전망 (수치 없음)",
+   "text": "상승폭 확대(NAND 전 품목 중 유일). 9/30 기준이며 11/19 리포트는 중국 CSP 주문 감축이 4Q26 NAND 계약가에 영향을 주기 시작했다고 언급",
    "low": null,
    "high": null,
    "source": "TrendForce",
-   "date": "2026-11-06",
-   "url": "https://www.trendforce.com/presscenter/news/20261106-13297.html",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html",
    "prev": null
   },
   {
-   "market": "DRAM",
-   "segment": "모바일 DRAM",
+   "market": "NAND",
+   "segment": "eSSD",
    "period": "2026년",
-   "metric": "리볼 메모리 스마트폰 침투율",
-   "text": "약 3–4%",
-   "low": 3,
-   "high": 4,
+   "metric": "비트 수요 YoY",
+   "text": "80% 이상 증가",
+   "low": 80,
+   "high": null,
    "source": "TrendForce",
-   "date": "2026-11-06",
-   "url": "https://www.trendforce.com/presscenter/news/20261106-13297.html",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html",
    "prev": null
   },
   {
-   "market": "DRAM",
-   "segment": "모바일 DRAM",
+   "market": "NAND",
+   "segment": "eSSD",
    "period": "2027년",
-   "metric": "리볼 메모리 스마트폰 침투율",
-   "text": "약 7–9%",
-   "low": 7,
-   "high": 9,
+   "metric": "수요",
+   "text": "중국 CSP의 주문 감축이 미국 CSP 추가 수요를 상회",
+   "low": null,
+   "high": null,
    "source": "TrendForce",
-   "date": "2026-11-06",
-   "url": "https://www.trendforce.com/presscenter/news/20261106-13297.html",
+   "date": "2026-11-19",
+   "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html",
+   "prev": null
+  },
+  {
+   "market": "HBM",
+   "segment": "HBM 전체",
+   "period": "2027년",
+   "metric": "ASP YoY",
+   "text": "혼합(blended) ASP +121% (전망 상향)",
+   "low": 121,
+   "high": 121,
+   "source": "TrendForce",
+   "date": "2026-09-29",
+   "url": "https://www.trendforce.com/presscenter/news/20260929-13255.html",
+   "prev": null
+  },
+  {
+   "market": "HBM",
+   "segment": "HBM 전체",
+   "period": "2027년",
+   "metric": "8-Hi Gb당 가격 프리미엄(12-Hi 대비)",
+   "text": "+10–20%",
+   "low": 10,
+   "high": 20,
+   "source": "TrendForce",
+   "date": "2026-09-29",
+   "url": "https://www.trendforce.com/presscenter/news/20260929-13255.html",
+   "prev": null
+  },
+  {
+   "market": "기타",
+   "segment": "NOR Flash 256Mb 이상",
+   "period": "2H26",
+   "metric": "계약가",
+   "text": "+90–110%",
+   "low": 90,
+   "high": 110,
+   "source": "TrendForce",
+   "date": "2026-09-14",
+   "url": "https://www.trendforce.com/presscenter/news/20260914-13235.html",
+   "prev": null
+  },
+  {
+   "market": "기타",
+   "segment": "NOR Flash 128Mb 이하",
+   "period": "4Q26",
+   "metric": "계약가",
+   "text": "+10–20%",
+   "low": 10,
+   "high": 20,
+   "source": "TrendForce",
+   "date": "2026-09-14",
+   "url": "https://www.trendforce.com/presscenter/news/20260914-13235.html",
+   "prev": null
+  },
+  {
+   "market": "기타",
+   "segment": "NOR Flash 전체",
+   "period": "1H26",
+   "metric": "계약가 누적 상승률",
+   "text": "평균 +100–120%",
+   "low": 100,
+   "high": 120,
+   "source": "TrendForce",
+   "date": "2026-09-14",
+   "url": "https://www.trendforce.com/presscenter/news/20260914-13235.html",
    "prev": null
   }
  ],
  "spot_view": [
   {
-   "item": "DDR4 8Gb (1Gx8) 3200",
-   "text": "현물 43.75달러(전일 -0.39%). 반월 계약가 26.0달러(+4.0%)보다 약 68% 높아 현물이 계약가를 웃돈다.",
+   "item": "DDR5 16Gb (2Gx8) 4800/5600 현물",
+   "text": "60.667달러, 전일 대비 0.0%",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
   },
   {
-   "item": "DDR4 16Gb (2Gx8) 3200",
-   "text": "현물 78.625달러(-0.16%). 반월 계약가 52.0달러(+4.0%)보다 약 51% 높다.",
+   "item": "DDR4 16Gb (2Gx8) 3200 현물",
+   "text": "78.625달러(-0.16%). 같은 규격 반월 계약가 52.0달러(+4.0%) 대비 현물이 약 51% 높음(계산)",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
   },
   {
-   "item": "DDR5 16Gb (2Gx8) 4800/5600",
-   "text": "현물 60.667달러로 전일 보합(0.0%). eTT 제품은 30.92달러, 역시 보합.",
+   "item": "DDR4 8Gb (1Gx8) 3200 현물",
+   "text": "43.75달러(-0.39%). 반월 계약가 26.0달러(+4.0%) 대비 현물이 약 68% 높음(계산)",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
   },
   {
    "item": "DDR5 RDIMM 32GB 모듈 현물",
-   "text": "1,950달러로 전일 대비 -3.7%. DDR5 UDIMM 16GB는 245.0달러(+0.69%).",
+   "text": "1,950달러, 전일 대비 -3.7%",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
   },
   {
-   "item": "DDR4 SO-DIMM 반월 계약",
-   "text": "16GB 275.0달러(+1.85%), 8GB 148.0달러(+4.23%). DDR5 8GB SO-DIMM은 133.0달러로 보합.",
+   "item": "DDR4 SO-DIMM 반월 계약가",
+   "text": "16GB 275.0달러(+1.85%), 8GB 148.0달러(+4.23%). DDR5 8GB SO-DIMM은 133.0달러(0.0%)",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
   },
   {
    "item": "NAND 웨이퍼 현물 512Gb TLC",
-   "text": "14.267달러로 전일 대비 -11.67%. 256Gb TLC는 18.142달러(-1.21%), 128Gb TLC는 9.967달러(보합).",
+   "text": "14.267달러, 전일 대비 -11.67%. 256Gb TLC 18.142달러(-1.21%), 128Gb TLC 9.967달러(0.0%). 512Gb가 256Gb보다 낮은 점은 입력 수치 그대로임",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
   },
   {
    "item": "NAND 현물 전반",
-   "text": "유통 채널의 재고 소진 압력으로 최근 현물가가 20% 이상 급락했다.",
+   "text": "유통 채널 재고 소진 압력으로 최근 현물가가 20% 이상 급락 조정",
    "source": "TrendForce",
    "date": "2026-11-19",
    "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
   },
   {
-   "item": "NAND 반월 계약 MLC",
-   "text": "128Gb 30.608달러, 64Gb 23.528달러, 32Gb 18.208달러. 모두 +0.44%.",
+   "item": "NAND 칩 계약·현물 (MLC)",
+   "text": "MLC 128Gb 계약 30.608달러(+0.44%), MLC 64Gb 현물 44.174달러(+0.42%)",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
   },
   {
    "item": "PC OEM SSD 계약 (TLC PCIe Value)",
-   "text": "1TB 321.0달러, 512GB 201.13달러, 256GB 128.38달러. 전일 대비 등락률은 입력에 없다.",
+   "text": "1TB 321.0달러, 512GB 201.13달러, 256GB 128.38달러 (변동률 수집 안 됨)",
    "source": "TrendForce",
    "date": "2026-11-20",
    "url": null
@@ -199,164 +355,183 @@
  ],
  "hbm": [
   {
-   "text": "Rubin Ultra의 HBM 용량이 칩당 1024GB에서 약 200GB로 대폭 하향되어 NVIDIA 로드맵이 바뀌었다고 SemiAnalysis는 설명한다.",
+   "text": "2027년 HBM 혼합 ASP 전망 +121% YoY로 상향. 공급 제약 지속, 고가 HBM4 비중 확대, 2H27 HBM4e 점진 확대가 근거",
+   "source": "TrendForce",
+   "date": "2026-09-29",
+   "url": "https://www.trendforce.com/presscenter/news/20260929-13255.html"
+  },
+  {
+   "text": "GPU·ASIC 업체가 HBM 공급 제한과 시스템 비용 상승 때문에 장치당 HBM 용량 축소를 검토(수요 약화 아님). 2027년 8-Hi 우선 평가, Gb당 가격은 12-Hi보다 10–20% 높을 전망",
+   "source": "TrendForce",
+   "date": "2026-09-29",
+   "url": "https://www.trendforce.com/presscenter/news/20260929-13255.html"
+  },
+  {
+   "text": "HBM과 범용 DRAM이 한정된 선단공정·웨이퍼 캐파를 두고 경쟁하며, 차세대 제품 수율·생산 확대에 시간이 걸려 메모리 공급은 2027년까지 타이트",
+   "source": "TrendForce",
+   "date": "2026-09-29",
+   "url": "https://www.trendforce.com/presscenter/news/20260929-13255.html"
+  },
+  {
+   "text": "Rubin Ultra의 HBM이 칩당 1024GB에서 약 200GB로 하향(despec)됐다고 언급. Engram 같은 모델 구조는 임베딩 테이블을 호스트 DRAM·SSD로 오프로드해 HBM 필요량을 낮추지만 HBM 수요가 사라지는 것은 아님",
    "source": "SemiAnalysis",
    "date": "2026-09-18",
    "url": "https://newsletter.semianalysis.com/p/engrams-embedding-entendre-codesign"
   },
   {
-   "text": "Engram 구조는 같은 품질의 모델에 필요한 HBM 용량을 줄이고, 임베딩 테이블을 호스트 DRAM으로 오프로딩(DeepSeek-V4.1-Flash의 Engram은 약 189GiB)한다. SemiAnalysis는 HBM 수요가 사라지는 것은 아니라고 본다.",
-   "source": "SemiAnalysis",
-   "date": "2026-09-18",
-   "url": "https://newsletter.semianalysis.com/p/engrams-embedding-entendre-codesign"
-  },
-  {
-   "text": "희소 어텐션은 SDPA 단계의 KV 캐시 메모리·대역폭 요구를 줄이지만 전체 메모리 용량 사용량은 줄이지 못한다. HiSparse는 KV 캐시를 HBM에서 호스트 DRAM으로 오프로딩한다.",
+   "text": "희소 어텐션은 SDPA 단계의 메모리 대역폭·사용량만 줄일 뿐 전체 용량 사용은 줄이지 않음(top-k 선택에 전체 컨텍스트가 HBM에 필요). HiSparse는 KV 캐시를 호스트 DRAM으로 오프로드해 처리량을 높임",
    "source": "SemiAnalysis",
    "date": "2026-09-28",
    "url": "https://newsletter.semianalysis.com/p/sparse-savings-persistent-demand-inside-glm53"
   },
   {
-   "text": "HBM은 DDR보다 몇 배 비싸고 공급 제약이 크므로, 수익을 내는 활성 배치 데이터에 쓰는 것이 최선이라고 SemiAnalysis는 본다.",
+   "text": "HBM은 DDR보다 수 배 비싸고 공급 제약이 커서 수익이 나는 활성 배치 데이터에만 쓰는 것이 최적이라는 분석",
    "source": "SemiAnalysis",
    "date": "2026-09-21",
    "url": "https://newsletter.semianalysis.com/p/computation-and-data-movement-for"
   },
   {
-   "text": "Huawei Ascend 950PR은 HiBL 스택 8개(256비트, 핀당 6.4Gbps)로 피크 메모리 대역폭 1.6384TB/s를 내며, 테스트 제품은 HBM 128GiB, 코어 28개다.",
-   "source": "SemiAnalysis",
-   "date": "2026-10-21",
-   "url": "https://newsletter.semianalysis.com/p/huawei-deepseek"
+   "text": "삼성 파운드리는 HBM 베이스 다이 등 신규 선단공정 주문이 2Q26 중 점차 증가",
+   "source": "TrendForce",
+   "date": "2026-09-09",
+   "url": "https://www.trendforce.com/presscenter/news/20260909-13225.html"
   }
  ],
  "drivers": [
   {
-   "text": "중국 CSP가 GPU 부족, 높은 재고, 토큰 가격 경쟁 때문에 2027년 eSSD 주문을 줄였고, 감소폭이 미국 CSP의 추가 수요를 웃돈다.",
-   "direction": "down",
-   "source": "TrendForce",
-   "date": "2026-11-19",
-   "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
-  },
-  {
-   "text": "2027년 NAND 비트 공급은 25–30% 증가하고 CAPEX는 26.7% 늘어난 299억 달러로 전망된다. QLC 비중 확대와 고적층 전환이 비트 출하를 키운다.",
-   "direction": "down",
-   "source": "TrendForce",
-   "date": "2026-11-19",
-   "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
-  },
-  {
-   "text": "미국 CSP가 AI 에이전트·범용 서버 프로젝트를 근거로 2027년 수요 전망을 다시 상향했다.",
+   "text": "주요 9개 CSP의 CapEx가 2026년 9,570억 달러(+106% YoY), 2027년 1.5조 달러 초과(+60%)로 상향. 서버 시스템 가격과 부품 가격 상승, 선급금 요구가 반영됨",
    "direction": "up",
    "source": "TrendForce",
-   "date": "2026-11-19",
-   "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
+   "date": "2026-10-14",
+   "url": "https://www.trendforce.com/presscenter/news/20261014-13269.html"
   },
   {
-   "text": "저가 메모리 재고가 2027년에 소진되면 완제품 가격 상승과 출하 부진이 예상된다. 브랜드들이 BOM 절감을 위해 저장 용량 사양을 낮추면 기기당 평균 용량이 크게 줄어든다.",
-   "direction": "down",
-   "source": "TrendForce",
-   "date": "2026-11-19",
-   "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
-  },
-  {
-   "text": "노트북 출하가 3Q26에 15.8% QoQ 감소하면서 PC OEM의 DRAM 재고 주수가 3Q26부터 늘고 있다. 일부 OEM은 4Q26과 1Q27 구매와 2027년 제품 믹스를 재협상 중이다.",
-   "direction": "down",
-   "source": "TrendForce",
-   "date": "2026-11-11",
-   "url": "https://www.trendforce.com/presscenter/news/20261111-13303.html"
-  },
-  {
-   "text": "AI 수요가 강해 메모리 업체들이 2027년 PC DRAM 공급 축소를 잠정 계획 중이다. 다만 소화해야 할 생산능력 부담이 작아 가격 인상폭을 다소 조절할 여지가 있다.",
+   "text": "AI 서버 출하 2026년 +32.2%, 2027년 약 +36% 전망. 서버 CPU 출하는 2026년 +31%, 2027년 40% 이상 증가하고 CPU:GPU/ASIC 비율이 1:8에서 1:2~1:1로 이동 전망(CPU마다 DDR5 동반)",
    "direction": "up",
    "source": "TrendForce",
-   "date": "2026-11-11",
-   "url": "https://www.trendforce.com/presscenter/news/20261111-13303.html"
+   "date": "2026-10-22",
+   "url": "https://www.trendforce.com/presscenter/news/20261022-13279.html"
   },
   {
-   "text": "클라이언트 SSD는 AI 수요로 생산능력이 잠식되어 공급사가 저용량 제품 가격을 더 크게 올리고 있다. 반면 중국 공급사와 모듈 업체는 주류 용량에서 낮은 인상폭으로 주문을 늘려 전체 인상 효과를 완화한다.",
-   "direction": "mixed",
+   "text": "DRAM 공급사가 선단공정 캐파를 서버용에 우선 배정해 전체 시장이 공급 부족. 2027년 PC DRAM 공급이 줄 수 있고 소비자용은 주요 업체 감산으로 대만 업체 의존도가 높음",
+   "direction": "up",
+   "source": "TrendForce",
+   "date": "2026-09-30",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html"
+  },
+  {
+   "text": "기업용 SSD 수요는 에이전틱 AI의 실시간 검색·캐싱, 벡터DB의 QLC 침투, 중국의 KV 캐시 오프로딩으로 확대. 미국 CSP가 수요 전망을 재상향",
+   "direction": "up",
+   "source": "TrendForce",
+   "date": "2026-09-21",
+   "url": "https://www.trendforce.com/presscenter/news/20260921-13246.html"
+  },
+  {
+   "text": "노트북 출하가 3Q26 -15.8% QoQ, 4Q26에도 한 자릿수 추가 감소 가능. OEM·북미 유통 재고가 늘고 DRAM 재고 주수도 증가, 일부 OEM이 4Q26~1Q27 및 2027년 메모리 조달 계획 조정 중",
+   "direction": "down",
    "source": "TrendForce",
    "date": "2026-11-11",
    "url": "https://www.trendforce.com/presscenter/news/20261111-13303.html"
   },
   {
-   "text": "높은 DRAM 가격으로 저가 스마트폰을 중심으로 리볼 메모리 채택이 늘지만, 전체 LPDDR 비트 소비 비중이 작아 DRAM 계약가 상승 추세를 크게 훼손하지는 않을 전망이다.",
+   "text": "2027년 노트북 출하는 한 자릿수 초중반 감소 전망이나 DRAM·CPU 가격이 높게 유지돼 비용이 전가되면 한 자릿수 후반 감소 가능. 3Q26 기준 900달러 노트북 BOM에서 CPU·DRAM·SSD가 약 68%",
+   "direction": "down",
+   "source": "TrendForce",
+   "date": "2026-10-08",
+   "url": "https://www.trendforce.com/presscenter/news/20261008-13264.html"
+  },
+  {
+   "text": "중국 CSP는 GPU 부족, 높은 재고, 토큰 가격 경쟁 때문에 2027년 기업용 SSD 주문을 줄임. 감소분이 미국 CSP 추가 수요를 초과하며 4Q26 NAND 계약가에도 영향",
+   "direction": "down",
+   "source": "TrendForce",
+   "date": "2026-11-19",
+   "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
+  },
+  {
+   "text": "NAND 공급이 빠르게 늘어남. 2027년 CapEx +26.7%, QLC 침투와 고적층 전환으로 비트 공급 +25–30%. 저가 재고 소진으로 소비자 기기 가격이 오르고 출하와 기기당 용량이 감소",
+   "direction": "down",
+   "source": "TrendForce",
+   "date": "2026-11-19",
+   "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
+  },
+  {
+   "text": "스마트폰 리볼 메모리(재가공 칩) 침투율이 2026년 3–4%에서 2027년 7–9%로 상승 전망이나, LPDRAM 비트 소비 비중은 작아 DRAM 계약가 상승 추세를 크게 흔들지는 않을 것으로 봄",
    "direction": "mixed",
    "source": "TrendForce",
    "date": "2026-11-06",
    "url": "https://www.trendforce.com/presscenter/news/20261106-13297.html"
   },
   {
-   "text": "메모리 가격 급등으로 TV 업체 수익성이 압박받고 있다. 2026년 TV 출하는 1.4% 감소한 1억 9,348만 대로 전망되며, 2027년에도 메모리 가격은 상승 기조라는 것이 TrendForce의 전망이다.",
+   "text": "2026년 스마트폰 생산 전망이 10.5억 대에서 10.7억 대로 상향됐으나 선구매·감산 복원에 따른 일시적 효과. 2027년 메모리 계약가 상승이 이어지면 하방 압력 확대",
    "direction": "mixed",
    "source": "TrendForce",
-   "date": "2026-11-16",
-   "url": "https://www.trendforce.com/presscenter/news/20261116-13306.html"
+   "date": "2026-09-08",
+   "url": "https://www.trendforce.com/presscenter/news/20260908-13222.html"
   },
   {
-   "text": "향후 NAND 전망은 중국 CSP의 재고 감축 속도, 해외 GPU 조달 규제 변화, 소비자 전자 업체의 저사양 메모리 채택 지속 여부, 美 중간선거 이후 AI 데이터센터 정책 방향에 좌우된다.",
+   "text": "NAND 전망 변수는 중국 CSP 재고 소진 속도, 해외 GPU 조달 제한 변화, 2028년까지 소비자 기기의 저사양 메모리 채택 지속 여부, 미국 중간선거 이후 2028년 AI 데이터센터 프로젝트 정책 방향",
    "direction": "mixed",
    "source": "TrendForce",
    "date": "2026-11-19",
    "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
   }
  ],
- "summary_md": "## 메모리 시장 요약\n\n**한 줄 결론**: DRAM 계약가는 4Q26에도 오르지만 상승폭이 둔화되고, NAND는 4Q26 상승폭이 8–13%로 낮아진 뒤 1Q27에 0–5% 하락 전환이 예상된다. 사이클이 꺾이는 구간에 들어선 신호다 (TrendForce 2026-11-19).\n\n**DRAM**: PC DRAM 4Q26 계약가는 13–18% QoQ 상승으로 직전 분기보다 둔화된다. 노트북 출하가 3Q26에 15.8% QoQ 줄어 OEM 재고 주수가 늘고 있다 (TrendForce 2026-11-11). 반면 1Q27에는 DRAM 가격 상승 모멘텀이 더 강해질 것으로 본다 (TrendForce 2026-11-06). 현물은 DDR4 8Gb 43.75달러로 반월 계약 26.0달러보다 높다. DDR5 16Gb 현물은 60.667달러로 보합이고, DDR5 RDIMM 32GB 모듈 현물은 1,950달러로 -3.7%였다 (TrendForce 2026-11-20).\n\n**NAND·SSD**: 중국 CSP의 2027년 eSSD 주문 삭감이 미국 CSP 증가분을 웃돈다. 2027년 비트 공급은 25–30% 늘고 CAPEX는 26.7% 증가한 299억 달러다. 2Q27부터 전 제품군이 하락 사이클에 든다 (TrendForce 2026-11-19). 최근 현물은 20% 이상 급락했고 512Gb TLC 웨이퍼 현물은 14.267달러(-11.67%)다 (TrendForce 2026-11-20). 클라이언트 SSD 4Q26 인상폭은 5% 미만이다 (TrendForce 2026-11-11).\n\n**HBM**: 이번 입력에는 HBM 가격·물량 자료가 없다. Rubin Ultra의 HBM이 1024GB에서 약 200GB로 하향됐다고 SemiAnalysis는 전한다. Engram 같은 구조는 HBM 필요 용량을 줄이고 DRAM 오프로딩을 늘린다 (SemiAnalysis 2026-09-18).\n\n**가격 요인**: 하방은 공급 증설, 중국 CSP 재고, 소비자 기기의 저사양화다. 상방은 미국 CSP의 수요 상향과 2027년 PC DRAM 공급 축소 계획이다.\n\n**한국 투자자 관점**: DRAM은 상승 둔화, NAND는 1Q27 하락 전환 전망으로 사업별 시차가 있다. 확인할 항목은 ① 중국 CSP 재고 소진 속도와 GPU 조달 규제, ② 2027년 PC DRAM 물량·믹스 협상 결과, ③ 중간선거 이후 美 AI 데이터센터 정책, ④ NAND 증설(CAPEX 299억 달러)이 장비·소재 수요에 미치는 영향이다.",
- "updatedAt": "2026-11-20T03:30:40Z",
+ "summary_md": "## 메모리 시장 요약\n(날짜는 모두 2026년)\n\n**한 줄 결론** — NAND는 4Q26 계약가 인상폭이 8–13%로 낮아졌고(기존 15–20%) 1Q27 0–5% 하락, 2Q27부터 전 품목 하락 전망이어서 정점 통과 국면이다(TrendForce 11-19, 09-30). DRAM과 HBM은 2027년까지 공급 부족이 이어진다는 시각이다(TrendForce 09-29).\n\n**DRAM** — 범용 DRAM 4Q26 계약가는 10–15% QoQ(TrendForce 09-30), PC DRAM은 13–18%로 인상폭이 둔화된다(TrendForce 11-11). 서버 DRAM은 공급 부족이 이어지나 일부 공급사는 LTA 조항 때문에 평균보다 덜 오른다(TrendForce 09-30). 현물은 약하다. DDR5 RDIMM 32GB는 1,950달러(-3.7%), DDR4 8Gb 3200은 43.75달러(-0.39%)다(TrendForce 11-20). DDR4 8Gb 반월 계약가는 26.0달러(+4.0%)로, 현물이 약 68% 높다(계산).\n\n**NAND·SSD** — 4Q26 클라이언트 SSD는 5% 미만 상승이다(TrendForce 11-11). 2027년 비트 공급은 25–30%, CapEx는 +26.7%(299억 달러) 늘어난다(TrendForce 11-19). 현물은 최근 20% 이상 조정됐고 512Gb TLC 웨이퍼는 14.267달러(-11.67%)다(TrendForce 11-19, 11-20). eSSD 비트 수요는 2026년 80% 이상 증가하나(TrendForce 09-30), 중국 CSP의 2027년 주문 감축이 미국 증가분을 넘는다(TrendForce 11-19).\n\n**HBM** — 2027년 혼합 ASP는 +121% YoY이고, 8-Hi는 12-Hi보다 Gb당 10–20% 비싸다(TrendForce 09-29). SemiAnalysis는 Rubin Ultra의 HBM이 칩당 1024GB에서 약 200GB로 낮아졌다고 짚으며, 모델 구조가 HBM 필요량을 줄이는 방향으로 진화 중이라고 본다(SemiAnalysis 09-18).\n\n**가격 요인** — 상승 요인은 CSP CapEx로, 2026년 9,570억 달러(+106%), 2027년 1.5조 달러 초과(+60%)다(TrendForce 10-14). 하락 요인은 노트북 3Q26 -15.8% QoQ와 OEM 재고 증가(TrendForce 11-11), 중국 eSSD 주문 감축, NAND 증설이다. 규모가 작은 변수로 리볼 메모리가 있다. 침투율 7–9%(2027)이나 상승 추세를 크게 바꾸지는 않는다고 한다(TrendForce 11-06).\n\n**한국 투자자 관점** — 삼성전자·SK하이닉스는 DRAM·HBM(공급 부족, 2027년 ASP +121%)과 NAND(1Q27부터 하락) 노출 비중에 따라 실적 방향이 갈릴 수 있다. 확인할 지표는 PC·모바일 OEM의 2027년 물량 재협상, 중국 CSP 재고 소진과 GPU 조달 규제 변화, 미국 중간선거 후 AI 데이터센터 정책이다(TrendForce 11-11, 11-19). 마이크론과 소부장은 2027년 NAND CapEx +26.7%가 실제 발주로 이어지는지가 점검 대상이다.",
+ "updatedAt": "2026-11-20T03:43:50Z",
  "model": "claude-sonnet-5-5",
  "sources": [
   {
    "source": "TrendForce",
    "date": "2026-11-19",
-   "title": "Press Center",
+   "title": "NAND Flash Prices Set to Decline in 2027 as Chinese CSP Order Cuts Outweigh North American Demand Growth, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261119-13314.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-18",
-   "title": "Press Center",
+   "title": "Global OLED Monitor Shipments Double YoY in 3Q26 as Rankings Shift Dramatically Among Top Five Brands, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261118-13311.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-17",
-   "title": "Press Center",
+   "title": "SpaceX’s Adoption of Qualcomm 5G Chipsets Could Significantly Reduce the Cost of Deploying Tens of Thousands of Base Stations, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261117-13309.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-16",
-   "title": "Press Center",
+   "title": "Global TV Shipments Decline 3.6% YoY in 3Q26 as Brands Target Premium Mini LED and RGB Mini LED Markets, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261116-13306.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-11",
-   "title": "Press Center",
+   "title": "Mounting Finished-Goods Inventories Prompt Some PC OEMs to Adjust Memory Procurement Plans for 2027, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261111-13303.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-09",
-   "title": "Press Center",
+   "title": "Penguin Solutions to Sell Cree LED to Private Equity Firm, Bringing Renewed Attention to the Lighting LED Supply Chain, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261109-13300.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-06",
-   "title": "Press Center",
+   "title": "Persistently High DRAM Prices Drive Adoption of Reballed Memory, with Smartphone Penetration Expected to Reach 7–9% in 2027, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261106-13297.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-03",
-   "title": "Press Center",
+   "title": "Marvell’s Acquisition of Lumentum to Unite Optical and Electronic Capabilities, Potentially Challenging Broadcom’s Market Leadership, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261103-13294.html"
   },
   {
    "source": "TrendForce",
    "date": "2026-11-02",
-   "title": "Press Center",
+   "title": "AI Networking and Interconnect Market Projected to Reach US$279.8 Billion in 2027, with Scale-Up Share Rising to 24%, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261102-13291.html"
   },
   {
@@ -368,8 +543,20 @@
   {
    "source": "TrendForce",
    "date": "2026-10-29",
-   "title": "Press Center",
+   "title": "New MacBook Pro Enters Market; Global OLED Notebook Shipments Forecast to Grow Over 40% YoY in 2027, Says TrendForce",
    "url": "https://www.trendforce.com/presscenter/news/20261029-13287.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-29",
+   "title": "AI Inference Drives CPU and DDR5 Demand, with High-Capacitance MLCC Shortages Expected to Persist Through 1H27, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261029-13284.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-28",
+   "title": "iPhone Duo Launch Sparks Strong Demand, but Fold-Area Structural Reliability and Hardware–Software Integration Remain Challenges, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261028-13282.html"
   },
   {
    "source": "SemiAnalysis",
@@ -378,10 +565,64 @@
    "url": "https://newsletter.semianalysis.com/p/amazons-trainium-takes-a-strike-at"
   },
   {
+   "source": "TrendForce",
+   "date": "2026-10-22",
+   "title": "Server CPU Shipments Projected to Grow Over 40% YoY in 2027, with Arm-Based Products Continuing to Gain Market Share, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261022-13279.html"
+  },
+  {
    "source": "SemiAnalysis",
    "date": "2026-10-21",
    "title": "The Huawei-DeepSeek Symbiosis",
    "url": "https://newsletter.semianalysis.com/p/huawei-deepseek"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-19",
+   "title": "Optical Fiber Spot Prices Surge Severalfold in 2026, with Data Center-Driven Supply Shortages Expected to Persist Through 2028, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261019-13275.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-15",
+   "title": "Meta and Chinese Brands Drive Doubling of AR Glasses Shipments, 2026 Forecast Expected to Reach 1.31 Million Units, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261015-13273.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-14",
+   "title": "CSP CapEx Projected to Exceed US$1.5 Trillion in 2027, with AI Server Revenue Growing Over 90% YoY on Higher Shipments and Prices, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261014-13269.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-13",
+   "title": "Integrated Optical-Electrical Testing Platforms Become Key to CPO Mass Production, Reshaping the Test Equipment Supply Chain, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261013-13267.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-08",
+   "title": "Rising Costs Threaten Notebook Demand in 2027, Raising Risks of Shipment Declines and Price Increases, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261008-13264.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-10-08",
+   "title": "Six Leading Suppliers Bet on VCSEL NPO; VCSEL Demand Projected to Reach 650 Million Units by 2031, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20261008-13260.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-30",
+   "title": "AI Server Demand Sustains Memory Contract Price Increases in 4Q26, While Consumer-Side Pressure Persists, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260930-13258.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-29",
+   "title": "HBM Supply Constraints Persist, 2027 Price Outlook Revised Upward with Blended ASP Forecast to Rise 121% YoY, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260929-13255.html"
   },
   {
    "source": "SemiAnalysis",
@@ -396,10 +637,34 @@
    "url": "https://newsletter.semianalysis.com/p/intel-panther-lake-teardown"
   },
   {
+   "source": "TrendForce",
+   "date": "2026-09-24",
+   "title": "Japanese and Korean MLCC Makers Cut Consumer Supply to Focus on AI, Chinese Suppliers Enter Global Brand Qualification, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260924-13252.html"
+  },
+  {
    "source": "SemiAnalysis",
    "date": "2026-09-23",
    "title": "ClusterMAX 3.0: The Industry Standard GPU Cloud Rating System Returns",
    "url": "https://newsletter.semianalysis.com/p/clustermax-30-the-industry-standard"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-22",
+   "title": "DRAM Module Revenue Surges 59% YoY in 2025 as Crowding-Out Effect Constrains Chip Supply and Drives Prices Higher, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260922-13249.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-21",
+   "title": "Rising Costs and Weakening Demand Push Large-Generation Panel Fab Utilization Down to 79.6% in October, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260921-13247.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-21",
+   "title": "Stronger North American Demand to Keep Enterprise SSD Prices on an Upward Trend in 4Q26, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260921-13246.html"
   },
   {
    "source": "SemiAnalysis",
@@ -408,10 +673,52 @@
    "url": "https://newsletter.semianalysis.com/p/computation-and-data-movement-for"
   },
   {
+   "source": "TrendForce",
+   "date": "2026-09-18",
+   "title": "AI Chip Packaging Pushes Beyond Reticle Limits, with CoWoS-L Set to Remain the Mainstream Advanced Packaging Solution Through 2028, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260918-13241.html"
+  },
+  {
    "source": "SemiAnalysis",
    "date": "2026-09-18",
    "title": "Engrams Embedding Entendre: Codesign for Efficient DRAM/SSD Offloading",
    "url": "https://newsletter.semianalysis.com/p/engrams-embedding-entendre-codesign"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-16",
+   "title": "Global Power Demand Capacity for Data Centers Expected to Rise 31% YoY in 2026; Grid Supply Gap to Widen in 2028, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260916-13237.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-14",
+   "title": "NOR Flash Price Trends Diverge in 2H26, with High-Capacity Products Poised for 90–110% Increases, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260914-13235.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-11",
+   "title": "Top 10 Global Fabless IC Design Houses Post 73% YoY Revenue Growth in 2Q26; AMD Breaks into Top Three, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260911-13231.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-10",
+   "title": "iPhone Duo Expected to Capture Nearly 25% of Foldable Smartphone Market in 2026 as Apple’s First Foldable Drives Supply Chain Upgrades, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260910-13228.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-09",
+   "title": "Global Foundry Revenue Approaches US$53.49 Billion in 2Q26 as SMIC Narrows Market Share Gap with Samsung, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260909-13225.html"
+  },
+  {
+   "source": "TrendForce",
+   "date": "2026-09-08",
+   "title": "Early Purchases Lift 2026 Smartphone Production Above Expectations; Full-Year Forecast Raised to 1.07 Billion Units, Says TrendForce",
+   "url": "https://www.trendforce.com/presscenter/news/20260908-13222.html"
   }
  ]
 }
