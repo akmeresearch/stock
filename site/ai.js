@@ -50,7 +50,7 @@
       const it = items[k], h = it.history, last = h[h.length - 1], prev = h.length > 1 ? h[h.length - 2] : null;
       const chg = last[2] != null ? last[2] : (prev ? (last[1] / prev[1] - 1) * 100 : null);
       const wk = h.filter(x => x[0] >= dayShift(last[0], -7))[0], mo = h.filter(x => x[0] >= dayShift(last[0], -30))[0];
-      const pc = (a, b) => (a && b && a[1]) ? `${sgn(b[1] / a[1] - 1)}${fmt((b[1] / a[1] - 1) * 100, 1)}%` : '—';
+      const pc = (a, b) => (a && b && a[1] && a[0] !== b[0]) ? `${sgn(b[1] / a[1] - 1)}${fmt((b[1] / a[1] - 1) * 100, 1)}%` : '—';
       return `<div class="ind ai-ind" data-k="${esc(k)}">
         <div class="meta">${esc(it.label)}</div>
         <div class="title">${esc(short(k))}</div>
@@ -82,15 +82,16 @@
     const since = trendMonths ? dayShift(new Date().toISOString().slice(0, 10), -30 * trendMonths) : '0000';
     const sel = [...trendSel].filter(k => items[k]);
     const dates = [...new Set(sel.flatMap(k => items[k].history.filter(h => h[0] >= since).map(h => h[0])))].sort();
+    const toX = d => Date.parse(d + 'T00:00:00Z') / 864e5, fromX = x => new Date(Math.round(x) * 864e5).toISOString().slice(2, 10);
     const datasets = sel.map((k, i) => {
-      const map = Object.fromEntries(items[k].history.map(h => [h[0], h[1]]));
-      const first = dates.map(d => map[d]).find(x => x != null) || 1;
-      return { label: short(k), data: dates.map(d => map[d] == null ? null : norm ? map[d] / first * 100 : map[d]), borderColor: PAL[i % PAL.length], backgroundColor: PAL[i % PAL.length], borderWidth: 2, pointRadius: dates.length > 80 ? 0 : 2.5, tension: .2, spanGaps: true, yAxisID: norm || sel.length === 1 ? 'y' : (i === 0 ? 'y' : 'y2') };
+      const hs = items[k].history.filter(h => h[0] >= since);
+      const first = hs[0]?.[1] || 1;
+      return { label: short(k), data: hs.map(h => ({ x: toX(h[0]), y: norm ? h[1] / first * 100 : h[1], src: h[4] })), borderColor: PAL[i % PAL.length], backgroundColor: PAL[i % PAL.length], borderWidth: 2, pointRadius: hs.length > 80 ? 0 : 2.5, tension: .2, spanGaps: true, yAxisID: norm || sel.length === 1 ? 'y' : (i === 0 ? 'y' : 'y2') };
     });
     const multi = !norm && sel.length > 1;
-    const cfg = { type: 'line', data: { labels: dates, datasets }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${norm ? fmt(c.parsed.y, 1) : '$' + fmt(c.parsed.y, 3)}` } } },
-      scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 10, font: { size: 11 }, callback: (val, i) => (dates[i] || '').slice(2, 10) } },
+    const cfg = { type: 'line', data: { datasets }, options: { responsive: true, maintainAspectRatio: false, parsing: false, interaction: { mode: 'nearest', axis: 'x', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { title: it => fromX(it[0].parsed.x), label: c => `${c.dataset.label}: ${norm ? fmt(c.parsed.y, 1) : '$' + fmt(c.parsed.y, 3)}${c.raw.src === 'weekly' ? ' (주간 기사)' : ''}` } } },
+      scales: { x: { type: 'linear', grid: { display: false }, ticks: { maxTicksLimit: 10, font: { size: 11 }, callback: x => fromX(x) } },
         y: { position: 'left', grid: { color: 'rgba(0,0,0,.06)' }, ticks: { font: { size: 11 }, callback: x => norm ? x : '$' + fmt(x, 1) } },
         ...(multi ? { y2: { position: 'right', grid: { display: false }, ticks: { font: { size: 11 }, callback: x => '$' + fmt(x, 1) } } } : {}) } } };
     if (trendChart) { trendChart.data = cfg.data; trendChart.options = cfg.options; trendChart.update(); } else trendChart = new Chart($('#trend'), cfg);
