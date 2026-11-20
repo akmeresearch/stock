@@ -177,17 +177,18 @@ def main() -> int:
         f"# 작성 기준일 {date.today()} (KST)",
         "## 현재 현물·계약가 (TrendForce 공개 페이지, 사이트 수집)\n" + ("\n".join(latest) or "미수집"),
         "## 기사·보도자료 (최신순)\n" + "\n\n".join(f"=== [{a['source']}] {a['date']} {a['title']}\nURL: {a['url']}\n{a['text'][:7000]}" for a in recent[:40]),
-        "위 자료만 근거로 스킬 지침의 JSON 을 출력하라.",
+        "위 자료만 근거로 스킬 지침대로 JSON, 구분선, 요약 markdown 순으로 출력하라.",
     ])
     print(f"user message: {len(user):,} chars")
     if args.dry_run:
         print(user[:3000]); return 0
     body, meta = call_claude(PROMPT.read_text(encoding="utf-8"), user)
     print(f"stop={meta['stop']} in={meta['in']} out={meta['out']}")
-    j = parse_json(body)
+    head, _, summary = body.partition("-----SUMMARY-----")
+    j = parse_json(head)
     if not j or "forecasts" not in j:
-        print("JSON parse failed", file=sys.stderr); print(body[:2000]); return 1
-    j["summary_md"] = clean_markdown(j.get("summary_md", ""))
+        print("JSON parse failed", file=sys.stderr); print(head[:2000]); return 1
+    j["summary_md"] = clean_markdown(summary.strip() or j.get("summary_md", ""))
     j["updatedAt"] = now_iso(); j["model"] = MODEL
     j["sources"] = [{"source": a["source"], "date": a["date"], "title": a["title"], "url": a["url"]} for a in recent[:40]]
     OUT.write_text(json.dumps(j, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")

@@ -39,6 +39,7 @@ jobs:
           BF="${{ github.event.inputs.backfill }}"
           python scripts/collect_memory.py ${BF:+--backfill}
       - name: Outlook (weekly or on demand)
+        continue-on-error: true
         if: github.event.inputs.outlook == 'true' || (github.event_name == 'schedule' && github.event.schedule == '0 23 * * 0')
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
