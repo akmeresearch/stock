@@ -1,0 +1,43 @@
+name: Deal watch (딜 알림)
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "며칠치 뉴스를 볼지 (기본 3)"
+        required: false
+        default: "3"
+  schedule:
+    - cron: "17 * * * *"   # 매시 17분
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  deals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Deal watch
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python scripts/deal_watch.py --days "${{ github.event.inputs.days || '3' }}"
+      - name: Commit
+        run: |
+          git config user.name "akme-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/deals.json
+          git diff --cached --quiet || git commit -m "deals: $(TZ=Asia/Seoul date +%Y-%m-%d\ %H:%M)"
+          git pull --rebase origin main
+          git push

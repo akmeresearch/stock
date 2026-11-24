@@ -1,0 +1,19 @@
+{
+  "note": "딜 감시 대상. queries_* 는 구글뉴스 검색식. cik 가 있으면 SEC 8-K Item 1.01/2.01 도 본다. 회사를 추가하려면 블록을 복사해 id·이름·검색식만 바꾸면 된다.",
+  "companies": [
+    {
+      "id": "lilly",
+      "name": "Eli Lilly",
+      "ko": "일라이 릴리",
+      "cik": "0000059478",
+      "queries_en": [
+        "\"Eli Lilly\" (acquisition OR acquire OR acquires OR \"to buy\" OR takeover OR merger)",
+        "\"Lilly\" (licensing OR \"license agreement\" OR collaboration OR partnership OR \"option to\" OR \"equity stake\") biotech"
+      ],
+      "queries_ko": [
+        "일라이릴리 (인수 OR 기술이전 OR 라이선스 OR 라이센스 OR 공동개발 OR 지분투자 OR 계약)",
+        "릴리 기술이전 OR 릴리 라이선스 OR 릴리 인수"
+      ]
+    }
+  ]
+}
