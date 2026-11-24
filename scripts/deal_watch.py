@@ -91,6 +91,7 @@ JSON 배열만 출력: [{{"n": 1, "is_deal": true, "type": "인수|기술이전�
 is_deal 이 false 면 {{"n": k, "is_deal": false}} 만."""
     resp = client.messages.create(model=MODEL, max_tokens=4000, system=system, messages=[{"role": "user", "content": lines}])
     txt = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+    print(f"  classify: {len(heads)} heads → {len(txt)} chars, stop={resp.stop_reason}"); print("  " + txt[:1200].replace("\n", " "))
     m = re.search(r"\[.*\]", re.sub(r"^```(?:json)?|```$", "", txt.strip(), flags=re.M), re.S)
     try:
         arr = json.loads(re.sub(r",\s*([}\]])", r"\1", m.group(0))) if m else []
@@ -156,7 +157,10 @@ def main() -> int:
             for h in fresh:
                 print("   ", h["ts"][:10], h["source"], "|", h["title"][:100])
             continue
+        for h in fresh:
+            print("   ", h["ts"][:10], h["source"], "|", h["title"][:90])
         deals = classify(c, fresh[:60]) if os.environ.get("ANTHROPIC_API_KEY") else []
+        print(f"  deals: {len(deals)}")
         for h in fresh:
             seen[norm_key(h["title"])] = h["ts"]
         # 상대방 기준 묶기
