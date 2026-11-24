@@ -123,7 +123,10 @@ def classify(company: dict, heads: list[dict]) -> list[dict]:
 - 같은 딜을 다룬 여러 헤드라인은 같은 counterparty 로 묶는다. counterparty 는 영문 공식 표기(예: "LoQus23 Therapeutics").
 JSON 배열만 출력: [{{"n": 1, "is_deal": true, "type": "인수|기술이전·라이선스|공동개발·협력|지분투자|기타", "counterparty": "...", "asset": "자산·모달리티·적응증 한 줄(한국어)", "value": "최대 7.25억달러 (없으면 null)", "status": "체결|완료|보도·추측", "summary": "한국어 한 문장", "kr_relevance": "한국 상장사 연관 있으면 한 줄, 없으면 null"}}]
 is_deal 이 false 면 {{"n": k, "is_deal": false}} 만."""
-    resp = client.messages.create(model=MODEL, max_tokens=4000, system=system, messages=[{"role": "user", "content": lines}])
+    with client.messages.stream(model=MODEL, max_tokens=16000, system=system, messages=[{"role": "user", "content": lines}]) as stream:
+        for _ in stream.text_stream:
+            pass
+        resp = stream.get_final_message()
     txt = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
     print(f"  classify: {len(heads)} heads → {len(txt)} chars, stop={resp.stop_reason}"); print("  " + txt[:1200].replace("\n", " "))
     m = re.search(r"\[.*\]", re.sub(r"^```(?:json)?|```$", "", txt.strip(), flags=re.M), re.S)
