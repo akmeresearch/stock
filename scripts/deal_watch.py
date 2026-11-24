@@ -32,15 +32,8 @@ PRE = re.compile(r"acqui|buy|buys|bought|purchas|licens|collaborat|partner|deal|
 TYPES = {"인수": "🏢", "기술이전·라이선스": "🧬", "공동개발·협력": "🤝", "지분투자": "💰", "기타": "📌"}
 
 
-def google_news(query: str, lang: str) -> list[dict]:
-    hl, gl, ceid = ("ko", "KR", "KR:ko") if lang == "ko" else ("en-US", "US", "US:en")
-    url = f"https://news.google.com/rss/search?q={quote_plus(query)}&hl={hl}&gl={gl}&ceid={ceid}"
-    try:
-        r = requests.get(url, headers=UA, timeout=30); r.raise_for_status()
-        root = ET.fromstring(r.content)
-    except Exception as e:
-        print(f"  gnews {lang}: {e}", file=sys.stderr); return []
-    out = []
+def parse_rss(content: bytes, default_src: str = "") -> list[dict]:
+    root = ET.fromstring(content); out = []
     for it in root.findall(".//item"):
         title = (it.findtext("title") or "").strip(); link = (it.findtext("link") or "").strip()
         src = it.find("{https://news.google.com/rss}source"); src = src.text if src is not None else ""
@@ -50,8 +43,49 @@ def google_news(query: str, lang: str) -> list[dict]:
             ts = parsedate_to_datetime(it.findtext("pubDate") or "")
         except Exception:
             continue
-        out.append({"title": title.strip(), "link": link, "source": src.strip(), "ts": ts.astimezone(timezone.utc).isoformat()})
+        out.append({"title": title.strip(), "link": link, "source": (src or default_src).strip(), "ts": ts.astimezone(timezone.utc).isoformat()})
     return out
+
+
+def fetch_rss(url: str, default_src: str = "", tries: int = 3) -> list[dict]:
+    import time
+    for i in range(tries):
+        try:
+            r = requests.get(url, headers=UA, timeout=30)
+            if r.status_code == 200:
+                return parse_rss(r.content, default_src)
+            print(f"  rss {r.status_code}: {url[:70]}", file=sys.stderr)
+        except Exception as e:
+            print(f"  rss: {e}", file=sys.stderr)
+        time.sleep(4 * (i + 1))
+    return []
+
+
+def google_news(query: str, lang: str) -> list[dict]:
+    hl, gl, ceid = ("ko", "KR", "KR:ko") if lang == "ko" else ("en-US", "US", "US:en")
+    got = fetch_rss(f"https://news.google.com/rss/search?q={quote_plus(query)}&hl={hl}&gl={gl}&ceid={ceid}")
+    if got:
+        return got
+    # 구글이 막히면 빙 뉴스 RSS
+    mkt = "ko-KR" if lang == "ko" else "en-US"
+    return fetch_rss(f"https://www.bing.com/news/search?q={quote_plus(query)}&format=rss&setlang={mkt[:2]}&cc={mkt[-2:]}", "Bing News")
+
+
+def yahoo_news(ticker: str) -> list[dict]:
+    try:
+        import yfinance as yf
+        out = []
+        for n in (yf.Ticker(ticker).news or [])[:40]:
+            c = n.get("content") or n
+            title = c.get("title") or ""; link = ((c.get("canonicalUrl") or {}).get("url")) or c.get("link") or ""
+            pub = c.get("pubDate") or c.get("providerPublishTime")
+            ts = datetime.fromisoformat(pub.replace("Z", "+00:00")) if isinstance(pub, str) else datetime.fromtimestamp(pub or 0, tz=timezone.utc)
+            src = ((c.get("provider") or {}).get("displayName")) or n.get("publisher") or "Yahoo Finance"
+            if title:
+                out.append({"title": title, "link": link, "source": src, "ts": ts.astimezone(timezone.utc).isoformat()})
+        return out
+    except Exception as e:
+        print(f"  yahoo {ticker}: {e}", file=sys.stderr); return []
 
 
 def sec_8k(cik: str, days: int) -> list[dict]:
@@ -140,6 +174,8 @@ def main() -> int:
             heads += google_news(q, "en")
         for q in c.get("queries_ko", []):
             heads += google_news(q, "ko")
+        if c.get("ticker"):
+            heads += yahoo_news(c["ticker"])
         if c.get("cik"):
             heads += sec_8k(c["cik"], args.days)
         fresh, keys = [], set()
