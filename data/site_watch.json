@@ -7,6 +7,13 @@
       "url": "https://www.peptron.co.kr/ds4_1_1.html",
       "base": "https://www.peptron.co.kr/",
       "link_re": "db=newsp&(?:amp;)?no=(\\d+)&(?:amp;)?c=view"
+    },
+    {
+      "id": "peptron_ir_faq",
+      "name": "펩트론 IR FAQ",
+      "mode": "irup_faq",
+      "url": "https://peptron.irupsite.co.kr/Default2.aspx",
+      "anchor": "#section007"
     }
   ]
 }

@@ -1,4 +1,4 @@
-name: Site watch (펩트론 공지)
+name: Site watch (펩트론 공지·IR FAQ)
 
 on:
   workflow_dispatch:

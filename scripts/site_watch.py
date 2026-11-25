@@ -64,6 +64,22 @@ def posts(site: dict, html: str) -> list[dict]:
     return out
 
 
+def faq_posts(site: dict, html: str) -> list[dict]:
+    """irupsite FAQ: <li><button class="trigger">…<div class="date">D</div></button><div class="target">…<p class="desc">…</p>. 글 id = 날짜+본문 해시."""
+    import hashlib
+    out = []
+    for m in re.finditer(r'<button class="trigger".*?<strong class="tit">(.*?)</strong>.*?<div class="date">\s*([\d.-]+)\s*</div>.*?<p class="desc">(.*?)</p>', html, re.S):
+        title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", m.group(1))).strip()
+        date = m.group(2).strip()
+        body = text_of(m.group(3))
+        pid = f"{date}-{hashlib.sha1(re.sub(r'\s+', '', body).encode()).hexdigest()[:8]}"
+        qs = [re.sub(r"\s+", " ", q).strip() for q in re.findall(r"(Q\d+\.[^\n]{3,140})", body)]
+        intro = re.sub(r"\s+", " ", body.split("Q1.")[0]).strip()[:300]
+        ex = (intro + ("\n\n" if intro else "") + "\n".join(f"• {q[:110]}" for q in qs[:8]) + (f"\n… 외 {len(qs) - 8}개" if len(qs) > 8 else "")).strip() or body[:600]
+        out.append({"id": pid, "title": f"{title} ({len(qs)}문항)" if qs else title, "link": site["url"] + site.get("anchor", ""), "date": date, "excerpt": ex, "body": body})
+    return out
+
+
 def excerpt(site: dict, link: str, title: str) -> str:
     try:
         t = text_of(fetch(link))
@@ -104,7 +120,7 @@ def main() -> int:
             html = fetch(site["url"])
         except Exception as e:
             print(f"{site['name']}: fetch FAIL {e}", file=sys.stderr); continue
-        ps = posts(site, html)
+        ps = faq_posts(site, html) if site.get("mode") == "irup_faq" else posts(site, html)
         if not ps:
             print(f"{site['name']}: 글 목록을 찾지 못함 (페이지 구조 변경?)", file=sys.stderr)
             for a in re.findall(r"<a[^>]+href=[^>]*c=view[^>]*>.{0,200}", html, re.S)[:3]:
@@ -119,8 +135,10 @@ def main() -> int:
             st["init"] = True; st["initAt"] = datetime.now(KST).isoformat(timespec="minutes"); changed = True
             print("  initialized (no alerts for existing posts)"); continue
         for p in sorted(new, key=lambda x: int(x["id"]) if x["id"].isdigit() else x["id"]):
-            ex = excerpt(site, p["link"], p["title"])
-            msg = f"📢 <b>{esc(site['name'])} 새 글</b>\n<b>{esc(p['title'])}</b>{(' · ' + esc(p['date'])) if p['date'] else ''}\n\n{esc(ex)}{'…' if len(ex) >= 600 else ''}\n\n<a href=\"{esc(p['link'])}\">원문 보기</a>"
+            ex = p.get("excerpt") or excerpt(site, p["link"], p["title"])
+            # 같은 날짜 글의 내용이 바뀐 경우(FAQ 수정)는 '수정'으로 표시
+            kind = "수정" if site.get("mode") == "irup_faq" and any(x.startswith(p["date"] + "-") for x in seen) else "새 글"
+            msg = f"📢 <b>{esc(site['name'])} {kind}</b>\n<b>{esc(p['title'])}</b>{(' · ' + esc(p['date'])) if p['date'] else ''}\n\n{esc(ex)}{'…' if len(ex) >= 600 and not p.get('excerpt') else ''}\n\n<a href=\"{esc(p['link'])}\">원문 보기</a>"
             ok = tg(msg)
             print(f"  ALERT {p['id']} {p['title'][:50]} sent={ok}")
             st.setdefault("alerts", []).append({"id": p["id"], "title": p["title"], "date": p["date"], "link": p["link"], "at": datetime.now(KST).isoformat(timespec="minutes"), "sent": ok})
