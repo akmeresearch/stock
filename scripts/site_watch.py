@@ -49,14 +49,14 @@ def fetch(url: str) -> str:
 
 def posts(site: dict, html: str) -> list[dict]:
     out, seen = [], set()
-    for m in re.finditer(r"<a[^>]+href=\"([^\"]*" + site["link_re"] + r"[^\"]*)\"[^>]*>(.*?)</a>", html, re.S | re.I):
+    for m in re.finditer(r"<a[^>]+href=['\"]([^'\"]*" + site["link_re"] + r"[^'\"]*)['\"][^>]*>(.*?)</a>", html, re.S | re.I):
         href, inner = m.group(1), m.group(2 + site.get("groups", 1))
         pid = m.group(2)
         title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", inner)).strip()
         if not title or pid in seen:
             continue
         seen.add(pid)
-        link = href if href.startswith("http") else site.get("base", "") + href.replace("&amp;", "&")
+        link = href if href.startswith("http") else (site["url"] + href if href.startswith("?") else site.get("base", "") + href)
         # 같은 행의 날짜
         row = html[m.end(): m.end() + 1500]
         dm = re.search(r"(20\d\d[-./]\d\d[-./]\d\d)", row)

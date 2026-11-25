@@ -6,7 +6,7 @@
       "name": "펩트론 공지",
       "url": "https://www.peptron.co.kr/ds4_1_1.html",
       "base": "https://www.peptron.co.kr/",
-      "link_re": "ds4_1_1\\.html\\?db=newsp&(?:amp;)?no=(\\d+)&(?:amp;)?c=view"
+      "link_re": "db=newsp&(?:amp;)?no=(\\d+)&(?:amp;)?c=view"
     }
   ]
 }
