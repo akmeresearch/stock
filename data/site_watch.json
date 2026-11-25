@@ -1,0 +1,12 @@
+{
+  "note": "게시판 감시 대상. link_re 는 글 링크를 찾는 정규식이고 첫 번째 괄호가 글 id. 5분마다 확인.",
+  "sites": [
+    {
+      "id": "peptron_news",
+      "name": "펩트론 공지",
+      "url": "https://www.peptron.co.kr/ds4_1_1.html",
+      "base": "https://www.peptron.co.kr/",
+      "link_re": "ds4_1_1\\.html\\?db=newsp&(?:amp;)?no=(\\d+)&(?:amp;)?c=view"
+    }
+  ]
+}
