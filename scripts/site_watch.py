@@ -106,7 +106,11 @@ def main() -> int:
             print(f"{site['name']}: fetch FAIL {e}", file=sys.stderr); continue
         ps = posts(site, html)
         if not ps:
-            print(f"{site['name']}: 글 목록을 찾지 못함 (페이지 구조 변경?)", file=sys.stderr); continue
+            print(f"{site['name']}: 글 목록을 찾지 못함 (페이지 구조 변경?)", file=sys.stderr)
+            for a in re.findall(r"<a[^>]+href=[^>]*c=view[^>]*>.{0,200}", html, re.S)[:3]:
+                print("   sample:", re.sub(r"\s+", " ", a)[:300], file=sys.stderr)
+            print("   len", len(html), "has no=", html.count("no="), "view", html.count("c=view"), file=sys.stderr)
+            continue
         seen = set(st["seen"])
         new = [p for p in ps if p["id"] not in seen]
         print(f"{site['name']}: {len(ps)} posts, {len(new)} new")
