@@ -110,6 +110,16 @@ def sec_8k(cik: str, days: int) -> list[dict]:
     return out
 
 
+def first_report_date(company: dict, counterparty: str) -> str | None:
+    """상대방 이름으로 뉴스를 다시 검색해 가장 오래된 기사 날짜를 돌려준다 → 예전 딜의 재언급 걸러내기."""
+    if not counterparty:
+        return None
+    q = f'"{company["name"].split()[-1]}" "{counterparty.split("(")[0].strip()}"'
+    heads = google_news(q, "en") + google_news(q, "ko")
+    dates = sorted(h["ts"][:10] for h in heads if h.get("ts"))
+    return dates[0] if dates else None
+
+
 def norm_key(title: str) -> str:
     return hashlib.sha1(re.sub(r"\W+", "", title.lower())[:80].encode()).hexdigest()[:16]
 
@@ -173,7 +183,8 @@ def main() -> int:
     since = datetime.now(timezone.utc) - timedelta(days=args.days)
     cutoff_seen = (datetime.now(timezone.utc) - timedelta(days=45)).isoformat()
     seen = {k: v for k, v in seen.items() if v >= cutoff_seen}
-    alerted_keys = {(a["company"], re.sub(r"\W+", "", (a.get("counterparty") or "").lower())) for a in state["alerts"] if a.get("at", "") >= cutoff_seen}
+    cutoff_year = (datetime.now(timezone.utc) - timedelta(days=365)).isoformat()
+    alerted_keys = {(a["company"], re.sub(r"\W+", "", (a.get("counterparty") or "").lower())) for a in state["alerts"] if a.get("at", "") >= cutoff_year}
     sent = 0
     for c in conf["companies"]:
         heads = []
@@ -212,9 +223,15 @@ def main() -> int:
             ck = re.sub(r"\W+", "", (d.get("counterparty") or d["title"]).lower())
             groups.setdefault(ck, []).append(d)
         for ck, ds in groups.items():
-            if (c["id"], ck) in alerted_keys:
-                print(f"  already alerted: {ds[0].get('counterparty')}"); continue
+            if (c["id"], ck) in alerted_keys or ck in state.get("known", {}):
+                print(f"  already known: {ds[0].get('counterparty')}"); continue
             d = max(ds, key=lambda x: len(x.get("summary") or ""))
+            # 신규 딜 검증: 상대방 이름으로 재검색해 첫 보도가 며칠 전이면 예전 딜의 재언급 → 알리지 않고 '아는 딜'로 등록
+            first = first_report_date(c, d.get("counterparty") or "")
+            if first and first < (datetime.now(timezone.utc) - timedelta(days=args.days)).date().isoformat():
+                print(f"  old deal (first reported {first}): {d.get('counterparty')} — skip")
+                state.setdefault("known", {})[ck] = {"company": c["id"], "counterparty": d.get("counterparty"), "first": first, "at": now_iso()}
+                continue
             icon = TYPES.get(d.get("type"), "📌")
             links = "\n".join(f"· <a href=\"{esc(x['link'])}\">{esc(x['source'] or '기사')}</a> {esc(x['title'][:80])}" for x in ds[:4])
             text = (f"{icon} <b>{esc(c.get('ko') or c['name'])} 딜 알림 — {esc(d.get('type'))}</b>\n"
