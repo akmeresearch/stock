@@ -1,0 +1,23 @@
+name: Telegram send (수동 메시지)
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "보낼 메시지 파일 (data/messages/*.html, 텔레그램 HTML)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests
+      - name: Send
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python scripts/notify.py --text "$(cat "${{ inputs.file }}")"
