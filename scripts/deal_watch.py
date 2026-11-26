@@ -147,11 +147,15 @@ is_deal 이 false 면 {{"n": k, "is_deal": false}} 만."""
 
 def tg(text: str) -> bool:
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-    chat_id = load_json(DATA / "notify.json", {}).get("chat_id")
-    if not token or not chat_id:
+    st = load_json(DATA / "notify.json", {})
+    ids = [c["id"] if isinstance(c, dict) else c for c in st.get("chat_ids", [])] or ([st["chat_id"]] if st.get("chat_id") else [])
+    if not token or not ids:
         print("  telegram not configured", file=sys.stderr); return False
-    r = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": chat_id, "text": text, "parse_mode": "HTML", "disable_web_page_preview": True}, timeout=30)
-    return r.ok
+    ok = False
+    for cid in ids:
+        r = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={"chat_id": cid, "text": text, "parse_mode": "HTML", "disable_web_page_preview": True}, timeout=30)
+        ok = ok or r.ok
+    return ok
 
 
 def esc(s) -> str:

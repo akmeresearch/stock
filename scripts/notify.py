@@ -30,29 +30,56 @@ def api(token: str, method: str, **payload):
     return out["result"]
 
 
+def targets(state: dict | None = None) -> list:
+    """알림 받을 chat id 목록: chat_ids(여러 명) + chat_id(기존 1명)."""
+    st = state if state is not None else load_json(STATE, {})
+    ids = [c["id"] if isinstance(c, dict) else c for c in st.get("chat_ids", [])]
+    if st.get("chat_id") and st["chat_id"] not in ids:
+        ids.insert(0, st["chat_id"])
+    return ids
+
+
 def send(token: str, chat_id, text: str) -> None:
-    api(token, "sendMessage", chat_id=chat_id, text=text, parse_mode="HTML", disable_web_page_preview=True)
+    """chat_id 하나를 받지만 실제로는 등록된 모든 수신자에게 보낸다 (chat_id 가 목록에 없으면 추가로)."""
+    ids = targets()
+    if chat_id and chat_id not in ids:
+        ids.append(chat_id)
+    for cid in ids:
+        try:
+            api(token, "sendMessage", chat_id=cid, text=text, parse_mode="HTML", disable_web_page_preview=True)
+        except Exception as e:
+            print(f"  telegram {cid}: {e}", file=sys.stderr)
 
 
 def setup(token: str) -> int:
+    """봇에게 말을 건 모든 대화(개인·그룹·채널)를 수신자 목록에 추가한다. 기존 수신자는 지우지 않는다."""
     updates = api(token, "getUpdates")
     chats = {}
     for u in updates:
-        m = u.get("message") or u.get("edited_message") or {}
-        c = m.get("chat") or {}
+        m = u.get("message") or u.get("edited_message") or u.get("channel_post") or u.get("edited_channel_post") or {}
+        c = m.get("chat") or (u.get("my_chat_member") or {}).get("chat") or {}
         if c.get("id"):
-            chats[c["id"]] = c.get("first_name") or c.get("title") or c.get("username") or ""
-    if not chats:
+            chats[c["id"]] = (c.get("title") or " ".join(x for x in (c.get("first_name"), c.get("last_name")) if x) or c.get("username") or "") + f" [{c.get('type', '')}]"
+    state = load_json(STATE, {})
+    cur = {(c["id"] if isinstance(c, dict) else c): (c.get("name", "") if isinstance(c, dict) else "") for c in state.get("chat_ids", [])}
+    if state.get("chat_id"):
+        cur.setdefault(state["chat_id"], state.get("chat_name", ""))
+    added = [cid for cid in chats if cid not in cur]
+    for cid in chats:
+        cur[cid] = chats[cid]
+    if not cur:
         print("봇이 받은 메시지가 없습니다. 텔레그램에서 봇 대화방을 열고 /start 를 보낸 뒤 다시 실행하세요.", file=sys.stderr)
         return 1
-    chat_id = list(chats)[-1]
-    state = load_json(STATE, {})
-    state.update({"chat_id": chat_id, "chat_name": chats[chat_id], "setupAt": now_iso()})
-    state.setdefault("notified_reports", [])
-    state.setdefault("notified_weekly", [])
+    state["chat_ids"] = [{"id": cid, "name": name} for cid, name in cur.items()]
+    state.setdefault("chat_id", list(cur)[0]); state["setupAt"] = now_iso()
+    state.setdefault("notified_reports", []); state.setdefault("notified_weekly", [])
     save_json(STATE, state)
-    send(token, chat_id, f"✅ <b>AKME Research 알림 연결 완료</b>\n이제 새 실적 리포트와 위클리가 여기로 옵니다.\n{SITE}")
-    print(f"chat_id={chat_id} ({chats[chat_id]}) 저장, 테스트 메시지 발송")
+    for cid in added:
+        try:
+            api(token, "sendMessage", chat_id=cid, text=f"✅ <b>AKME Research 알림 연결 완료</b>\n실적 리포트·데일리·위클리·딜 알림·공지 감시가 여기로 옵니다.\n{SITE}", parse_mode="HTML", disable_web_page_preview=True)
+        except Exception as e:
+            print(f"  welcome {cid}: {e}", file=sys.stderr)
+    print("수신자:", ", ".join(f"{cid} {name}" for cid, name in cur.items()), f"| 새로 추가 {len(added)}")
     return 0
 
 
