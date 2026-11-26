@@ -12,7 +12,8 @@
    "120",
    "121",
    "122",
-   "123"
+   "123",
+   "124"
   ],
   "init": true,
   "initAt": "2026-11-25T17:30+09:00",
@@ -24,9 +25,17 @@
     "link": "https://www.peptron.co.kr/ds4_1_1.html?db=newsp&no=123&c=view&page=1&SK=&SN=&kind3=&idx=",
     "at": "2026-11-25T17:31+09:00",
     "sent": true
+   },
+   {
+    "id": "124",
+    "title": "펩트론, 글로벌 제약사 ‘페링’과 장기�..",
+    "date": "2026-11-27",
+    "link": "https://www.peptron.co.kr/ds4_1_1.html?db=newsp&no=124&c=view&page=1&SK=&SN=&kind3=&idx=",
+    "at": "2026-11-27T07:28+09:00",
+    "sent": true
    }
   ],
-  "checkedAt": "2026-11-25T17:39+09:00"
+  "checkedAt": "2026-11-27T07:28+09:00"
  },
  "peptron_ir_faq": {
   "seen": [
@@ -42,6 +51,7 @@
    "2026-11-20-15507b21"
   ],
   "init": true,
-  "initAt": "2026-11-25T17:39+09:00"
+  "initAt": "2026-11-25T17:39+09:00",
+  "checkedAt": "2026-11-27T07:28+09:00"
  }
 }
