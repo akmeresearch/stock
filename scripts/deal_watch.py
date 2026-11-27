@@ -120,17 +120,36 @@ def first_report_date(company: dict, counterparty: str) -> str | None:
     return dates[0] if dates else None
 
 
+def resolve(link: str) -> str:
+    """구글뉴스 리다이렉트 링크 → 실제 기사 URL (실패하면 원래 링크)."""
+    if "news.google.com" not in link:
+        return link
+    try:
+        r = requests.get(link, headers=UA, timeout=12, allow_redirects=True)
+        if "news.google.com" not in r.url:
+            return r.url
+        m = re.search(r'data-n-au="([^"]+)"|<a[^>]+href="(https?://(?!news\.google)[^"]+)"', r.text)
+        if m:
+            return m.group(1) or m.group(2)
+    except Exception:
+        pass
+    return link
+
+
 def norm_key(title: str) -> str:
     return hashlib.sha1(re.sub(r"\W+", "", title.lower())[:80].encode()).hexdigest()[:16]
 
 
-def classify(company: dict, heads: list[dict]) -> list[dict]:
+def classify(company: dict, heads: list[dict], known: list[str]) -> list[dict]:
     from anthropic import Anthropic
     client = Anthropic()
     lines = "\n".join(f"{i + 1}. [{h['source']}] {h['title']}" for i, h in enumerate(heads))
+    known_txt = ", ".join(known[:40]) or "없음"
     system = f"""너는 제약·바이오 딜 분석가다. 아래 뉴스 헤드라인이 {company['name']}({company.get('ko', '')})가 당사자인 **새로운 기업 인수, 기술이전(라이선스 인·아웃), 공동개발·협력 계약, 지분투자** 체결 소식인지 판정한다.
 - 딜이 아닌 것: 실적·가이던스, 임상 결과, 승인, 가격 정책, 소송, 인사, 공장 투자(설비), 과거 딜의 재언급·분석 기사, 추측("논의 중" 보도는 is_deal=true 로 하되 status="보도·추측").
 - 같은 딜을 다룬 여러 헤드라인은 같은 counterparty 로 묶는다. counterparty 는 영문 공식 표기(예: "LoQus23 Therapeutics").
+- **이미 알려진 딜(알리지 않음, is_deal=false)**: {known_txt}. 이 회사들과의 딜을 다시 다루는 기사, 여러 딜을 묶어 정리한 기사("two buyouts", "deal spree", "pads pipeline", 신용등급·실적과 함께 다룬 기사)는 모두 false.
+- 헤드라인에 **상대 회사 이름이 없으면 is_deal=false**. counterparty 에 "미확인"·"확인 불가" 같은 값을 넣지 않는다.
 JSON 배열만 출력: [{{"n": 1, "is_deal": true, "type": "인수|기술이전·라이선스|공동개발·협력|지분투자|기타", "counterparty": "...", "asset": "자산·모달리티·적응증 한 줄(한국어)", "value": "최대 7.25억달러 (없으면 null)", "status": "체결|완료|보도·추측", "summary": "한국어 한 문장", "kr_relevance": "한국 상장사 연관 있으면 한 줄, 없으면 null"}}]
 is_deal 이 false 면 {{"n": k, "is_deal": false}} 만."""
     with client.messages.stream(model=MODEL, max_tokens=16000, system=system, messages=[{"role": "user", "content": lines}]) as stream:
@@ -150,7 +169,8 @@ is_deal 이 false 면 {{"n": k, "is_deal": false}} 만."""
             h = heads[int(a["n"]) - 1]
         except Exception:
             continue
-        if a.get("is_deal"):
+        cp = (a.get("counterparty") or "").strip()
+        if a.get("is_deal") and cp and not re.search(r"미확인|불가|미기재|unknown|n/a|undisclosed|unnamed", cp, re.I):
             out.append({**h, **{k: a.get(k) for k in ("type", "counterparty", "asset", "value", "status", "summary", "kr_relevance")}})
     return out
 
@@ -213,7 +233,9 @@ def main() -> int:
             continue
         for h in fresh:
             print("   ", h["ts"][:10], h["source"], "|", h["title"][:90])
-        deals = classify(c, fresh[:60]) if os.environ.get("ANTHROPIC_API_KEY") else []
+        known_names = sorted({v.get("counterparty") for v in state.get("known", {}).values() if v.get("company") == c["id"] and v.get("counterparty")} |
+                             {a.get("counterparty") for a in state["alerts"] if a.get("company") == c["id"] and a.get("counterparty")})
+        deals = classify(c, fresh[:60], known_names) if os.environ.get("ANTHROPIC_API_KEY") else []
         print(f"  deals: {len(deals)}")
         for h in fresh:
             seen[norm_key(h["title"])] = h["ts"]
@@ -233,7 +255,7 @@ def main() -> int:
                 state.setdefault("known", {})[ck] = {"company": c["id"], "counterparty": d.get("counterparty"), "first": first, "at": now_iso()}
                 continue
             icon = TYPES.get(d.get("type"), "📌")
-            links = "\n".join(f"· <a href=\"{esc(x['link'])}\">{esc(x['source'] or '기사')}</a> {esc(x['title'][:80])}" for x in ds[:4])
+            links = "\n".join(f"· <a href=\"{esc(resolve(x['link']))}\">{esc(x['source'] or '기사')}</a> {esc(x['title'][:80])}" for x in ds[:4])
             text = (f"{icon} <b>{esc(c.get('ko') or c['name'])} 딜 알림 — {esc(d.get('type'))}</b>\n"
                     f"<b>{esc(d.get('counterparty'))}</b>{(' · ' + esc(d['value'])) if d.get('value') else ''} · {esc(d.get('status'))}\n"
                     f"{esc(d.get('asset'))}\n\n{esc(d.get('summary'))}"
