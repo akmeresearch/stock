@@ -113,10 +113,13 @@ async function check(env) {
       log.push(`${site.name}: ALERT ${p.id} ${p.title.slice(0, 40)} sent=${ok}`);
     }
     st.seen = st.seen.slice(-500); st.checkedAt = kst(); st.count = ps.length;
-    await env.STATE.put(key, JSON.stringify(st));
-    if (!fresh.length) log.push(`${site.name}: ${ps.length} posts, 0 new`);
+    // KV 무료 한도(쓰기 1,000/일) 때문에 새 글이 있을 때만 저장한다
+    if (fresh.length) await env.STATE.put(key, JSON.stringify(st));
+    else log.push(`${site.name}: ${ps.length} posts, 0 new`);
   }
-  await env.STATE.put('lastRun', JSON.stringify({ at: kst(), log }));
+  // 상태 기록도 1시간에 한 번(또는 알림·오류가 있을 때)만
+  const alerted = log.some(l => l.includes('ALERT') || l.includes('FAIL') || l.includes('init'));
+  if (alerted || new Date().getUTCMinutes() === 0) await env.STATE.put('lastRun', JSON.stringify({ at: kst(), log }));
   return log;
 }
 
