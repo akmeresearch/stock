@@ -120,11 +120,16 @@ async function check(env) {
   return log;
 }
 
+async function safeCheck(env) {
+  try { return await check(env); }
+  catch (e) { await env.STATE.put('lastRun', JSON.stringify({ at: kst(), error: String(e && e.stack || e) })); return [String(e)]; }
+}
+
 export default {
-  async scheduled(event, env, ctx) { ctx.waitUntil(check(env)); },
+  async scheduled(event, env, ctx) { ctx.waitUntil(safeCheck(env)); },
   async fetch(req, env) {
     const url = new URL(req.url);
-    if (url.pathname === '/run' && url.searchParams.get('key') === (env.RUN_KEY || '')) return Response.json({ log: await check(env) });
+    if (url.pathname === '/run' && url.searchParams.get('key') === (env.RUN_KEY || '')) return Response.json({ log: await safeCheck(env) });
     const last = await env.STATE.get('lastRun', 'json');
     const sites = [];
     for (const k of (await env.STATE.list({ prefix: 'site:' })).keys) { const s = await env.STATE.get(k.name, 'json'); sites.push({ id: k.name.slice(5), init: s?.init, initAt: s?.initAt, checkedAt: s?.checkedAt, count: s?.count, seen: s?.seen?.length, alerts: s?.alerts?.slice(-5) }); }
