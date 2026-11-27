@@ -1,0 +1,38 @@
+name: Cloudflare deploy (게시판 감시 워커)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["cf/sitewatch/**"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: KV namespace (없으면 생성)
+        working-directory: cf/sitewatch
+        run: |
+          npm i -g wrangler@3 >/dev/null 2>&1
+          ID=$(wrangler kv namespace list | python3 -c "import sys,json; ns=json.load(sys.stdin); print(next((n['id'] for n in ns if n['title'].endswith('SITEWATCH')), ''))")
+          if [ -z "$ID" ]; then
+            wrangler kv namespace create SITEWATCH > create.log 2>&1; cat create.log
+            ID=$(grep -oE 'id = "[0-9a-f]+"' create.log | grep -oE '[0-9a-f]{32}' | head -1)
+          fi
+          echo "KV id: $ID"; sed -i "s/__KV_ID__/$ID/" wrangler.toml
+      - name: Deploy
+        working-directory: cf/sitewatch
+        run: wrangler deploy
+      - name: Secrets (배포 후 등록)
+        working-directory: cf/sitewatch
+        run: |
+          echo "${{ secrets.TELEGRAM_BOT_TOKEN }}" | wrangler secret put TELEGRAM_BOT_TOKEN
+          echo "${{ secrets.TELEGRAM_BOT_TOKEN }}" | tail -c 12 | wrangler secret put RUN_KEY

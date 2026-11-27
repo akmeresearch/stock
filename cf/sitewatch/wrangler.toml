@@ -1,0 +1,14 @@
+name = "akme-sitewatch"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+SITE = "https://akmeresearch.github.io/stock/"
+
+[[kv_namespaces]]
+binding = "STATE"
+id = "__KV_ID__"
