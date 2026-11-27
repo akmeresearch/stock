@@ -1,9 +1,8 @@
 name: Site watch (펩트론 공지·IR FAQ)
 
+# Cloudflare Worker(akme-sitewatch, 1분 간격)로 이전. 이 워크플로는 백업용 수동 실행만.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
